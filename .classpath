@@ -8,5 +8,15 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/Project/Resources/Netta.jar!/doc"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="Resources/TTS/cmu_time_awb.jar"/>
+	<classpathentry kind="lib" path="Resources/TTS/cmu_us_kal.jar"/>
+	<classpathentry kind="lib" path="Resources/TTS/cmudict04.jar"/>
+	<classpathentry kind="lib" path="Resources/TTS/cmulex.jar"/>
+	<classpathentry kind="lib" path="Resources/TTS/cmutimelex.jar"/>
+	<classpathentry kind="lib" path="Resources/TTS/en_us.jar"/>
+	<classpathentry kind="lib" path="Resources/TTS/freetts-jsapi10.jar"/>
+	<classpathentry kind="lib" path="Resources/TTS/freetts.jar"/>
+	<classpathentry kind="lib" path="Resources/TTS/jsapi.jar"/>
+	<classpathentry kind="lib" path="Resources/TTS/mbrola.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
