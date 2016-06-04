@@ -1,0 +1,26 @@
+Here's how the heart handles connections through socket:
+
+Hosts on it's own IP (maybe change this, i'm not really sure yet)
+
+Hosts on port 6976
+
+accepts an incoming connection on the port
+
+if(heart config is set up):
+sends (the first) Registration packet to client containing server GUID for authentication and the command key (ie "ok crystal")
+else:
+Declines and closes connection with an error packet (info in the packetString)
+
+waits for registration packet from shard that contains shard GUID. This allows the heart to identify per shard, with details such
+	as location, name, type, etc (heart will not accept other data without this packet).
+
+if:
+heart recognizes the shard as a device that's been set up before, sends Handshake packet and it will be open to packet types (below)
+else:
+tell the shard that it needs to have the config set up, and then to reconnect with a closeconnection packet type.
+
+Available commands for shard from here:
+Close Connection (no info required)
+Command (requires packetString containing the command)
+
+Heart closes the connection with a CloseConnection packet containing reason in packetString
