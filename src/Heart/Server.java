@@ -3,12 +3,15 @@ package Heart;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import Netta.Connection.Packet;
 import Netta.Connection.Server.MultiClientServer;
+import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
+import Netta.Exceptions.SendPacketException;
 
 public class Server extends MultiClientServer {
 
-	private ArrayList<ClientConnection> clients;
+	public ArrayList<ClientConnection> clients;
 	private ArrayList<Thread> clientThreads;
 
 	public Server(int port) {
@@ -28,6 +31,25 @@ public class Server extends MultiClientServer {
 			t.start();
 		} catch (ConnectionInitializationException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public void CloseConnections() {
+		Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
+		p.packetString = "Manual disconnect";
+
+		for (int i = 0; i < clients.size(); i++) {
+			ClientConnection temp = clients.get(i);
+			try {
+				temp.SendPacket(p);
+			} catch (SendPacketException e) {
+				e.printStackTrace();
+			}
+			try {
+				temp.CloseIOStreams();
+			} catch (ConnectionException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

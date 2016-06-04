@@ -26,8 +26,6 @@ import javax.swing.SwingUtilities;
 
 import Exceptions.ConfigurationException;
 import Exceptions.ServerInitializationException;
-import Netta.Connection.Packet;
-import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
 import Utilities.Log;
 
@@ -346,13 +344,6 @@ public class Heart_Core {
 	}
 
 	private void StopHeartServer() {
-		// TODO this method is a failure, not implemented
-		Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, uuid.toString());
-		p.packetString = "Manual disconnect";
-		try {
-			server.SendPacket(p);
-		} catch (SendPacketException e) {
-			e.printStackTrace();
-		}
+		server.CloseConnections();
 	}
 }
