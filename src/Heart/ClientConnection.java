@@ -11,6 +11,8 @@ public class ClientConnection extends ConnectedClient {
 
 	public ClientConnection(Socket socket) throws ConnectionInitializationException {
 		super(socket);
+
+		// Start connection procedures
 	}
 
 	@Override

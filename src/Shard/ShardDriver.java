@@ -31,23 +31,14 @@ public class ShardDriver {
 		}
 
 		// TESTING
-		// try {
-		// Thread.sleep(1000);
-		// } catch (InterruptedException e1) {
-		// // TODO Auto-generated catch block
-		// e1.printStackTrace();
-		// }
-		//
-		// for (int i = 0; i < 20; i++) {
-		// Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
-		// p.packetString = "test" + i;
-		// try {
-		// shardCore.SendPacket(p);
-		// System.out.println("packet sent");
-		// } catch (SendPacketException e) {
-		// e.printStackTrace();
-		// }
-		// }
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		///////////////////////////////
+
+		// Establish connection and ready use with core
 	}
 }
