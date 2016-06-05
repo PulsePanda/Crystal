@@ -6,13 +6,12 @@ import com.sun.speech.freetts.VoiceManager;
 public class SpeechDriver {
 
 	private static final String VOICENAME_kevin = "kevin";
-	private String text; // string to speech
 
-	public SpeechDriver(String text) {
-		this.text = text;
+	public SpeechDriver() {
+
 	}
 
-	public void speak() {
+	public void speak(String text) {
 		Voice voice;
 		VoiceManager voiceManager = VoiceManager.getInstance();
 		voice = voiceManager.getVoice(VOICENAME_kevin);

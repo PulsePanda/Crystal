@@ -2,6 +2,6 @@ package Utilities.Speech;
 
 public class SpeechTestDriver {
 	public static void main(String[] args) {
-		new SpeechDriver("Welcome to Crystal Home Systems!").speak();
+		new SpeechDriver().speak("Welcome to Crystal Home Systems!");
 	}
 }
