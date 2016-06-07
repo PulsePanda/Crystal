@@ -18,5 +18,7 @@
 	<classpathentry kind="lib" path="Resources/TTS/freetts.jar"/>
 	<classpathentry kind="lib" path="Resources/TTS/jsapi.jar"/>
 	<classpathentry kind="lib" path="Resources/TTS/mbrola.jar"/>
+	<classpathentry kind="lib" path="Resources/Sphinx/sphinx4-core-5prealpha-20160531.163425-9.jar"/>
+	<classpathentry kind="lib" path="Resources/Sphinx/sphinx4-data-5prealpha-20160531.163451-9.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
