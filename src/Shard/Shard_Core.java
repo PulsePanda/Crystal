@@ -13,10 +13,12 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.UUID;
 
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
@@ -43,6 +45,7 @@ public class Shard_Core {
 	private static JTextArea textArea;
 	private Client client = null;
 	private Thread clientThread = null;
+	private Command command;
 
 	public Shard_Core(boolean headless) {
 		shard_core = this;
@@ -96,6 +99,7 @@ public class Shard_Core {
 		configDir = baseDir + configDir;
 	}
 
+	@SuppressWarnings("serial")
 	private void InitGUI() {
 		frame = new JFrame(systemName);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -128,12 +132,28 @@ public class Shard_Core {
 		textArea.setLineWrap(true);
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
-		scrollPane.setBounds(0, 60, frame.getWidth() - 5, frame.getHeight() - 85);
+		scrollPane.setBounds(0, 60, frame.getWidth() - 5, frame.getHeight() - 115);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+		JTextField commandField = new JTextField();
+		command = new Command();
+		commandField.setBounds(0, frame.getHeight() - 50, frame.getWidth() - 5, 25);
+		commandField.addActionListener(new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String commandText = commandField.getText();
+				System.out.println("Input Command: " + commandText);
+				command.AnalyzeCommand(commandText);
+				commandField.setText("");
+			}
+		});
 
 		frame.getContentPane().add(exitButton);
 		frame.getContentPane().add(scrollPane);
+		frame.getContentPane().add(commandField);
 		frame.setVisible(true);
+
+		commandField.requestFocus();
 	}
 
 	/**
