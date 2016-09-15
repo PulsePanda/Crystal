@@ -259,7 +259,7 @@ public class Heart_Core {
 			// TODO if the configuration isn't found, create and init it
 		}
 
-		cfg_set = Boolean.parseBoolean(cfg.Get("cfg_set"));
+		//cfg_set = Boolean.parseBoolean(cfg.Get("cfg_set"));
 
 		if (cfg_set) {
 			systemName = cfg.Get("systemName");

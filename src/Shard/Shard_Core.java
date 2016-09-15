@@ -196,7 +196,7 @@ public class Shard_Core {
 			// TODO if the configuration isn't found, create and init it
 		}
 
-		uuid = UUID.fromString(cfg.Get("uuid"));
+		//uuid = UUID.fromString(cfg.Get("uuid"));
 		if (uuid != null) {
 			System.out.println("Configuration file loaded.");
 		} else {
