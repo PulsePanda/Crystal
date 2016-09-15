@@ -2,7 +2,6 @@
  * @file Shard_Core.java
  * @author Austin VanAlstyne
  */
-
 package Shard;
 
 import java.awt.Rectangle;
@@ -28,259 +27,281 @@ import Netta.Connection.Packet;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
 import Utilities.Log;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 
 public class Shard_Core {
-	public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", logBaseDir = "Logs/",
-			configDir = "shard_config.cfg";
-	private static boolean logActive = false, initialized = false;
 
-	private boolean headless = false;
+    public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", logBaseDir = "Logs/",
+            configDir = "shard_config.cfg";
+    private static boolean logActive = false, initialized = false;
 
-	// private Client client;
-	private static Shard_Core shard_core;
-	private Log log;
-	private Config cfg = null;
-	private JFrame frame;
-	private UUID uuid;
-	private static JTextArea textArea;
-	private Client client = null;
-	private Thread clientThread = null;
-	private Command command;
+    private boolean headless = false;
 
-	public Shard_Core(boolean headless) {
-		shard_core = this;
-		this.headless = headless;
-	}
+    // private Client client;
+    private static Shard_Core shard_core;
+    private Log log;
+    private Config cfg = null;
+    private UUID uuid;
+    private Client client = null;
+    private Thread clientThread = null;
+    private Command command;
 
-	public void Init() {
-		if (initialized)
-			return;
+    // GUI elements
+    private JFrame frame;
+    private static JTextArea textArea;
+    private JPanel consolePanel, commandPanel;
+    private JTabbedPane tabbedPane;
 
-		if (!headless) {
-			InitGUI();
-			RedirectSystemStreams();
-		}
+    public Shard_Core(boolean headless) {
+        shard_core = this;
+        this.headless = headless;
+    }
 
-		InitVariables();
+    public void Init() {
+        if (initialized) {
+            return;
+        }
 
-		InitLog();
+        if (!headless) {
+            InitGUI();
+            RedirectSystemStreams();
+        }
 
-		InitCfg();
-	}
+        InitVariables();
 
-	/**
-	 * Function to redirect standard output streams to the Write function
-	 */
-	private void RedirectSystemStreams() {
-		OutputStream out = new OutputStream() {
-			@Override
-			public void write(int b) throws IOException {
-				Write(String.valueOf((char) b));
-			}
+        InitLog();
 
-			@Override
-			public void write(byte[] b, int off, int len) throws IOException {
-				Write(new String(b, off, len));
-			}
+        InitCfg();
+    }
 
-			@Override
-			public void write(byte[] b) throws IOException {
-				write(b, 0, b.length);
-			}
-		};
+    /**
+     * Function to redirect standard output streams to the Write function
+     */
+    private void RedirectSystemStreams() {
+        OutputStream out = new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                Write(String.valueOf((char) b));
+            }
 
-		System.setOut(new PrintStream(out, true));
-		System.setErr(new PrintStream(out, true));
-	}
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+                Write(new String(b, off, len));
+            }
 
-	private void InitVariables() {
-		baseDir = System.getProperty("user.home") + baseDir;
-		logBaseDir = baseDir + logBaseDir;
-		configDir = baseDir + configDir;
-	}
+            @Override
+            public void write(byte[] b) throws IOException {
+                write(b, 0, b.length);
+            }
+        };
 
-	@SuppressWarnings("serial")
-	private void InitGUI() {
-		frame = new JFrame(systemName);
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.setSize(800, 600);
-		frame.setResizable(false);
-		frame.setLocationRelativeTo(null);
-		frame.setLayout(null);
+        System.setOut(new PrintStream(out, true));
+        System.setErr(new PrintStream(out, true));
+    }
 
-		JButton exitButton = new JButton("Shutdown");
-		exitButton.addActionListener(new ActionListener() {
-			boolean allowShutdown = true;
+    private void InitVariables() {
+        baseDir = System.getProperty("user.home") + baseDir;
+        logBaseDir = baseDir + logBaseDir;
+        configDir = baseDir + configDir;
+    }
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (!allowShutdown)
-					return;
+    @SuppressWarnings("serial")
+    private void InitGUI() {
+        // Frame setup
+        frame = new JFrame(systemName);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.setSize(800, 600);
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
+        frame.setLayout(null);
+        tabbedPane = new JTabbedPane();
+        tabbedPane.setBounds(0, 0, 800, 600);
 
-				allowShutdown = false;
-				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				StopShardClient();
-				System.out.println("");
-				System.out.println("IT IS NOW SAFE TO CLOSE THE WINDOW");
-				System.out.println("");
-			}
-		});
-		exitButton.setBounds(new Rectangle(10, 10, 100, 40));
+        // Command panel setup
+        commandPanel = new JPanel();
+        commandPanel.setLayout(new FlowLayout());
 
-		textArea = new JTextArea();
-		textArea.setEditable(false);
-		textArea.setLineWrap(true);
+        // Console panel setup
+        consolePanel = new JPanel();
+        consolePanel.setLayout(new BorderLayout());
 
-		JScrollPane scrollPane = new JScrollPane(textArea);
-		scrollPane.setBounds(0, 60, frame.getWidth() - 5, frame.getHeight() - 115);
-		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        JButton exitButton = new JButton("Shutdown");
+        exitButton.addActionListener(new ActionListener() {
+            boolean allowShutdown = true;
 
-		JTextField commandField = new JTextField();
-		command = new Command();
-		commandField.setBounds(0, frame.getHeight() - 50, frame.getWidth() - 5, 25);
-		commandField.addActionListener(new AbstractAction() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				String commandText = commandField.getText();
-				System.out.println("Input Command: " + commandText);
-				command.AnalyzeCommand(commandText);
-				commandField.setText("");
-			}
-		});
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!allowShutdown) {
+                    return;
+                }
 
-		frame.getContentPane().add(exitButton);
-		frame.getContentPane().add(scrollPane);
-		frame.getContentPane().add(commandField);
-		frame.setVisible(true);
+                allowShutdown = false;
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                StopShardClient();
+                System.out.println("");
+                System.out.println("IT IS NOW SAFE TO CLOSE THE WINDOW");
+                System.out.println("");
+            }
+        });
+        exitButton.setBounds(new Rectangle(10, 10, 100, 40));
 
-		commandField.requestFocus();
-	}
+        textArea = new JTextArea();
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
 
-	/**
-	 * Sets up the log system
-	 */
-	private void InitLog() {
-		log = new Log();
-		try {
-			log.CreateLog(logBaseDir);
-			logActive = true;
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setBounds(0, 60, frame.getWidth() - 5, frame.getHeight() - 115);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
-			// Start the log and initialize the text
-			System.out.println("###############" + systemName + "###############");
-			System.out.println("System logging enabled");
-		} catch (SecurityException e) {
-			System.out.println(
-					"Unable to access log file or directory because of permission settings. Will continue running without logs, however please reboot to set logs.\n");
-		} catch (IOException e) {
-			System.out.println(
-					"Unable to access find or create log on object creation. Will continue running without logs, however please reboot to set logs.\n");
-		}
-	}
+//        JTextField commandField = new JTextField();
+//        command = new Command();
+//        commandField.setBounds(0, frame.getHeight() - 50, frame.getWidth() - 5, 25);
+//        commandField.addActionListener(new AbstractAction() {
+//            @Override
+//            public void actionPerformed(ActionEvent arg0) {
+//                String commandText = commandField.getText();
+//                System.out.println("Input Command: " + commandText);
+//                command.AnalyzeCommand(commandText);
+//                commandField.setText("");
+//            }
+//        });
+        consolePanel.add(exitButton, BorderLayout.NORTH);
+        consolePanel.add(scrollPane, BorderLayout.CENTER);
 
-	/**
-	 * Sets up the configuration file(s) for the Shard
-	 * 
-	 * @throws ConfigurationException
-	 *             if there is an issue creating the configuration file. Details
-	 *             will be in the exceptions message.
-	 */
-	private void InitCfg() {
-		// TODO: This method is for loading local configuration files. However,
-		// the Shard will have both local and "cloud" based
-		// configuration files, making this method out of date. Update to solve
-		// this issue
-		System.out.println("Loading configuration file...");
-		try {
-			cfg = new Config(configDir);
-		} catch (ConfigurationException e) {
-			// TODO if the configuration isn't found, create and init it
-		}
+        // Finish GUI
+        tabbedPane.addTab("Commands", commandPanel);
+        tabbedPane.addTab("Console", consolePanel);
+        frame.add(tabbedPane);
+        frame.setVisible(true);
+    }
 
-		//uuid = UUID.fromString(cfg.Get("uuid"));
-		if (uuid != null) {
-			System.out.println("Configuration file loaded.");
-		} else {
-			System.err.println("Please initialize the Config with Nerv before proceeding!");
-		}
-	}
+    /**
+     * Sets up the log system
+     */
+    private void InitLog() {
+        log = new Log();
+        try {
+            log.CreateLog(logBaseDir);
+            logActive = true;
 
-	public void StartShardClient(String IP, int port) throws ClientInitializationException {
-		try {
-			if (client != null || client.IsConnectionActive()) {
-				throw new ClientInitializationException(
-						"Client is already initialized! Aborting attempt to create connection.");
-			}
-		} catch (NullPointerException e) {
-			// If client is not initialized, initialize it
-			client = new Client(IP, port);
-		}
+            // Start the log and initialize the text
+            System.out.println("###############" + systemName + "###############");
+            System.out.println("System logging enabled");
+        } catch (SecurityException e) {
+            System.out.println(
+                    "Unable to access log file or directory because of permission settings. Will continue running without logs, however please reboot to set logs.\n");
+        } catch (IOException e) {
+            System.out.println(
+                    "Unable to access find or create log on object creation. Will continue running without logs, however please reboot to set logs.\n");
+        }
+    }
 
-		try {
-			if (clientThread != null || clientThread.isAlive()) {
-				throw new ClientInitializationException(
-						"Client Thread is already initialized! Aborting attempt to create connection.");
-			}
-		} catch (NullPointerException e) {
-			// If the clientThread isn't initialized, do nothing
-			// ((re)-initialize below)
-		}
+    /**
+     * Sets up the configuration file(s) for the Shard
+     *
+     * @throws ConfigurationException if there is an issue creating the
+     * configuration file. Details will be in the exceptions message.
+     */
+    private void InitCfg() {
+        // TODO: This method is for loading local configuration files. However,
+        // the Shard will have both local and "cloud" based
+        // configuration files, making this method out of date. Update to solve
+        // this issue
+        System.out.println("Loading configuration file...");
+        try {
+            cfg = new Config(configDir);
+        } catch (ConfigurationException e) {
+            // TODO if the configuration isn't found, create and init it
+        }
 
-		clientThread = new Thread(client);
-		clientThread.start();
-	}
+        //uuid = UUID.fromString(cfg.Get("uuid"));
+        if (uuid != null) {
+            System.out.println("Configuration file loaded.");
+        } else {
+            System.err.println("Please initialize the Config with Nerv before proceeding!");
+        }
+    }
 
-	private void StopShardClient() {
-		try {
-			Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
-			p.packetString = "Manual disconnect";
-			client.SendPacket(p);
-		} catch (SendPacketException e) {
-			e.printStackTrace();
-		}
-	}
+    public void StartShardClient(String IP, int port) throws ClientInitializationException {
+        try {
+            if (client != null || client.IsConnectionActive()) {
+                throw new ClientInitializationException(
+                        "Client is already initialized! Aborting attempt to create connection.");
+            }
+        } catch (NullPointerException e) {
+            // If client is not initialized, initialize it
+            client = new Client(IP, port);
+        }
 
-	public Shard_Core GetShardCore() {
-		return shard_core;
-	}
+        try {
+            if (clientThread != null || clientThread.isAlive()) {
+                throw new ClientInitializationException(
+                        "Client Thread is already initialized! Aborting attempt to create connection.");
+            }
+        } catch (NullPointerException e) {
+            // If the clientThread isn't initialized, do nothing
+            // ((re)-initialize below)
+        }
 
-	public UUID GetUUID() {
-		return uuid;
-	}
+        clientThread = new Thread(client);
+        clientThread.start();
+    }
 
-	public void SendPacket(Packet p) throws SendPacketException {
-		client.SendPacket(p);
-	}
+    private void StopShardClient() {
+        try {
+            Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
+            p.packetString = "Manual disconnect";
+            client.SendPacket(p);
+        } catch (SendPacketException e) {
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * Writes to the Standard Output Stream, as well as calls 'write' on the
-	 * local log object
-	 * 
-	 * @param msg
-	 *            Message to be displayed and written
-	 * @return Returns TRUE if successful at writing to the log, FALSE if not
-	 */
-	private boolean Write(String msg) {
-		boolean success = true;
+    public Shard_Core GetShardCore() {
+        return shard_core;
+    }
 
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				textArea.append(msg);
-				textArea.setCaretPosition(textArea.getDocument().getLength());
-				// textArea.append("\n");
-			}
-		});
+    public UUID GetUUID() {
+        return uuid;
+    }
 
-		if (logActive) {
-			try {
-				log.Write(msg);
-			} catch (IOException e) {
-				logActive = false;
-				System.out.println(
-						"Unable to write to log. IOException thrown. Deactivating log file, please reboot to regain access.");
-				success = false;
-			}
-		}
+    public void SendPacket(Packet p) throws SendPacketException {
+        client.SendPacket(p);
+    }
 
-		return success;
-	}
+    /**
+     * Writes to the Standard Output Stream, as well as calls 'write' on the
+     * local log object
+     *
+     * @param msg Message to be displayed and written
+     * @return Returns TRUE if successful at writing to the log, FALSE if not
+     */
+    private boolean Write(String msg) {
+        boolean success = true;
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                textArea.append(msg);
+                textArea.setCaretPosition(textArea.getDocument().getLength());
+                // textArea.append("\n");
+            }
+        });
+
+        if (logActive) {
+            try {
+                log.Write(msg);
+            } catch (IOException e) {
+                logActive = false;
+                System.out.println(
+                        "Unable to write to log. IOException thrown. Deactivating log file, please reboot to regain access.");
+                success = false;
+            }
+        }
+
+        return success;
+    }
 }

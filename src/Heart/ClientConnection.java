@@ -9,31 +9,32 @@ import Netta.Exceptions.ConnectionInitializationException;
 
 public class ClientConnection extends ConnectedClient {
 
-	public ClientConnection(Socket socket) throws ConnectionInitializationException {
-		super(socket);
+    public ClientConnection(Socket socket) throws ConnectionInitializationException {
+        super(socket);
 
-		// Start connection procedures
-	}
+        // Start connection procedures
+    }
 
-        /**
-         * This method is called every time the shard receives a packet from it's heart.
-         * 
-         * @param p packet received from the heart
-         */
-	@Override
-	public void ThreadAction(Packet p) {
-		String packetType = p.packetType.toString();
+    /**
+     * This method is called every time the shard receives a packet from it's
+     * heart.
+     *
+     * @param p packet received from the heart
+     */
+    @Override
+    public void ThreadAction(Packet p) {
+        String packetType = p.packetType.toString();
 
-		switch (packetType) {
-		case "CloseConnection":
-			System.out
-					.println("Shard requested connection closure. Reason: " + p.packetString + ". Closing connection.");
-			try {
-				CloseIOStreams();
-			} catch (ConnectionException e) {
-				e.printStackTrace();
-			}
-			break;
-		}
-	}
+        switch (packetType) {
+            case "CloseConnection":
+                System.out
+                        .println("Shard requested connection closure. Reason: " + p.packetString + ". Closing connection.");
+                try {
+                    CloseIOStreams();
+                } catch (ConnectionException e) {
+                    e.printStackTrace();
+                }
+                break;
+        }
+    }
 }

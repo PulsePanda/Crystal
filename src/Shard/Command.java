@@ -1,11 +1,12 @@
 package Shard;
 
 public class Command {
-	public Command() {
 
-	}
+    public Command() {
 
-	public void AnalyzeCommand(String c) {
+    }
 
-	}
+    public void AnalyzeCommand(String c) {
+
+    }
 }
