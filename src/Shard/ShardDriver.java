@@ -19,7 +19,7 @@ public class ShardDriver {
 			shardCore = new Shard_Core(false);
 			shardCore.Init();
 		} else {
-			System.err.println("No arguement passed on call. Must specify if headless! Add -headless or -gui");
+			System.err.println("No argument passed on call. Must specify if headless! Add -headless or -gui");
 			System.exit(0);
 		}
 
@@ -30,7 +30,7 @@ public class ShardDriver {
 			System.err.println("Error starting Shard client! Error message: " + e.getMessage());
 		}
 
-		// TESTING
+		// TESTING ////////////////////
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e1) {

@@ -118,11 +118,11 @@ public class Shard_Core {
 					return;
 
 				allowShutdown = false;
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				StopShardClient();
 				System.out.println("");
 				System.out.println("IT IS NOW SAFE TO CLOSE THE WINDOW");
 				System.out.println("");
-				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			}
 		});
 		exitButton.setBounds(new Rectangle(10, 10, 100, 40));

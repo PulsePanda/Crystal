@@ -15,6 +15,11 @@ public class ClientConnection extends ConnectedClient {
 		// Start connection procedures
 	}
 
+        /**
+         * This method is called every time the shard receives a packet from it's heart.
+         * 
+         * @param p packet received from the heart
+         */
 	@Override
 	public void ThreadAction(Packet p) {
 		String packetType = p.packetType.toString();

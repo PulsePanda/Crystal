@@ -21,7 +21,7 @@ public class HeartDriver {
 			heartCore = new Heart_Core(false);
 			heartCore.Init();
 		} else {
-			System.err.println("No arguement passed on call. Must specify if headless! Add -headless or -gui");
+			System.err.println("No argument passed on call. Must specify if headless! Add -headless or -gui");
 			System.exit(0);
 		}
 
