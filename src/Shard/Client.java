@@ -1,8 +1,11 @@
 package Shard;
 
+import Exceptions.ClientInitializationException;
 import Netta.Connection.Packet;
 import Netta.Connection.Client.ClientTemplate;
 import Netta.Exceptions.ConnectionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Client extends ClientTemplate {
 
@@ -25,6 +28,8 @@ public class Client extends ClientTemplate {
                         "Server requested connection termination. Reason: " + p.packetString + ". Closing connection.");
                 try {
                     CloseIOStreams();
+//                    Shard_Core.GetShardCore().setInitializedToFalse();
+//                    new Thread(new ReconnectShard()).start();
                 } catch (ConnectionException e) {
                     System.err.println("Error closing connection with Heart. Error: " + e.getMessage());
                 }
@@ -34,4 +39,30 @@ public class Client extends ClientTemplate {
                 break;
         }
     }
+}
+
+class ReconnectShard implements Runnable {
+
+    Shard_Core sc;
+
+    public ReconnectShard() {
+        sc = Shard_Core.GetShardCore();
+    }
+
+    @Override
+    public void run() {
+        while (sc.IsActive() == false) {
+            try {
+                sc.StartShardClient(sc.getIP(), sc.getPort());
+            } catch (ClientInitializationException ex) {
+                System.err.println("Error in initializing client in the reconnection class. Error: " + ex.getMessage());
+            }
+
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ex) {
+            }
+        }
+    }
+
 }

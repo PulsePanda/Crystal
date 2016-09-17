@@ -47,6 +47,8 @@ public class Shard_Core {
     private UUID uuid;
     private Client client = null;
     private Thread clientThread = null;
+    private String IP = "localhost";
+    private int port = 6987;
 
     // GUI elements
     private JFrame frame;
@@ -278,6 +280,8 @@ public class Shard_Core {
         } catch (NullPointerException e) {
             // If client is not initialized, initialize it
             client = new Client(IP, port);
+            this.IP = IP;
+            this.port = port;
         }
 
         try {
@@ -304,13 +308,35 @@ public class Shard_Core {
         }
     }
 
-    public Shard_Core GetShardCore() {
+    public static Shard_Core GetShardCore() {
         return shard_core;
     }
 
     public UUID GetUUID() {
         return uuid;
     }
+
+    public boolean IsActive() {
+        return client.IsConnectionActive();
+    }
+
+    public String getIP() {
+        return IP;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+//    public void setInitializedToFalse() {
+//        initialized = false;
+//        client = null;
+//        try {
+//            clientThread.join();
+//        } catch (InterruptedException ex) {
+//        }
+//        clientThread = null;
+//    }
 
     public void SendPacket(Packet p) throws SendPacketException {
         client.SendPacket(p);
