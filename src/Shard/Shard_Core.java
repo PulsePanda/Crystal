@@ -27,6 +27,8 @@ import Utilities.Config;
 import Utilities.Log;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -334,12 +336,21 @@ public class Shard_Core {
 
         if (logActive) {
             try {
+                if (initialized) {
+                    // Log packet to Heart
+                    Packet p = new Packet(Packet.PACKET_TYPE.Message, "");
+                    p.packetString = msg;
+                    client.SendPacket(p);
+                }
+
                 log.Write(msg);
             } catch (IOException e) {
                 logActive = false;
-                System.out.println(
+                System.err.println(
                         "Unable to write to log. IOException thrown. Deactivating log file, please reboot to regain access.");
                 success = false;
+            } catch (SendPacketException ex) {
+                System.err.println("Unable to send log packet to Heart. Error: " + ex.getMessage());
             }
         }
 
