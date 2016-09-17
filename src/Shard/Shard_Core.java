@@ -111,6 +111,7 @@ public class Shard_Core {
 
     @SuppressWarnings("serial")
     private void InitGUI() {
+        command = new Command();
         // Frame setup
         frame = new JFrame(systemName);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -124,6 +125,34 @@ public class Shard_Core {
         // Command panel setup
         commandPanel = new JPanel();
         commandPanel.setLayout(new FlowLayout());
+
+        JButton goodMorning = new JButton("Good Morning");
+        goodMorning.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                command.AnalyzeCommand("Good Morning");
+            }
+        });
+
+        JButton btcPrice = new JButton("BTC Price");
+        btcPrice.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                command.AnalyzeCommand("BTC Price");
+            }
+        });
+
+        JButton weather = new JButton("Weather");
+        weather.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                command.AnalyzeCommand("Weather");
+            }
+        });
+
+        commandPanel.add(goodMorning);
+        commandPanel.add(btcPrice);
+        commandPanel.add(weather);
 
         // Console panel setup
         consolePanel = new JPanel();
@@ -140,11 +169,9 @@ public class Shard_Core {
                 }
 
                 allowShutdown = false;
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 StopShardClient();
-                System.out.println("");
-                System.out.println("IT IS NOW SAFE TO CLOSE THE WINDOW");
-                System.out.println("");
+                System.out.println("Shard is shut down and exiting");
+                System.exit(0);
             }
         });
         exitButton.setBounds(new Rectangle(10, 10, 100, 40));
@@ -158,7 +185,6 @@ public class Shard_Core {
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
 //        JTextField commandField = new JTextField();
-//        command = new Command();
 //        commandField.setBounds(0, frame.getHeight() - 50, frame.getWidth() - 5, 25);
 //        commandField.addActionListener(new AbstractAction() {
 //            @Override
@@ -171,6 +197,8 @@ public class Shard_Core {
 //        });
         consolePanel.add(exitButton, BorderLayout.NORTH);
         consolePanel.add(scrollPane, BorderLayout.CENTER);
+
+        commandPanel.add(exitButton);
 
         // Finish GUI
         tabbedPane.addTab("Commands", commandPanel);
