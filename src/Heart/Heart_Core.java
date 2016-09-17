@@ -309,7 +309,6 @@ public class Heart_Core {
      *
      * @return Heart_Core object
      */
-    @Deprecated
     public static Heart_Core GetCore() {
         return heart_core;
     }

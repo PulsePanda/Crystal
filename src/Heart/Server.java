@@ -16,8 +16,8 @@ public class Server extends MultiClientServer {
 
     public Server(int port) {
         super(port);
-        clients = new ArrayList<ClientConnection>();
-        clientThreads = new ArrayList<Thread>();
+        clients = new ArrayList<>();
+        clientThreads = new ArrayList<>();
     }
 
     @Override
@@ -30,7 +30,7 @@ public class Server extends MultiClientServer {
             clientThreads.add(t);
             t.start();
         } catch (ConnectionInitializationException e) {
-            e.printStackTrace();
+            System.err.println("Error initializing connection with Shard. Error: " + e.getMessage());
         }
     }
 
@@ -43,12 +43,12 @@ public class Server extends MultiClientServer {
             try {
                 temp.SendPacket(p);
             } catch (SendPacketException e) {
-                e.printStackTrace();
+                System.err.println("Unable to send Close Connection Packet to Shard. Error: " + e.getMessage());
             }
             try {
                 temp.CloseIOStreams();
             } catch (ConnectionException e) {
-                e.printStackTrace();
+                System.out.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
             }
         }
     }

@@ -26,9 +26,11 @@ public class Client extends ClientTemplate {
                 try {
                     CloseIOStreams();
                 } catch (ConnectionException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    System.err.println("Error closing connection with Heart. Error: " + e.getMessage());
                 }
+                break;
+            case "Message":
+                new HandleMessage(p.packetString);
                 break;
         }
     }

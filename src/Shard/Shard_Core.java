@@ -12,12 +12,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.UUID;
 
-import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
@@ -28,7 +26,6 @@ import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
 import Utilities.Log;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -48,7 +45,6 @@ public class Shard_Core {
     private UUID uuid;
     private Client client = null;
     private Thread clientThread = null;
-    private Command command;
 
     // GUI elements
     private JFrame frame;
@@ -111,7 +107,6 @@ public class Shard_Core {
 
     @SuppressWarnings("serial")
     private void InitGUI() {
-        command = new Command();
         // Frame setup
         frame = new JFrame(systemName);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -130,7 +125,13 @@ public class Shard_Core {
         goodMorning.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                command.AnalyzeCommand("Good Morning");
+                Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+                p.packetString = "Good Morning";
+                try {
+                    client.SendPacket(p);
+                } catch (SendPacketException ex) {
+                    System.err.println("Error sending Good Morning packet to Heart. Error: " + ex.getMessage());
+                }
             }
         });
 
@@ -138,7 +139,13 @@ public class Shard_Core {
         btcPrice.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                command.AnalyzeCommand("BTC Price");
+                Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+                p.packetString = "BTC Price";
+                try {
+                    client.SendPacket(p);
+                } catch (SendPacketException ex) {
+                    System.err.println("Error sending BTC Price packet to Heart. Error: " + ex.getMessage());
+                }
             }
         });
 
@@ -146,7 +153,13 @@ public class Shard_Core {
         weather.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                command.AnalyzeCommand("Weather");
+                Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+                p.packetString = "Weather";
+                try {
+                    client.SendPacket(p);
+                } catch (SendPacketException ex) {
+                    System.err.println("Error sending Weather packet to Heart. Error: " + ex.getMessage());
+                }
             }
         });
 

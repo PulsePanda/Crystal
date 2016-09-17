@@ -6,12 +6,16 @@ import Netta.Connection.Packet;
 import Netta.Connection.Server.ConnectedClient;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
+import Netta.Exceptions.SendPacketException;
 
 public class ClientConnection extends ConnectedClient {
+
+    private Command command;
 
     public ClientConnection(Socket socket) throws ConnectionInitializationException {
         super(socket);
 
+        command = new Command(this);
         // Start connection procedures
     }
 
@@ -32,9 +36,17 @@ public class ClientConnection extends ConnectedClient {
                 try {
                     CloseIOStreams();
                 } catch (ConnectionException e) {
-                    e.printStackTrace();
+                    System.err.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
                 }
                 break;
+            case "Command": {
+                try {
+                    command.AnalyzeCommand(p.packetString);
+                } catch (SendPacketException ex) {
+                    System.err.println("Error sending response packet to Shard. Error: " + ex.getMessage());
+                }
+            }
+            break;
         }
     }
 }
