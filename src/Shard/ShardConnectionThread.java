@@ -32,12 +32,7 @@ public class ShardConnectionThread implements Runnable {
     @Override
     public void run() {
         while (true) {
-            try {
-                sc.StartShardClient(sc.getIP(), sc.getPort());
-            } catch (ClientInitializationException ex) {
-                System.err.println(ex.getMessage());
-            }
-
+            sc.StartShardClientSuppressed(sc.getIP(), sc.getPort());
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException ex) {
