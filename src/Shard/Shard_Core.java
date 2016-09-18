@@ -28,6 +28,8 @@ import Utilities.Config;
 import Utilities.Log;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -79,6 +81,8 @@ public class Shard_Core {
         InitLog();
 
         InitCfg();
+
+        InitPatcher();
     }
 
     /**
@@ -114,6 +118,14 @@ public class Shard_Core {
         baseDir = System.getProperty("user.home") + baseDir;
         logBaseDir = baseDir + logBaseDir;
         configDir = baseDir + configDir;
+    }
+
+    /**
+     * Patcher helper method. Initializes the Patcher class, checks if there is
+     * an update to the Shard.
+     */
+    private void InitPatcher() {
+        ShardPatcher patcher = new ShardPatcher(IP, port);
     }
 
     /**
@@ -298,7 +310,7 @@ public class Shard_Core {
      */
     public void StartShardClient(String IP, int port) throws ClientInitializationException {
         try {
-            if (client != null || client.IsConnectionActive()) {
+            if (client.IsConnectionActive()) {
                 throw new ClientInitializationException(
                         "Client is already initialized! Aborting attempt to create connection.");
             }
@@ -311,16 +323,25 @@ public class Shard_Core {
 
         try {
             if (clientThread != null || clientThread.isAlive()) {
+                StopShardClient();
                 throw new ClientInitializationException(
                         "Client Thread is already initialized! Aborting attempt to create connection.");
             }
         } catch (NullPointerException e) {
             // If the clientThread isn't initialized, do nothing
             // ((re)-initialize below)
+        } catch (ConnectionException ex) {
         }
 
         clientThread = new Thread(client);
         clientThread.start();
+    }
+
+    public void StartShardClientSuppressed(String IP, int port) {
+        try {
+            StartShardClient(IP, port);
+        } catch (ClientInitializationException ex) {
+        }
     }
 
     /**
@@ -336,8 +357,11 @@ public class Shard_Core {
             p.packetString = "Manual disconnect";
             client.SendPacket(p);
             client.CloseIOStreams();
+            clientThread.join();
+            clientThread = null;
         } catch (SendPacketException e) {
             System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
+        } catch (InterruptedException ex) {
         }
     }
 
