@@ -4,8 +4,6 @@ import Exceptions.ClientInitializationException;
 import Netta.Connection.Packet;
 import Netta.Connection.Client.ClientTemplate;
 import Netta.Exceptions.ConnectionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Client extends ClientTemplate {
 

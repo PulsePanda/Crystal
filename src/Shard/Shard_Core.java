@@ -22,13 +22,12 @@ import javax.swing.SwingUtilities;
 import Exceptions.ClientInitializationException;
 import Exceptions.ConfigurationException;
 import Netta.Connection.Packet;
+import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
 import Utilities.Log;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -61,6 +60,10 @@ public class Shard_Core {
         this.headless = headless;
     }
 
+    /**
+     * Begin initialization of the Shard. When this method is done executing,
+     * the Shard will be ready to connect to a Heart.
+     */
     public void Init() {
         if (initialized) {
             return;
@@ -103,12 +106,21 @@ public class Shard_Core {
         System.setErr(new PrintStream(out, true));
     }
 
+    /**
+     * Initialize variables being used for configuration files and log systems.
+     * Other variables can be initialized here too.
+     */
     private void InitVariables() {
         baseDir = System.getProperty("user.home") + baseDir;
         logBaseDir = baseDir + logBaseDir;
         configDir = baseDir + configDir;
     }
 
+    /**
+     * Create the GUI for the Shard. The GUI will handle everything from the
+     * console output, being the System.out and System.err output, displaying
+     * information from the Heart, and handling input from the user.
+     */
     @SuppressWarnings("serial")
     private void InitGUI() {
         // Frame setup
@@ -186,7 +198,11 @@ public class Shard_Core {
                 }
 
                 allowShutdown = false;
-                StopShardClient();
+                try {
+                    StopShardClient();
+                } catch (ConnectionException ex) {
+                    System.err.println("Error when closing the connection to the Heart. Error: " + ex.getMessage());
+                }
                 System.out.println("Shard is shut down and exiting");
                 System.exit(0);
             }
@@ -271,6 +287,15 @@ public class Shard_Core {
         }
     }
 
+    /**
+     * Used to start the Shard, create connection to it's Heart and initialize
+     * the running thread.
+     *
+     * @param IP IP address to connect to
+     * @param port port to connect to
+     * @throws ClientInitializationException thrown if there is an error
+     * creating the Client. Error details will be in the getMessage()
+     */
     public void StartShardClient(String IP, int port) throws ClientInitializationException {
         try {
             if (client != null || client.IsConnectionActive()) {
@@ -298,32 +323,67 @@ public class Shard_Core {
         clientThread.start();
     }
 
-    private void StopShardClient() {
+    /**
+     * Used to stop the Shard. Sends a close connection packet to the Heart to
+     * terminate connection, which will then terminate IO streams
+     *
+     * @throws ConnectionException thrown when there is an issue closing the IO
+     * streams to the Heart. Error will be in the getMessage()
+     */
+    private void StopShardClient() throws ConnectionException {
         try {
             Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
             p.packetString = "Manual disconnect";
             client.SendPacket(p);
+            client.CloseIOStreams();
         } catch (SendPacketException e) {
-            e.printStackTrace();
+            System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
         }
     }
 
+    /**
+     * Retrieve the object of ShardCore being used by the Shard. There can only
+     * be one, it is static.
+     *
+     * @return Shard_Core object being used by the Shard
+     */
     public static Shard_Core GetShardCore() {
         return shard_core;
     }
 
+    /**
+     * Return the UUID of the Shard for use with networking with the Heart
+     *
+     * @return UUID of the Shard
+     */
+    @Deprecated
     public UUID GetUUID() {
         return uuid;
     }
 
+    /**
+     * Check whether the Shards connection to the Heart is active or not
+     *
+     * @return boolean whether the connection is active
+     */
     public boolean IsActive() {
         return client.IsConnectionActive();
     }
 
+    /**
+     * Get the IP address being connected to by the Shard
+     *
+     * @return String IP address being connected to
+     */
     public String getIP() {
         return IP;
     }
 
+    /**
+     * Get the Port being connected to by the Shard
+     *
+     * @return int Port being connected to
+     */
     public int getPort() {
         return port;
     }
@@ -337,7 +397,13 @@ public class Shard_Core {
 //        }
 //        clientThread = null;
 //    }
-
+    /**
+     * Send a packet to the Heart
+     *
+     * @param p Packet to send
+     * @throws SendPacketException thrown if there is an error sending the
+     * Packet to the Heart. Error will be in the getMessage()
+     */
     public void SendPacket(Packet p) throws SendPacketException {
         client.SendPacket(p);
     }
