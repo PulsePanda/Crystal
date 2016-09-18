@@ -81,6 +81,8 @@ public class Shard_Core {
         InitLog();
 
         InitCfg();
+
+        InitPatcher();
     }
 
     /**
@@ -116,6 +118,14 @@ public class Shard_Core {
         baseDir = System.getProperty("user.home") + baseDir;
         logBaseDir = baseDir + logBaseDir;
         configDir = baseDir + configDir;
+    }
+
+    /**
+     * Patcher helper method. Initializes the Patcher class, checks if there is
+     * an update to the Shard.
+     */
+    private void InitPatcher() {
+        ShardPatcher patcher = new ShardPatcher(IP, port);
     }
 
     /**
