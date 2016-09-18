@@ -38,29 +38,3 @@ public class Client extends ClientTemplate {
         }
     }
 }
-
-class ReconnectShard implements Runnable {
-
-    Shard_Core sc;
-
-    public ReconnectShard() {
-        sc = Shard_Core.GetShardCore();
-    }
-
-    @Override
-    public void run() {
-        while (sc.IsActive() == false) {
-            try {
-                sc.StartShardClient(sc.getIP(), sc.getPort());
-            } catch (ClientInitializationException ex) {
-                System.err.println("Error in initializing client in the reconnection class. Error: " + ex.getMessage());
-            }
-
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ex) {
-            }
-        }
-    }
-
-}

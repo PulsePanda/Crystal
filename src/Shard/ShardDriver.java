@@ -24,11 +24,14 @@ public class ShardDriver {
         }
 
         // Init Shard networking, try to connect to the Heart
-        try {
-            shardCore.StartShardClient("localhost", 6987);
-        } catch (ClientInitializationException e) {
-            System.err.println("Error starting Shard client! Error message: " + e.getMessage());
-        }
+//        try {
+//            shardCore.StartShardClient("localhost", 6987);
+//        } catch (ClientInitializationException e) {
+//            System.err.println("Error starting Shard client! Error message: " + e.getMessage());
+//        }
+        ShardConnectionThread sct = new ShardConnectionThread("localhost", 6987);
+        Thread t = new Thread(sct);
+        t.start();
 
         // TESTING ////////////////////
 //        try {
@@ -38,7 +41,6 @@ public class ShardDriver {
 //            e1.printStackTrace();
 //        }
         ///////////////////////////////
-
         // Establish connection and ready use with core
     }
 }

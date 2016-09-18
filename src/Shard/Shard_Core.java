@@ -28,6 +28,8 @@ import Utilities.Config;
 import Utilities.Log;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -311,16 +313,25 @@ public class Shard_Core {
 
         try {
             if (clientThread != null || clientThread.isAlive()) {
+                StopShardClient();
                 throw new ClientInitializationException(
                         "Client Thread is already initialized! Aborting attempt to create connection.");
             }
         } catch (NullPointerException e) {
             // If the clientThread isn't initialized, do nothing
             // ((re)-initialize below)
+        } catch (ConnectionException ex) {
         }
 
         clientThread = new Thread(client);
         clientThread.start();
+    }
+
+    public void StartShardClientSuppressed(String IP, int port) {
+        try {
+            StartShardClient(IP, port);
+        } catch (ClientInitializationException ex) {
+        }
     }
 
     /**
@@ -336,8 +347,11 @@ public class Shard_Core {
             p.packetString = "Manual disconnect";
             client.SendPacket(p);
             client.CloseIOStreams();
+            clientThread.join();
+            clientThread = null;
         } catch (SendPacketException e) {
             System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
+        } catch (InterruptedException ex) {
         }
     }
 
