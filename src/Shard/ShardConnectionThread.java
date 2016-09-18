@@ -6,6 +6,8 @@
 package Shard;
 
 import Exceptions.ClientInitializationException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -30,7 +32,11 @@ public class ShardConnectionThread implements Runnable {
     @Override
     public void run() {
         while (true) {
-            sc.StartShardClientSuppressed(sc.getIP(), sc.getPort());
+            try {
+                sc.StartShardClient(sc.getIP(), sc.getPort());
+            } catch (ClientInitializationException ex) {
+                System.err.println(ex.getMessage());
+            }
 
             try {
                 Thread.sleep(5000);

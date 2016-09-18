@@ -300,7 +300,7 @@ public class Shard_Core {
      */
     public void StartShardClient(String IP, int port) throws ClientInitializationException {
         try {
-            if (client != null || client.IsConnectionActive()) {
+            if (client.IsConnectionActive()) {
                 throw new ClientInitializationException(
                         "Client is already initialized! Aborting attempt to create connection.");
             }
