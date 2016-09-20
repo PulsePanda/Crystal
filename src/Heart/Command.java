@@ -2,13 +2,14 @@ package Heart;
 
 import Netta.Connection.Packet;
 import Netta.Exceptions.SendPacketException;
+import Shard.Shard_Core;
 import Utilities.APIHandler;
 import java.util.Calendar;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Command {
-
+    
     private APIHandler api;
     private ClientConnection connection;
 
@@ -41,6 +42,10 @@ public class Command {
                 weather();
                 break;
             case "Patch":
+                
+                break;
+            case "Get Shard Version":
+                sendToClient(Heart_Core.SHARD_VERSION);
                 break;
             default:
                 break;
@@ -78,10 +83,10 @@ public class Command {
      */
     private void btcPrice() throws SendPacketException {
         System.out.println("Shard requested BTC Price info.");
-
+        
         api = new APIHandler("https://blockchain.info/ticker");
         Double btcPrice = api.getJSONObject("USD").getDouble("buy");
-
+        
         sendToClient("BTC Price today: $" + btcPrice.toString());
     }
 
@@ -97,7 +102,7 @@ public class Command {
         System.out.println("Shard requested Weather info.");
         api = new APIHandler("http://api.openweathermap.org/data/2.5/forecast?id=5275191&appid=70546178bd3fbec19e717d754e53b129");
         StringBuilder forecast = new StringBuilder();
-
+        
         JSONArray array = api.getJSONArray("list");
         for (int i = 0; i < array.length(); i++) {
             JSONObject obj = array.getJSONObject(i);
@@ -106,22 +111,22 @@ public class Command {
             if (!obj.getString("dt_txt").contains("12:00:00")) {
                 continue;
             }
-
+            
             int apiDate = obj.getInt("dt"); // Date pulled from forecast
 
             // Set up the calendar object for the given date
             Calendar date = Calendar.getInstance();
             java.util.Date time = new java.util.Date((long) apiDate * 1000);
             date.setTime(time);
-
+            
             String weather = obj.getJSONArray("weather").getJSONObject(0).getString("description");
             int temp = (int) kelvinToF(obj.getJSONObject("main").getDouble("temp"));
-
+            
             String calendarMonth = getCalendarMonth(date.get(Calendar.MONTH));
-
+            
             forecast.append("Date: " + calendarMonth + " " + date.get(Calendar.DAY_OF_MONTH) + "\nSky: " + weather + "\nTemperature: " + temp + "\n\n");
         }
-
+        
         sendToClient(forecast.toString());
     }
 

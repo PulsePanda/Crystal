@@ -139,11 +139,16 @@ public class Shard_Core {
             patcher.getVersion();
         } catch (SendPacketException ex) {
             System.err.println("Error getting Hearts version of the Shard. Error: " + ex.getMessage());
+            System.err.println("Cancelling execution, unsafe to run unpatched Shard.");
+            try {
+                StopShardClient();
+            } catch (ConnectionException ex1) {
+            }
         }
 
         while (SHARD_VERSION_SERVER == "") {
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException ex) {
             }
         }

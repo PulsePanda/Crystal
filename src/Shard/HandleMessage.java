@@ -26,6 +26,13 @@ public class HandleMessage {
      */
     public HandleMessage(String message) {
         this.message = message;
-        JOptionPane.showMessageDialog(null, message);
+
+        if (message.startsWith("version:")) {
+            String[] split = message.split(":");
+            String version = split[1];
+            Shard_Core.SHARD_VERSION_SERVER = version;
+        } else {
+            JOptionPane.showMessageDialog(null, message);
+        }
     }
 }
