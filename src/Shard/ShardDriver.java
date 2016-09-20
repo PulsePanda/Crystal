@@ -1,10 +1,21 @@
 package Shard;
 
 import Exceptions.ClientInitializationException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ShardDriver {
 
     private static Shard_Core shardCore;
+
+    private static void startCore(boolean headless) {
+        try {
+            shardCore = new Shard_Core(headless);
+            shardCore.Init();
+        } catch (ClientInitializationException ex) {
+            System.err.println("Error starting Shard Core. Error: " + ex.getMessage());
+        }
+    }
 
     public static void main(String[] args) {
         // Init Shard graphics and settings
@@ -13,11 +24,9 @@ public class ShardDriver {
         String arg = "-gui";
 
         if (arg == "-headless") {
-            shardCore = new Shard_Core(true);
-            shardCore.Init();
+            startCore(true);
         } else if (arg == "-gui") {
-            shardCore = new Shard_Core(false);
-            shardCore.Init();
+            startCore(false);
         } else {
             System.err.println("No argument passed on call. Must specify if headless! Add -headless or -gui");
             System.exit(0);
