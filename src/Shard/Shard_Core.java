@@ -146,13 +146,18 @@ public class Shard_Core {
             }
         }
 
-        while (SHARD_VERSION_SERVER == "") {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-            }
-        }
+//        while (SHARD_VERSION_SERVER == "") {
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException ex) {
+//            }
+//        }
 
+//        try {
+//            shard_core.wait();
+//        } catch (InterruptedException ex) {
+//            Logger.getLogger(Shard_Core.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         if (SHARD_VERSION.equals(SHARD_VERSION_SERVER)) {
             System.out.println("Shard is up to date!");
             patched = true;
@@ -248,9 +253,6 @@ public class Shard_Core {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!patched) {
-                    return;
-                }
                 if (!allowShutdown) {
                     return;
                 }

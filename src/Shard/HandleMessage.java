@@ -31,6 +31,7 @@ public class HandleMessage {
             String[] split = message.split(":");
             String version = split[1];
             Shard_Core.SHARD_VERSION_SERVER = version;
+            Shard_Core.GetShardCore().notify();
         } else {
             JOptionPane.showMessageDialog(null, message);
         }
