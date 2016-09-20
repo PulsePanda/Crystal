@@ -23,14 +23,13 @@ public class ShardPatcher {
         this.client = client;
     }
 
-    public boolean isOutOfDate() throws SendPacketException {
+    public void getVersion() throws SendPacketException {
         Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
-        p.packetString = Shard_Core.SHARD_VERSION;
+        p.packetString = "Get Shard Version";
         client.SendPacket(p);
-        return false;
     }
 
     public void patch() {
-
+        Shard_Core.patched = true;
     }
 }

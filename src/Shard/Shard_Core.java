@@ -28,21 +28,25 @@ import Utilities.Config;
 import Utilities.Log;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 public class Shard_Core {
 
     public static final String SHARD_VERSION = "0.1.1";
+    public static String SHARD_VERSION_SERVER = "";
 
     public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", logBaseDir = "Logs/",
             configDir = "shard_config.cfg";
-    private static boolean logActive = false, initialized = false, patched = false;
+    private static boolean logActive = false, initialized = false;
+    public static boolean patched = false;
 
     private boolean headless = false;
 
     // private Client client;
-    private static Shard_Core shard_core;
+    private static Shard_Core shard_core = null;
     private Log log;
     private Config cfg = null;
     private UUID uuid;
@@ -57,7 +61,10 @@ public class Shard_Core {
     private JPanel consolePanel, commandPanel;
     private JTabbedPane tabbedPane;
 
-    public Shard_Core(boolean headless) {
+    public Shard_Core(boolean headless) throws ClientInitializationException {
+        if (shard_core != null) {
+            throw new ClientInitializationException("There can only be one instance of Shard Core!");
+        }
         shard_core = this;
         this.headless = headless;
     }
@@ -122,17 +129,32 @@ public class Shard_Core {
      * Patcher helper method. Initializes the Patcher class, checks if there is
      * an update to the Shard. GUI Elements will not be available until this
      * method is finished.
+     *
+     * Called after clientThread is started
      */
     public void InitPatcher() {
         System.out.println("Initializing Patcher...");
         ShardPatcher patcher = new ShardPatcher(client);
-        if (!patcher.isOutOfDate()) {
+        try {
+            patcher.getVersion();
+        } catch (SendPacketException ex) {
+            System.err.println("Error getting Hearts version of the Shard. Error: " + ex.getMessage());
+        }
+
+        while (SHARD_VERSION_SERVER == "") {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+            }
+        }
+
+        if (SHARD_VERSION.equals(SHARD_VERSION_SERVER)) {
             System.out.println("Shard is up to date!");
+            patched = true;
         } else {
             System.out.println("Shard is out of date. Patching...");
             patcher.patch();
         }
-        patched = true;
     }
 
     /**
