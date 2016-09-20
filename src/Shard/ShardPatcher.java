@@ -5,6 +5,9 @@
  */
 package Shard;
 
+import Netta.Connection.Packet;
+import Netta.Exceptions.SendPacketException;
+
 /**
  * Patcher class. Checks if there is an update to the Shard, and if there is
  * downloads the .zip from the server. From there, it unzips the download to the
@@ -14,7 +17,20 @@ package Shard;
  */
 public class ShardPatcher {
 
-    public ShardPatcher(String IP, int port) {
+    private Client client;
+
+    public ShardPatcher(Client client) {
+        this.client = client;
+    }
+
+    public boolean isOutOfDate() throws SendPacketException {
+        Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+        p.packetString = Shard_Core.SHARD_VERSION;
+        client.SendPacket(p);
+        return false;
+    }
+
+    public void patch() {
 
     }
 }

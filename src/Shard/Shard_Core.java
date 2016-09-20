@@ -28,16 +28,16 @@ import Utilities.Config;
 import Utilities.Log;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 public class Shard_Core {
 
+    public static final String SHARD_VERSION = "0.1.1";
+
     public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", logBaseDir = "Logs/",
             configDir = "shard_config.cfg";
-    private static boolean logActive = false, initialized = false;
+    private static boolean logActive = false, initialized = false, patched = false;
 
     private boolean headless = false;
 
@@ -81,8 +81,6 @@ public class Shard_Core {
         InitLog();
 
         InitCfg();
-
-        InitPatcher();
     }
 
     /**
@@ -122,10 +120,19 @@ public class Shard_Core {
 
     /**
      * Patcher helper method. Initializes the Patcher class, checks if there is
-     * an update to the Shard.
+     * an update to the Shard. GUI Elements will not be available until this
+     * method is finished.
      */
-    private void InitPatcher() {
-        ShardPatcher patcher = new ShardPatcher(IP, port);
+    public void InitPatcher() {
+        System.out.println("Initializing Patcher...");
+        ShardPatcher patcher = new ShardPatcher(client);
+        if (!patcher.isOutOfDate()) {
+            System.out.println("Shard is up to date!");
+        } else {
+            System.out.println("Shard is out of date. Patching...");
+            patcher.patch();
+        }
+        patched = true;
     }
 
     /**
@@ -153,6 +160,9 @@ public class Shard_Core {
         goodMorning.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!patched) {
+                    return;
+                }
                 Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
                 p.packetString = "Good Morning";
                 try {
@@ -167,6 +177,9 @@ public class Shard_Core {
         btcPrice.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!patched) {
+                    return;
+                }
                 Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
                 p.packetString = "BTC Price";
                 try {
@@ -181,6 +194,9 @@ public class Shard_Core {
         weather.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!patched) {
+                    return;
+                }
                 Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
                 p.packetString = "Weather";
                 try {
@@ -205,6 +221,9 @@ public class Shard_Core {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!patched) {
+                    return;
+                }
                 if (!allowShutdown) {
                     return;
                 }
@@ -335,6 +354,7 @@ public class Shard_Core {
 
         clientThread = new Thread(client);
         clientThread.start();
+        InitPatcher();
     }
 
     public void StartShardClientSuppressed(String IP, int port) {

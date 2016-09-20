@@ -40,6 +40,8 @@ public class Command {
             case "Weather":
                 weather();
                 break;
+            case "Patch":
+                break;
             default:
                 break;
         }
