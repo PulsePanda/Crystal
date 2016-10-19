@@ -26,12 +26,16 @@ public class HandleMessage {
      */
     public HandleMessage(String message) {
         this.message = message;
+        System.out.println(message);
+        handle();
+    }
 
+    private void handle() {
         if (message.startsWith("version:")) {
             String[] split = message.split(":");
             String version = split[1];
             Shard_Core.SHARD_VERSION_SERVER = version;
-            Shard_Core.GetShardCore().notify();
+//            Shard_Core.GetShardCore().InitPatcher();
         } else {
             JOptionPane.showMessageDialog(null, message);
         }

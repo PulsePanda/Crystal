@@ -1,6 +1,5 @@
 package Shard;
 
-import Exceptions.ClientInitializationException;
 import Netta.Connection.Packet;
 import Netta.Connection.Client.ClientTemplate;
 import Netta.Exceptions.ConnectionException;
@@ -11,7 +10,6 @@ public class Client extends ClientTemplate {
 
     public Client(String serverIP, int port) {
         super(serverIP, port);
-
     }
 
     /**

@@ -37,6 +37,7 @@ public class Shard_Core {
 
     public static final String SHARD_VERSION = "0.1.1";
     public static String SHARD_VERSION_SERVER = "";
+    private ShardPatcher patcher;
 
     public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", logBaseDir = "Logs/",
             configDir = "shard_config.cfg";
@@ -82,6 +83,8 @@ public class Shard_Core {
             InitGUI();
             RedirectSystemStreams();
         }
+
+        System.out.println("VERSION: " + SHARD_VERSION);
 
         InitVariables();
 
@@ -132,39 +135,32 @@ public class Shard_Core {
      *
      * Called after clientThread is started
      */
-    public void InitPatcher() {
-        System.out.println("Initializing Patcher...");
-        ShardPatcher patcher = new ShardPatcher(client);
-        try {
-            patcher.getVersion();
-        } catch (SendPacketException ex) {
-            System.err.println("Error getting Hearts version of the Shard. Error: " + ex.getMessage());
-            System.err.println("Cancelling execution, unsafe to run unpatched Shard.");
+    public synchronized void InitPatcher() {
+        // Check shard version
+        patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.checkVersion);
+        patcher.start();
+        while (SHARD_VERSION_SERVER == "") {
             try {
-                StopShardClient();
-            } catch (ConnectionException ex1) {
+                Thread.sleep(5);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Shard_Core.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
-//        while (SHARD_VERSION_SERVER == "") {
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException ex) {
-//            }
-//        }
-
-//        try {
-//            shard_core.wait();
-//        } catch (InterruptedException ex) {
-//            Logger.getLogger(Shard_Core.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        if (SHARD_VERSION.equals(SHARD_VERSION_SERVER)) {
-            System.out.println("Shard is up to date!");
-            patched = true;
-        } else {
-            System.out.println("Shard is out of date. Patching...");
-            patcher.patch();
+        // download shard update (ShardPatcher will not download anything if there's no update)
+        patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.downloadUpdate);
+        patcher.start();
+        while (patched == false) {
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Shard_Core.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+
+        // Run shard update
+        patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.runUpdate);
+        patcher.start();
     }
 
     /**
@@ -400,7 +396,7 @@ public class Shard_Core {
      * @throws ConnectionException thrown when there is an issue closing the IO
      * streams to the Heart. Error will be in the getMessage()
      */
-    private void StopShardClient() throws ConnectionException {
+    public void StopShardClient() throws ConnectionException {
         try {
             Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
             p.packetString = "Manual disconnect";
