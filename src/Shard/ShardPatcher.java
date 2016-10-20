@@ -76,16 +76,17 @@ public class ShardPatcher extends Thread {
 
     private void updateHelper() {
         /*
-        I'm thinking this will zip up the current shard files and dependencies found on github.
-        It'll download the zip, unzip, remove unneeded files, and rezip.
-        Then, it'll push that zip to the shard, which will then unzip, run the install
-        script found in it, and then close. The install script will replace the old files
-        with the new ones and then launch the compiler and run script
+        This will download the shard source zip from the server, unzip
          */
     }
 
     private void runUpdateHelper() {
-
+        /*
+        run the patcher script file. Close Shard
+        
+        Patcher file will remove old files, replace them with new files, launch
+        the new shard
+         */
     }
 
     public enum PATCHER_TYPE {
