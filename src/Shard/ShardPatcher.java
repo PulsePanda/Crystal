@@ -19,15 +19,15 @@ import java.util.logging.Logger;
  * @author Austin
  */
 public class ShardPatcher extends Thread {
-    
+
     private Client client;
     private PATCHER_TYPE type;
-    
+
     public ShardPatcher(Client client, PATCHER_TYPE type) {
         this.client = client;
         this.type = type;
     }
-    
+
     @Override
     public void run() {
         if (type == PATCHER_TYPE.checkVersion) {
@@ -38,7 +38,7 @@ public class ShardPatcher extends Thread {
             runUpdateHelper();
         }
     }
-    
+
     private void checkVersionHelper() {
         System.out.println("Initializing Patcher...");
         try {
@@ -52,7 +52,7 @@ public class ShardPatcher extends Thread {
             }
         }
     }
-    
+
     public void getVersion() throws SendPacketException {
         Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
         p.packetString = "Get Shard Version";
@@ -63,25 +63,31 @@ public class ShardPatcher extends Thread {
         }
         client.SendPacket(p);
     }
-    
+
     private void downloadUpdateHelper() {
         if (!Shard_Core.GetShardCore().SHARD_VERSION.equals(Shard_Core.GetShardCore().SHARD_VERSION_SERVER)) {
-            patchHelper();
+            updateHelper();
         } else {
             System.out.println("Shard is up to date!");
             Shard_Core.GetShardCore().patched = true;
         }
         Shard_Core.patched = true;
     }
-    
-    private void patchHelper() {
-        
+
+    private void updateHelper() {
+        /*
+        I'm thinking this will zip up the current shard files and dependencies found on github.
+        It'll download the zip, unzip, remove unneeded files, and rezip.
+        Then, it'll push that zip to the shard, which will then unzip, run the install
+        script found in it, and then close. The install script will replace the old files
+        with the new ones and then launch the compiler and run script
+         */
     }
-    
+
     private void runUpdateHelper() {
-        
+
     }
-    
+
     public enum PATCHER_TYPE {
         checkVersion, downloadUpdate, runUpdate;
     }

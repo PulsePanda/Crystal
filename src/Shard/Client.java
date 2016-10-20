@@ -20,7 +20,6 @@ public class Client extends ClientTemplate {
     @Override
     public void ThreadAction(Packet p) {
         String packetType = p.packetType.toString();
-
         if (!conversation) {
             switch (packetType) {
                 case "CloseConnection":
