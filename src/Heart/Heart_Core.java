@@ -30,8 +30,8 @@ import Utilities.Log;
 public class Heart_Core {
 
     public final static boolean DEBUG = false;
-    
-    public final static String SHARD_VERSION = "0.1.1";
+
+    public final static String SHARD_VERSION = "0.1.1", HEART_VERSION = "0.1.1";
 
     public static String systemName = "CHS Heart", musicDir = "", movieDir = "", commandKey = "",
             baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardLogsDir = "Shard_Logs/",
