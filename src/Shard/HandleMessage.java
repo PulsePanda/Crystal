@@ -8,6 +8,7 @@ package Shard;
 import javax.swing.JOptionPane;
 
 /**
+ * This class handles messages received from the Heart.
  *
  * @author Austin
  */
@@ -15,8 +16,28 @@ public class HandleMessage {
 
     private String message;
 
+    /**
+     * Default constructor
+     *
+     * Currently only shows the results of the message in a JOptionPane Message
+     * box
+     *
+     * @param message String message to be handled from Heart.
+     */
     public HandleMessage(String message) {
         this.message = message;
-        JOptionPane.showMessageDialog(null, message);
+        System.out.println(message);
+        handle();
+    }
+
+    private void handle() {
+        if (message.startsWith("version:")) {
+            String[] split = message.split(":");
+            String version = split[1];
+            Shard_Core.SHARD_VERSION_SERVER = version;
+//            Shard_Core.GetShardCore().InitPatcher();
+        } else {
+            JOptionPane.showMessageDialog(null, message);
+        }
     }
 }

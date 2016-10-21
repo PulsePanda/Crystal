@@ -22,6 +22,7 @@ import javax.swing.SwingUtilities;
 import Exceptions.ClientInitializationException;
 import Exceptions.ConfigurationException;
 import Netta.Connection.Packet;
+import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
 import Utilities.Log;
@@ -34,14 +35,19 @@ import javax.swing.JTabbedPane;
 
 public class Shard_Core {
 
+    public static final String SHARD_VERSION = "0.1.1";
+    public static String SHARD_VERSION_SERVER = "";
+    private ShardPatcher patcher;
+
     public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", logBaseDir = "Logs/",
             configDir = "shard_config.cfg";
     private static boolean logActive = false, initialized = false;
+    public static boolean patched = false;
 
     private boolean headless = false;
 
     // private Client client;
-    private static Shard_Core shard_core;
+    private static Shard_Core shard_core = null;
     private Log log;
     private Config cfg = null;
     private UUID uuid;
@@ -56,11 +62,18 @@ public class Shard_Core {
     private JPanel consolePanel, commandPanel;
     private JTabbedPane tabbedPane;
 
-    public Shard_Core(boolean headless) {
+    public Shard_Core(boolean headless) throws ClientInitializationException {
+        if (shard_core != null) {
+            throw new ClientInitializationException("There can only be one instance of Shard Core!");
+        }
         shard_core = this;
         this.headless = headless;
     }
 
+    /**
+     * Begin initialization of the Shard. When this method is done executing,
+     * the Shard will be ready to connect to a Heart.
+     */
     public void Init() {
         if (initialized) {
             return;
@@ -70,6 +83,8 @@ public class Shard_Core {
             InitGUI();
             RedirectSystemStreams();
         }
+
+        System.out.println("VERSION: " + SHARD_VERSION);
 
         InitVariables();
 
@@ -103,12 +118,56 @@ public class Shard_Core {
         System.setErr(new PrintStream(out, true));
     }
 
+    /**
+     * Initialize variables being used for configuration files and log systems.
+     * Other variables can be initialized here too.
+     */
     private void InitVariables() {
         baseDir = System.getProperty("user.home") + baseDir;
         logBaseDir = baseDir + logBaseDir;
         configDir = baseDir + configDir;
     }
 
+    /**
+     * Patcher helper method. Initializes the Patcher class, checks if there is
+     * an update to the Shard. GUI Elements will not be available until this
+     * method is finished.
+     *
+     * Called after clientThread is started
+     */
+    public synchronized void InitPatcher() {
+        // Check shard version
+        patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.checkVersion);
+        patcher.start();
+        while (SHARD_VERSION_SERVER == "") {
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Shard_Core.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        // download shard update (ShardPatcher will not download anything if there's no update)
+        patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.downloadUpdate);
+        patcher.start();
+        while (patched == false) {
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Shard_Core.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        // Run shard update
+        patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.runUpdate);
+        patcher.start();
+    }
+
+    /**
+     * Create the GUI for the Shard. The GUI will handle everything from the
+     * console output, being the System.out and System.err output, displaying
+     * information from the Heart, and handling input from the user.
+     */
     @SuppressWarnings("serial")
     private void InitGUI() {
         // Frame setup
@@ -129,6 +188,9 @@ public class Shard_Core {
         goodMorning.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!patched) {
+                    return;
+                }
                 Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
                 p.packetString = "Good Morning";
                 try {
@@ -143,6 +205,9 @@ public class Shard_Core {
         btcPrice.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!patched) {
+                    return;
+                }
                 Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
                 p.packetString = "BTC Price";
                 try {
@@ -157,6 +222,9 @@ public class Shard_Core {
         weather.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!patched) {
+                    return;
+                }
                 Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
                 p.packetString = "Weather";
                 try {
@@ -186,7 +254,11 @@ public class Shard_Core {
                 }
 
                 allowShutdown = false;
-                StopShardClient();
+                try {
+                    StopShardClient();
+                } catch (ConnectionException ex) {
+                    System.err.println("Error when closing the connection to the Heart. Error: " + ex.getMessage());
+                }
                 System.out.println("Shard is shut down and exiting");
                 System.exit(0);
             }
@@ -271,9 +343,18 @@ public class Shard_Core {
         }
     }
 
+    /**
+     * Used to start the Shard, create connection to it's Heart and initialize
+     * the running thread.
+     *
+     * @param IP IP address to connect to
+     * @param port port to connect to
+     * @throws ClientInitializationException thrown if there is an error
+     * creating the Client. Error details will be in the getMessage()
+     */
     public void StartShardClient(String IP, int port) throws ClientInitializationException {
         try {
-            if (client != null || client.IsConnectionActive()) {
+            if (client.IsConnectionActive()) {
                 throw new ClientInitializationException(
                         "Client is already initialized! Aborting attempt to create connection.");
             }
@@ -286,44 +367,92 @@ public class Shard_Core {
 
         try {
             if (clientThread != null || clientThread.isAlive()) {
+                StopShardClient();
                 throw new ClientInitializationException(
                         "Client Thread is already initialized! Aborting attempt to create connection.");
             }
         } catch (NullPointerException e) {
             // If the clientThread isn't initialized, do nothing
             // ((re)-initialize below)
+        } catch (ConnectionException ex) {
         }
 
         clientThread = new Thread(client);
         clientThread.start();
+        InitPatcher();
     }
 
-    private void StopShardClient() {
+    public void StartShardClientSuppressed(String IP, int port) {
+        try {
+            StartShardClient(IP, port);
+        } catch (ClientInitializationException ex) {
+        }
+    }
+
+    /**
+     * Used to stop the Shard. Sends a close connection packet to the Heart to
+     * terminate connection, which will then terminate IO streams
+     *
+     * @throws ConnectionException thrown when there is an issue closing the IO
+     * streams to the Heart. Error will be in the getMessage()
+     */
+    public void StopShardClient() throws ConnectionException {
         try {
             Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
             p.packetString = "Manual disconnect";
             client.SendPacket(p);
+            client.CloseIOStreams();
+            clientThread.join();
+            clientThread = null;
         } catch (SendPacketException e) {
-            e.printStackTrace();
+            System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
+        } catch (InterruptedException ex) {
         }
     }
 
+    /**
+     * Retrieve the object of ShardCore being used by the Shard. There can only
+     * be one, it is static.
+     *
+     * @return Shard_Core object being used by the Shard
+     */
     public static Shard_Core GetShardCore() {
         return shard_core;
     }
 
+    /**
+     * Return the UUID of the Shard for use with networking with the Heart
+     *
+     * @return UUID of the Shard
+     */
+    @Deprecated
     public UUID GetUUID() {
         return uuid;
     }
 
+    /**
+     * Check whether the Shards connection to the Heart is active or not
+     *
+     * @return boolean whether the connection is active
+     */
     public boolean IsActive() {
         return client.IsConnectionActive();
     }
 
+    /**
+     * Get the IP address being connected to by the Shard
+     *
+     * @return String IP address being connected to
+     */
     public String getIP() {
         return IP;
     }
 
+    /**
+     * Get the Port being connected to by the Shard
+     *
+     * @return int Port being connected to
+     */
     public int getPort() {
         return port;
     }
@@ -337,7 +466,13 @@ public class Shard_Core {
 //        }
 //        clientThread = null;
 //    }
-
+    /**
+     * Send a packet to the Heart
+     *
+     * @param p Packet to send
+     * @throws SendPacketException thrown if there is an error sending the
+     * Packet to the Heart. Error will be in the getMessage()
+     */
     public void SendPacket(Packet p) throws SendPacketException {
         client.SendPacket(p);
     }
