@@ -204,7 +204,7 @@ public class UpdateCheckerThread extends Thread {
                 ZipEntry entry = entries.nextElement();
                 //If directory then create a new directory in uncompressed folder
                 if (entry.isDirectory()) {
-                    Files.createDirectories(fileSystem.getPath(uncompressedDirectory + entry.getName()));
+                    Files.createDirectories(fileSystem.getPath(uncompressedDirectory));
                 } //Else create the file
                 else {
                     InputStream is = file.getInputStream(entry);
