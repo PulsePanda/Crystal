@@ -26,7 +26,7 @@ public class UpdateCheckerThread extends Thread {
 
     private static final String gitAddress = "https://github.com/PulsePanda/Crystal/archive/master.zip";
     private static final int waitDelay = 180000;
-    private boolean running = false;
+    private boolean running = false, shardUpdate = false;
 
     public UpdateCheckerThread() {
 
@@ -91,7 +91,11 @@ public class UpdateCheckerThread extends Thread {
         String heartVersion = readVersionFile(Heart_Core.GetCore().baseDir + "HeartVersion.txt");
         String shardVersion = readVersionFile(Heart_Core.GetCore().baseDir + "ShardVersion.txt");
         if (heartVersion != null || shardVersion != null) {
-            if (heartVersion != Heart_Core.HEART_VERSION || shardVersion != Heart_Core.SHARD_VERSION) {
+            if (heartVersion != Heart_Core.HEART_VERSION) {
+                // if the shard has an update, the heart will always have an update for the shardversion
+                if (shardVersion != Heart_Core.SHARD_VERSION) {
+                    shardUpdate = true;
+                }
                 return true;
             }
         }
@@ -128,7 +132,11 @@ public class UpdateCheckerThread extends Thread {
     }
 
     private void preparePatch() {
+        // if this method is called, heart will always have a patch.
+        // do stuff
+        if (shardUpdate) {
 
+        }
     }
 
     private void removeFiles() {
