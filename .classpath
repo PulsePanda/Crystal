@@ -20,5 +20,6 @@
 	<classpathentry kind="lib" path="Resources/TTS/mbrola.jar"/>
 	<classpathentry kind="lib" path="Resources/Sphinx/sphinx4-core-5.jar"/>
 	<classpathentry kind="lib" path="Resources/Sphinx/sphinx4-data-5.jar"/>
+	<classpathentry kind="lib" path="Resources/json.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

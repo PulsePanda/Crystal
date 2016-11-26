@@ -140,7 +140,7 @@ public class UpdateCheckerThread extends Thread {
 
     private void preparePatch() {
         // if this method is called, heart will always have a patch.
-        // do stuff
+        // Unzip patch files
         unZipIt(Heart_Core.GetCore().baseDir + "patch.zip", Heart_Core.GetCore().baseDir + "patch");
 
         if (shardUpdate) {
