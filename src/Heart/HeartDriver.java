@@ -36,6 +36,6 @@ public class HeartDriver {
 
         // Init Patching Thread
         updateCheckerThread = new UpdateCheckerThread();
-//        updateCheckerThread.start();
+        updateCheckerThread.start();
     }
 }
