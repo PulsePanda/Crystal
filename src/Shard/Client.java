@@ -1,5 +1,7 @@
 package Shard;
 
+import java.security.NoSuchAlgorithmException;
+
 import Netta.Connection.Packet;
 import Netta.Connection.Client.ClientTemplate;
 import Netta.Exceptions.ConnectionException;
@@ -8,7 +10,7 @@ public class Client extends ClientTemplate {
 
     private boolean conversation = false;
 
-    public Client(String serverIP, int port) {
+    public Client(String serverIP, int port) throws NoSuchAlgorithmException {
         super(serverIP, port);
     }
 

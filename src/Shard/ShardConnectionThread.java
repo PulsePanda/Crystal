@@ -5,6 +5,8 @@
  */
 package Shard;
 
+import Exceptions.ClientInitializationException;
+
 /**
  *
  * @author Austin
@@ -28,9 +30,12 @@ public class ShardConnectionThread implements Runnable {
     @Override
     public void run() {
         while (true) {
-            sc.StartShardClientSuppressed(sc.getIP(), sc.getPort());
             try {
-                Thread.sleep(5000);
+				sc.StartShardClient(sc.getIP(), sc.getPort());
+			} catch (ClientInitializationException e) {
+			}
+            try {
+                Thread.sleep(10000);
             } catch (InterruptedException ex) {
             }
 
