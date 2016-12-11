@@ -13,3 +13,17 @@ version = '0.1.0'
 manifest {
 	attributes 'Implementation-Title': 'Crystal Heart', 'Implementation-Version': version
 }
+
+task copyLicense {
+    outputs.file new File("$buildDir/LICENSE")
+    doLast {
+        copy {
+            from "../LICENSE"
+            into "$buildDir"
+        }
+    }
+}
+
+applicationDistribution.from(copyLicense) {
+    into ""
+}
