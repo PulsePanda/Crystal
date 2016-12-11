@@ -46,20 +46,21 @@ public class UpdateCheckerThread extends Thread {
 				checkForUpdate();
 				if (shardUpdate || heartUpdate) {
 					System.out.println("UPDATER: There is a new version of the build. Downloading...");
-//					downloadUpdate();
+					// downloadUpdate();
 					System.out.println("UPDATER: Update is downloaded. Packing for client and installing for Heart...");
 					System.out.println("UPDATER: Preparing patch...");
 					preparePatch();
 					System.out.println("UPDATER: Patch is ready.");
+					installHeartPatch();
 				}
 				// removeFiles();
 				System.out.println("UPDATER: All software is up to date!");
 				shardUpdate = false;
 				heartUpdate = false;
 			} catch (Exception ex) {
-				// throw download exception
-				ex.printStackTrace();
-				System.err.println("UPDATER: ERROR");
+				System.err.println("UPDATER: Issue downloading patch from GitHub. Aborting patch.");
+				shardUpdate = false;
+				heartUpdate = false;
 			}
 
 			try {
@@ -135,14 +136,13 @@ public class UpdateCheckerThread extends Thread {
 	}
 
 	private void preparePatch() {
-		File patchDir = new File(Heart_Core.GetCore().baseDir + "patch");
-		deleteDir(patchDir);
-
 		try {
 			unZipIt(Heart_Core.GetCore().baseDir + "patch.zip", Heart_Core.GetCore().baseDir + "patch");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		File dir = new File(Heart_Core.GetCore().baseDir + "patch/Crystal-master/");
 
 		if (shardUpdate) {
 
@@ -151,6 +151,10 @@ public class UpdateCheckerThread extends Thread {
 		if (heartUpdate) {
 
 		}
+	}
+
+	private void installHeartPatch() {
+
 	}
 
 	private void deleteDir(File file) {
@@ -179,9 +183,9 @@ public class UpdateCheckerThread extends Thread {
 	}
 
 	private void removeFiles() {
-		new File(Heart_Core.GetCore().baseDir + "HeartVersion.txt").delete();
-		new File(Heart_Core.GetCore().baseDir + "ShardVersion.txt").delete();
-		new File(Heart_Core.GetCore().baseDir + "patch.zip").delete();
-		new File(Heart_Core.GetCore().baseDir + "patch").delete();
+		deleteDir(new File(Heart_Core.GetCore().baseDir + "HeartVersion.txt"));
+		deleteDir(new File(Heart_Core.GetCore().baseDir + "ShardVersion.txt"));
+		deleteDir(new File(Heart_Core.GetCore().baseDir + "patch.zip"));
+		deleteDir(new File(Heart_Core.GetCore().baseDir + "patch"));
 	}
 }
