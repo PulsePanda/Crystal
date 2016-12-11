@@ -1,8 +1,35 @@
 allprojects {
-  task hello << { task -> println "I'm $task.project.name" }
+
 }
 
 subprojects {
   apply plugin: 'java'
   apply plugin: 'eclipse'
+}
+
+//Common Project specific stuff
+project(':Common') {
+
+}
+
+//Heart Project specific stuff
+project(':Heart') {
+  mainClassName = 'Heart.HeartDriver'
+
+  dependencies {
+	 compile fileTree(dir: 'libs', include: ['*.jar'])
+  }
+}
+
+//Shard Project specific stuff
+project(':Shard') {
+  apply plugin: 'application'
+
+  mainClassName = 'Shard.ShardDriver'
+
+  dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(dir: 'libs/Sphinx', include: ['*.jar'])
+	  compile fileTree(dir: 'libs/TTS', include: ['*.jar'])
+  }
 }
