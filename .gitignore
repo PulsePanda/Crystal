@@ -7,6 +7,7 @@
 .metadata
 /.recommenders/
 /.gradle/
+/.distributions/
 .gradle/
 bin/
 tmp/

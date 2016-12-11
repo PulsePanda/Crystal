@@ -1,3 +1,5 @@
+apply plugin: 'base'
+
 allprojects {
 
 }
@@ -5,23 +7,56 @@ allprojects {
 subprojects {
   apply plugin: 'java'
   apply plugin: 'eclipse'
+
+  task copyLicense {
+      outputs.file new File("$buildDir/LICENSE")
+      doLast {
+          copy {
+              from "../LICENSE"
+              into "$buildDir"
+          }
+      }
+  }
 }
 
-//Common Project specific stuff
+clean.doFirst {
+  delete ".distributions"
+}
+
+build.doLast {
+  copy {
+    from(file('Heart/build/distributions'))
+    into('.distributions')
+
+    from(file('Shard/build/distributions'))
+    into('.distributions')
+  }
+}
+
+//Common specific stuff
 project(':Common') {
-
+  dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+  }
 }
 
-//Heart Project specific stuff
+//Heart specific stuff
 project(':Heart') {
+  apply plugin: 'application'
+
   mainClassName = 'Heart.HeartDriver'
 
   dependencies {
 	 compile fileTree(dir: 'libs', include: ['*.jar'])
+   compile project(':Common')
+  }
+
+  applicationDistribution.from(copyLicense) {
+      into ""
   }
 }
 
-//Shard Project specific stuff
+//Shard specific stuff
 project(':Shard') {
   apply plugin: 'application'
 
@@ -31,5 +66,10 @@ project(':Shard') {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile fileTree(dir: 'libs/Sphinx', include: ['*.jar'])
 	  compile fileTree(dir: 'libs/TTS', include: ['*.jar'])
+    compile project(':Common')
+  }
+
+  applicationDistribution.from(copyLicense) {
+      into ""
   }
 }
