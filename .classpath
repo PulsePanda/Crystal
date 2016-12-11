@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="Resources"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="Resources/TTS/cmu_time_awb.jar"/>
-	<classpathentry kind="lib" path="Resources/TTS/cmu_us_kal.jar"/>
-	<classpathentry kind="lib" path="Resources/TTS/cmudict04.jar"/>
-	<classpathentry kind="lib" path="Resources/TTS/cmulex.jar"/>
-	<classpathentry kind="lib" path="Resources/TTS/cmutimelex.jar"/>
-	<classpathentry kind="lib" path="Resources/TTS/en_us.jar"/>
-	<classpathentry kind="lib" path="Resources/TTS/freetts-jsapi10.jar"/>
-	<classpathentry kind="lib" path="Resources/TTS/freetts.jar"/>
-	<classpathentry kind="lib" path="Resources/TTS/jsapi.jar"/>
-	<classpathentry kind="lib" path="Resources/TTS/mbrola.jar"/>
-	<classpathentry kind="lib" path="Resources/Sphinx/sphinx4-core-5.jar"/>
-	<classpathentry kind="lib" path="Resources/Sphinx/sphinx4-data-5.jar"/>
-	<classpathentry kind="lib" path="Resources/json.jar"/>
-	<classpathentry kind="lib" path="D:/Programming/Resources/Libraries/Netta/Netta.jar">
+	<classpathentry kind="src" path="src/main/java">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/D:/Programming/Resources/Libraries/Netta/Netta.jar!/doc"/>
+			<attribute name="FROM_GRADLE_MODEL" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8/"/>
+	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
+	<classpathentry kind="lib" path="libs/Sphinx/sphinx4-core-5.jar"/>
+	<classpathentry kind="lib" path="libs/Sphinx/sphinx4-data-5.jar"/>
+	<classpathentry kind="lib" path="libs/TTS/cmu_time_awb.jar"/>
+	<classpathentry kind="lib" path="libs/TTS/cmu_us_kal.jar"/>
+	<classpathentry kind="lib" path="libs/TTS/cmudict04.jar"/>
+	<classpathentry kind="lib" path="libs/TTS/cmulex.jar"/>
+	<classpathentry kind="lib" path="libs/TTS/cmutimelex.jar"/>
+	<classpathentry kind="lib" path="libs/TTS/en_us.jar"/>
+	<classpathentry kind="lib" path="libs/TTS/freetts-jsapi10.jar"/>
+	<classpathentry kind="lib" path="libs/TTS/freetts.jar"/>
+	<classpathentry kind="lib" path="libs/TTS/jsapi.jar"/>
+	<classpathentry kind="lib" path="libs/TTS/mbrola.jar"/>
+	<classpathentry kind="lib" path="libs/json.jar"/>
+	<classpathentry kind="lib" path="libs/Netta-1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

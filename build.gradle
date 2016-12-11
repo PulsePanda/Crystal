@@ -1,0 +1,11 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+
+task buildHeart {
+	version = '0.1.0'
+}
+
+task buildShard {
+	version = '0.1.1'
+}
