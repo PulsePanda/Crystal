@@ -2,36 +2,14 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'application'
 
-task buildHeart {
-	mainClassName = 'Heart.HeartDriver'
-	dependencies {
-		compile fileTree(dir: 'libs', include: ['*.jar'])
-	}
+mainClassName = 'Heart.HeartDriver'
 
-	version = '0.1.0'
-	manifest {
-		attributes 'Implementation-Title': 'Crystal Heart', 'Implementation-Version': version
-	}
-	//baseName = 'Crystal Heart' + version
+dependencies {
+	compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
-task buildShard {
-	mainClassName = 'Shard.ShardDriver'
-	dependencies {
-		compile fileTree(dir: 'libs', include: ['*.jar'])
-		compile fileTree(dir: 'libs/Sphinx', include: ['*.jar'])
-		compile fileTree(dir: 'libs/TTS', include: ['*.jar'])
-	}
+version = '0.1.0'
 
-	version = '0.1.1'
-	manifest {
-		attributes 'Implementation-Title': 'Crystal Shard', 'Implementation-Version': version
-	}
-	//baseName = 'Crystal Shard' + version
-}
-
-task fatJar(type: Jar) {
-	baseName = project.name
-	from {configurations.compile.collect {it.isDirectory() ? it : zipTree(it)}}
-	with jar
+manifest {
+	attributes 'Implementation-Title': 'Crystal Heart', 'Implementation-Version': version
 }
