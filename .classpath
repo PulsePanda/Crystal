@@ -16,7 +16,7 @@
 	<classpathentry kind="lib" path="Resources/Sphinx/sphinx4-core-5.jar"/>
 	<classpathentry kind="lib" path="Resources/Sphinx/sphinx4-data-5.jar"/>
 	<classpathentry kind="lib" path="Resources/json.jar"/>
-	<classpathentry kind="lib" path="D:/Programming/Resources/Libraries/Netta/Netta.jar">
+	<classpathentry kind="lib" path="D:/Programming/Resources/Libraries/Netta/Netta-1.1.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/D:/Programming/Resources/Libraries/Netta/Netta.jar!/doc"/>
 		</attributes>
