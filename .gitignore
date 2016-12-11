@@ -5,6 +5,9 @@
 *.pydevproject
 .project
 .metadata
+/.recommenders/
+/.gradle/
+.gradle/
 bin/
 tmp/
 *.tmp
@@ -214,4 +217,3 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
-/.gradle/
