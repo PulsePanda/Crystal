@@ -1,3 +1,5 @@
+![alt tag](http://pulsepanda.com/austinVanAlstyne_files/chs.png)
+
 # Crystal Home Systems
 Copyright© 2015 Austin VanAlstyne, Bailey Thorson
 
