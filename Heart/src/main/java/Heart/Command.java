@@ -3,6 +3,10 @@ package Heart;
 import Netta.Connection.Packet;
 import Netta.Exceptions.SendPacketException;
 import Utilities.APIHandler;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Calendar;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,7 +36,7 @@ public class Command {
 	 *            command given to analyze
 	 */
 	public void AnalyzeCommand(String c) throws SendPacketException {
-		System.out.println("Received command from Shard.");
+		System.out.println("Received command from Shard. Command: " + c);
 		switch (c) {
 		case "Good Morning":
 			goodMorning();
@@ -44,15 +48,36 @@ public class Command {
 			weather();
 			break;
 		case "Patch":
+			byte[] file = null;
+			try {
+				file = Files.readAllBytes(Paths.get(Heart_Core.baseDir + "patch/Shard.zip"));
+			} catch (IOException e1) {
+				System.err.println("Error reading Shard.zip to send to shards. Aborting.");
+				return;
+			}
+			// dummy packet to allow client's readpacket to reset
+			Packet blank = new Packet(Packet.PACKET_TYPE.NULL, null);
+			sendToClient(blank, true);
 
+			Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
+			p.packetString = "update";
+			p.packetByteArray = file;
+			System.out.println("Sending patch to Shard...");
+			sendToClient(p, false);
+			System.out.println("Sent patch to Shard.");
+
+			// second dummy packet
+			Packet blank2 = new Packet(Packet.PACKET_TYPE.NULL, null);
+			sendToClient(blank2, false);
 			break;
 		case "Get Shard Version":
 			System.out.println("Shard requested version information.");
-			sendToClient("version:" + Heart_Core.SHARD_VERSION);
+			sendToClient("version:" + Heart_Core.SHARD_VERSION, true);
 			break;
 		default:
 			break;
 		}
+
 	}
 
 	/**
@@ -77,7 +102,7 @@ public class Command {
 		String wCoverage = api.getJSONArray("weather").getJSONObject(0).getString("description");
 		int wTemp = (int) kelvinToF(api.getJSONObject("main").getDouble("temp"));
 		sendToClient("Good Morning.\n\nBTC Price: $" + btcPrice + ".\n\nCurrent Weather: " + wCoverage + " and " + wTemp
-				+ " degrees.\n");
+				+ " degrees.\n", true);
 	}
 
 	/**
@@ -94,7 +119,7 @@ public class Command {
 		api = new APIHandler("https://blockchain.info/ticker");
 		Double btcPrice = api.getJSONObject("USD").getDouble("buy");
 
-		sendToClient("BTC Price today: $" + btcPrice.toString());
+		sendToClient("BTC Price today: $" + btcPrice.toString(), true);
 	}
 
 	/**
@@ -137,7 +162,7 @@ public class Command {
 					+ "\nTemperature: " + temp + "\n\n");
 		}
 
-		sendToClient(forecast.toString());
+		sendToClient(forecast.toString(), true);
 	}
 
 	/**
@@ -149,10 +174,14 @@ public class Command {
 	 *             thrown if there is an issue sending the packet to the Shard.
 	 *             Details will be in the getMessage()
 	 */
-	private void sendToClient(String s) throws SendPacketException {
+	private void sendToClient(String s, boolean encrypted) throws SendPacketException {
 		Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
 		p.packetString = s;
-		connection.SendPacket(p);
+		connection.SendPacket(p, encrypted);
+	}
+
+	private void sendToClient(Packet p, boolean encrypted) throws SendPacketException {
+		connection.SendPacket(p, encrypted);
 	}
 
 	/**

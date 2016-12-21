@@ -42,7 +42,7 @@ public class Server extends MultiClientServer {
 		for (int i = 0; i < clients.size(); i++) {
 			ClientConnection temp = clients.get(i);
 			try {
-				temp.SendPacket(p);
+				temp.SendPacket(p, true);
 			} catch (SendPacketException e) {
 				System.err.println("Unable to send Close Connection Packet to Shard. Error: " + e.getMessage());
 			}
