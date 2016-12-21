@@ -38,10 +38,10 @@ public class UpdateCheckerThread extends Thread {
 				checkForUpdate();
 				if (shardUpdate || heartUpdate) {
 					System.out.println("UPDATER: There is a new version of the build. Downloading...");
-					// downloadUpdate();
+					downloadUpdate();
 					System.out.println("UPDATER: Update is downloaded. Packing for client and installing for Heart...");
 					System.out.println("UPDATER: Preparing patch...");
-					// preparePatch();
+					preparePatch();
 					System.out.println("UPDATER: Patch is ready.");
 					installHeartPatch();
 				}
@@ -173,7 +173,7 @@ public class UpdateCheckerThread extends Thread {
 	private void installHeartPatch() throws IOException {
 		Heart_Core.GetCore().StopHeartServer();
 
-		unZipIt(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir + "patch/");
+		unZipIt(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir);
 
 		try {
 			Thread.sleep(5000);
@@ -181,8 +181,7 @@ public class UpdateCheckerThread extends Thread {
 		}
 
 		System.out.println("UPDATER: Starting Heart Patcher...");
-		Runtime.getRuntime()
-				.exec(new String[] { "cmd", "/c", "start", Heart_Core.baseDir + "patch/Heart/bin/Heart.bat", "-p" });
+		Runtime.getRuntime().exec(new String[] { "cmd", "/c", "start", Heart_Core.heartDir + "bin/Heart.bat" });
 		System.exit(0);
 	}
 
