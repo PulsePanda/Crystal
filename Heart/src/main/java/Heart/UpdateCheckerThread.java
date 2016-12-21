@@ -12,16 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  *
@@ -46,21 +38,23 @@ public class UpdateCheckerThread extends Thread {
 				checkForUpdate();
 				if (shardUpdate || heartUpdate) {
 					System.out.println("UPDATER: There is a new version of the build. Downloading...");
-					// downloadUpdate();
+					downloadUpdate();
 					System.out.println("UPDATER: Update is downloaded. Packing for client and installing for Heart...");
 					System.out.println("UPDATER: Preparing patch...");
 					preparePatch();
 					System.out.println("UPDATER: Patch is ready.");
 					installHeartPatch();
 				}
-				// removeFiles();
+				removeFiles();
 				System.out.println("UPDATER: All software is up to date!");
 				shardUpdate = false;
 				heartUpdate = false;
 			} catch (Exception ex) {
 				System.err.println("UPDATER: Issue downloading patch from GitHub. Aborting patch.");
+				ex.printStackTrace();
 				shardUpdate = false;
 				heartUpdate = false;
+				removeFiles();
 			}
 
 			try {
@@ -75,7 +69,7 @@ public class UpdateCheckerThread extends Thread {
 	private void checkForUpdate() throws MalformedURLException, FileNotFoundException, IOException {
 		URL url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/HeartVersion");
 		BufferedInputStream bis = new BufferedInputStream(url.openStream());
-		FileOutputStream fis = new FileOutputStream(Heart_Core.GetCore().baseDir + "HeartVersion.txt");
+		FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "HeartVersion.txt");
 		byte[] buffer = new byte[1024];
 		int count = 0;
 		while ((count = bis.read(buffer, 0, 1024)) != -1) {
@@ -86,7 +80,7 @@ public class UpdateCheckerThread extends Thread {
 
 		url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/ShardVersion");
 		bis = new BufferedInputStream(url.openStream());
-		fis = new FileOutputStream(Heart_Core.GetCore().baseDir + "ShardVersion.txt");
+		fis = new FileOutputStream(Heart_Core.baseDir + "ShardVersion.txt");
 		buffer = new byte[1024];
 		count = 0;
 		while ((count = bis.read(buffer, 0, 1024)) != -1) {
@@ -95,8 +89,8 @@ public class UpdateCheckerThread extends Thread {
 		fis.close();
 		bis.close();
 
-		String heartVersion = readVersionFile(Heart_Core.GetCore().baseDir + "HeartVersion.txt");
-		String shardVersion = readVersionFile(Heart_Core.GetCore().baseDir + "ShardVersion.txt");
+		String heartVersion = readVersionFile(Heart_Core.baseDir + "HeartVersion.txt");
+		String shardVersion = readVersionFile(Heart_Core.baseDir + "ShardVersion.txt");
 		if (heartVersion != null || shardVersion != null) {
 
 			if (!shardVersion.equals(Heart_Core.SHARD_VERSION))
@@ -125,7 +119,7 @@ public class UpdateCheckerThread extends Thread {
 	private void downloadUpdate() throws MalformedURLException, FileNotFoundException, IOException {
 		URL url = new URL(gitAddress);
 		BufferedInputStream bis = new BufferedInputStream(url.openStream());
-		FileOutputStream fis = new FileOutputStream(Heart_Core.GetCore().baseDir + "patch.zip");
+		FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "patch.zip");
 		byte[] buffer = new byte[1024];
 		int count = 0;
 		while ((count = bis.read(buffer, 0, 1024)) != -1) {
@@ -135,26 +129,56 @@ public class UpdateCheckerThread extends Thread {
 		bis.close();
 	}
 
-	private void preparePatch() {
+	private synchronized void preparePatch() throws IOException {
+		unZipIt(Heart_Core.baseDir + "patch.zip", Heart_Core.baseDir + "patch");
+
 		try {
-			unZipIt(Heart_Core.GetCore().baseDir + "patch.zip", Heart_Core.GetCore().baseDir + "patch");
-		} catch (IOException e) {
-			e.printStackTrace();
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
 		}
 
-		File dir = new File(Heart_Core.GetCore().baseDir + "patch/Crystal-master/");
+		File patchDir = new File(Heart_Core.baseDir + "patch/Crystal-master/");
 
 		if (shardUpdate) {
+			String[] params = new String[] { "cmd.exe", "/c", "gradlew Shard:build" };
+			ProcessBuilder builder = new ProcessBuilder(params);
+			builder.directory(patchDir);
+			builder.start();
 
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+			}
+
+			File dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Shard/build/distributions/Shard.zip");
+			dir.renameTo(new File(Heart_Core.baseDir + "patch/Shard.zip"));
 		}
 
 		if (heartUpdate) {
+			String[] params = new String[] { "cmd.exe", "/c", "gradlew Heart:build" };
+			ProcessBuilder builder = new ProcessBuilder(params);
+			builder.directory(patchDir);
+			builder.start();
 
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+			}
+
+			File dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Heart/build/distributions/Heart.zip");
+			dir.renameTo(new File(Heart_Core.baseDir + "patch/Heart.zip"));
 		}
 	}
 
-	private void installHeartPatch() {
+	private void installHeartPatch() throws IOException {
+		Heart_Core.GetCore().StopHeartServer();
 
+		unZipIt(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir);
+
+//		ProcessBuilder builder = new ProcessBuilder(
+//				new String[] { "cmd.exe", "/c", "\"C:/Program Files/Heart/bin/Heart.bat\"", "true" });
+//		builder.start();
+//		System.exit(0);
 	}
 
 	private void deleteDir(File file) {
@@ -170,22 +194,22 @@ public class UpdateCheckerThread extends Thread {
 	/**
 	 * Unzip it
 	 *
-	 * @param zipFile
+	 * @param zf
 	 *            input zip file
-	 * @param output
+	 * @param outputFolder
 	 *            zip file output folder
 	 * @throws IOException
 	 *             thrown if there is an issue spawning the script.
 	 */
-	public void unZipIt(String zf, String outputFolder) throws IOException {
-		String[] params = { "py", ".\\src\\Utilities\\unzip.py", zf, outputFolder };
-		Process p = Runtime.getRuntime().exec(params);
+	private void unZipIt(String zf, String outputFolder) throws IOException {
+		String[] params = { "py", "../lib/unzip.py", zf, outputFolder };
+		Runtime.getRuntime().exec(params);
 	}
 
 	private void removeFiles() {
-		deleteDir(new File(Heart_Core.GetCore().baseDir + "HeartVersion.txt"));
-		deleteDir(new File(Heart_Core.GetCore().baseDir + "ShardVersion.txt"));
-		deleteDir(new File(Heart_Core.GetCore().baseDir + "patch.zip"));
-		deleteDir(new File(Heart_Core.GetCore().baseDir + "patch"));
+		deleteDir(new File(Heart_Core.baseDir + "HeartVersion.txt"));
+		deleteDir(new File(Heart_Core.baseDir + "ShardVersion.txt"));
+		deleteDir(new File(Heart_Core.baseDir + "patch.zip"));
+		deleteDir(new File(Heart_Core.baseDir + "patch/Crystal-master"));
 	}
 }
