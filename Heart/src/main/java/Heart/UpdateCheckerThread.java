@@ -43,7 +43,8 @@ public class UpdateCheckerThread extends Thread {
 					System.out.println("UPDATER: Preparing patch...");
 					preparePatch();
 					System.out.println("UPDATER: Patch is ready.");
-					installHeartPatch();
+					if (heartUpdate)
+						installHeartPatch();
 				}
 				removeFiles();
 				System.out.println("UPDATER: All software is up to date!");
