@@ -38,10 +38,10 @@ public class UpdateCheckerThread extends Thread {
 				checkForUpdate();
 				if (shardUpdate || heartUpdate) {
 					System.out.println("UPDATER: There is a new version of the build. Downloading...");
-					downloadUpdate();
+					// downloadUpdate();
 					System.out.println("UPDATER: Update is downloaded. Packing for client and installing for Heart...");
 					System.out.println("UPDATER: Preparing patch...");
-					preparePatch();
+					// preparePatch();
 					System.out.println("UPDATER: Patch is ready.");
 					installHeartPatch();
 				}
@@ -173,15 +173,20 @@ public class UpdateCheckerThread extends Thread {
 	private void installHeartPatch() throws IOException {
 		Heart_Core.GetCore().StopHeartServer();
 
-		unZipIt(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir);
+		unZipIt(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir + "patch/");
 
-//		ProcessBuilder builder = new ProcessBuilder(
-//				new String[] { "cmd.exe", "/c", "\"C:/Program Files/Heart/bin/Heart.bat\"", "true" });
-//		builder.start();
-//		System.exit(0);
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+		}
+
+		System.out.println("UPDATER: Starting Heart Patcher...");
+		Runtime.getRuntime()
+				.exec(new String[] { "cmd", "/c", "start", Heart_Core.baseDir + "patch/Heart/bin/Heart.bat", "-p" });
+		System.exit(0);
 	}
 
-	private void deleteDir(File file) {
+	public static void deleteDir(File file) {
 		File[] contents = file.listFiles();
 		if (contents != null) {
 			for (File f : contents) {
@@ -201,7 +206,7 @@ public class UpdateCheckerThread extends Thread {
 	 * @throws IOException
 	 *             thrown if there is an issue spawning the script.
 	 */
-	private void unZipIt(String zf, String outputFolder) throws IOException {
+	public static void unZipIt(String zf, String outputFolder) throws IOException {
 		String[] params = { "py", "../lib/unzip.py", zf, outputFolder };
 		Runtime.getRuntime().exec(params);
 	}

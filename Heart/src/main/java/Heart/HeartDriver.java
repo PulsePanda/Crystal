@@ -1,5 +1,8 @@
 package Heart;
 
+import java.io.File;
+import java.io.IOException;
+
 import Exceptions.ServerInitializationException;
 
 public class HeartDriver {
@@ -10,28 +13,42 @@ public class HeartDriver {
 
 	public static void main(String[] args) {
 
-		// Init the Heart window and settings
-		// String patchArg = args[0];
-		// patchArg = patchArg.toLowerCase();
-		// String guiArg= args[1];
-		// guiArg = guiArg.toLowerCase();
-		String guiArg = "-gui";
-		String patchArg = "false";
+		boolean headlessArg = false;
+		boolean patchArg = false;
 
-		if (patchArg.equals("true")) {
-			// do patching shit
+		for (String s : args) {
+			s = s.toLowerCase();
+			switch (s) {
+			case "-p":
+				patchArg = true;
+				break;
+			case "-h":
+				headlessArg = true;
+				break;
+			}
 		}
 
-		if (guiArg.equals("-headless")) {
-			heartCore = new Heart_Core(true);
-			heartCore.Init();
-		} else if (guiArg.equals("-gui")) {
-			heartCore = new Heart_Core(false);
-			heartCore.Init();
+		if (patchArg) {
+			try {
+				System.out.println("Patching...");
+				UpdateCheckerThread.unZipIt(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir);
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+				}
+				Runtime.getRuntime()
+						.exec(new String[] { "cmd", "/c", "start", Heart_Core.baseDir + "Heart/bin/Heart.bat" });
+				System.exit(0);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return;
+			}
 		} else {
-			System.err.println("No argument passed on call. Must specify if headless! Add -headless or -gui");
-			System.exit(0);
+			removeHeartPatcher();
 		}
+
+		heartCore = new Heart_Core(headlessArg);
+		heartCore.Init();
 
 		// Init Heart networking, start listening for Shards
 		try {
@@ -44,5 +61,10 @@ public class HeartDriver {
 		// Init Patching Thread
 		updateCheckerThread = new UpdateCheckerThread();
 		updateCheckerThread.start();
+	}
+
+	private static void removeHeartPatcher() {
+		UpdateCheckerThread.deleteDir(new File(Heart_Core.baseDir + "patch/Heart"));
+		UpdateCheckerThread.deleteDir(new File(Heart_Core.baseDir + "patch/Heart.zip"));
 	}
 }
