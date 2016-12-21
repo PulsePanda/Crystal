@@ -220,3 +220,5 @@ pip-log.txt
 .mr.developer.cfg
 runHeart.bat
 runShard.bat
+buildHeart.bat
+buildShard.bat
