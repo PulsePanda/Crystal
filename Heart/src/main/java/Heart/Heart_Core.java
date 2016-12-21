@@ -37,8 +37,8 @@ public class Heart_Core {
 	public final static String SHARD_VERSION = "0.1.1", HEART_VERSION = "0.1.1";
 
 	public static String systemName = "CHS Heart", musicDir = "", movieDir = "", commandKey = "",
-			baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardDir = "Shard/", shardLogsDir = shardDir + "Logs/",
-			configDir = "heart_config.cfg", logBaseDir = "Logs/", shardFileDir = "Shard_Files/";
+			baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardLogsDir = "Logs/", configDir = "heart_config.cfg",
+			logBaseDir = "Logs/", shardFileDir = "Shard_Files/";
 	private static boolean cfg_set = false, logActive = false, initialized = false;
 
 	private boolean headless = false;
@@ -367,7 +367,7 @@ public class Heart_Core {
 			p.packetString = "update";
 			p.packetByteArray = file;
 			try {
-				cc.SendPacket(p);
+				cc.SendPacket(p, true);
 			} catch (SendPacketException e) {
 				System.err.println("Error sending update notification to shard. Details: " + e.getMessage());
 			}

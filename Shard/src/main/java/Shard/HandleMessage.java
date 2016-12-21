@@ -31,7 +31,7 @@ public class HandleMessage {
 	public HandleMessage(Packet packet) {
 		this.message = packet.packetString;
 		this.packet = packet;
-		System.out.println(message);
+		System.out.println("Message from server: " + message);
 		handle();
 	}
 

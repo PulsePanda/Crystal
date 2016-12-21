@@ -9,11 +9,10 @@ import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Patcher class. Checks if there is an update to the Shard, and if there is
@@ -66,30 +65,31 @@ public class ShardPatcher extends Thread {
 			Thread.sleep(2000);
 		} catch (InterruptedException ex) {
 		}
-		client.SendPacket(p);
+		client.SendPacket(p, true);
 	}
 
 	private void downloadUpdateHelper() {
-		if (!Shard_Core.GetShardCore().SHARD_VERSION.equals(Shard_Core.GetShardCore().SHARD_VERSION_SERVER)) {
+		if (!Shard_Core.SHARD_VERSION.equals(Shard_Core.SHARD_VERSION_SERVER)) {
 			System.out.println("Update required. Initializing update.");
 			try {
 				updateHelper();
 			} catch (SendPacketException e) {
 				System.err.println("Error sending update command to Heart. Details: " + e.getMessage());
-				Shard_Core.patched = true;
+				Shard_Core.patchReady = true;
 				return;
 			}
 		} else {
 			System.out.println("Shard is up to date!");
-			Shard_Core.GetShardCore().patched = true;
+			Shard_Core.patchReady = true;
 		}
-		Shard_Core.patched = true;
+		Shard_Core.patchReady = true;
 	}
 
 	private void updateHelper() throws SendPacketException {
 		Packet p = new Packet(Packet.PACKET_TYPE.Command, null);
 		p.packetString = "Patch";
-		client.SendPacket(p);
+		client.setPacketEncrypted(false);
+		client.SendPacket(p, true);
 		System.out.println("Requested patch from Heart.");
 
 		while (updateFile == null) {
@@ -98,16 +98,23 @@ public class ShardPatcher extends Thread {
 			} catch (InterruptedException e) {
 			}
 		}
+		client.setPacketEncrypted(true);
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 		}
 
 		try {
-			System.out.println("Saving update file.");
+			System.out.println("Saving update file...");
+			File file = new File(Shard_Core.shardDir + "Shard.zip");
+			System.out.println("TEMP:::: " + file.getAbsolutePath());
+			if (!file.exists())
+				file.createNewFile();
+
 			FileOutputStream fos = new FileOutputStream(Shard_Core.shardDir + "Shard.zip");
 			fos.write(updateFile);
 			fos.close();
+			System.out.println("Update file saved.");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -116,6 +123,7 @@ public class ShardPatcher extends Thread {
 	}
 
 	private void runUpdateHelper() {
+		System.out.println("Installing update...");
 		/*
 		 * run the patcher script file. Close Shard
 		 * 
