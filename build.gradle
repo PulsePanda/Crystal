@@ -36,7 +36,7 @@ build.doLast {
 //Common specific stuff
 project(':Common') {
   dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(dir: 'libs', include: ['*.jar', '*.py'])
   }
 }
 
@@ -47,7 +47,7 @@ project(':Heart') {
   mainClassName = 'Heart.HeartDriver'
 
   dependencies {
-	 compile fileTree(dir: 'libs', include: ['*.jar', '*.py'])
+	 compile fileTree(dir: 'libs', include: ['*.jar'])
    compile project(':Common')
   }
 

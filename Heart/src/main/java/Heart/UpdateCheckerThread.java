@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import Utilities.UnZip;
+
 /**
  *
  * @author Austin
@@ -133,7 +135,7 @@ public class UpdateCheckerThread extends Thread {
 	}
 
 	private synchronized void preparePatch() throws IOException {
-		unZipIt(Heart_Core.baseDir + "patch.zip", Heart_Core.baseDir + "patch");
+		new UnZip(Heart_Core.baseDir + "patch.zip", Heart_Core.baseDir + "patch").run();
 
 		try {
 			Thread.sleep(2000);
@@ -176,7 +178,7 @@ public class UpdateCheckerThread extends Thread {
 	private void installHeartPatch() throws IOException {
 		Heart_Core.GetCore().StopHeartServer();
 
-		unZipIt(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir);
+		new UnZip(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir).run();
 
 		try {
 			Thread.sleep(5000);
@@ -198,20 +200,11 @@ public class UpdateCheckerThread extends Thread {
 		file.delete();
 	}
 
-	/**
-	 * Unzip it
-	 *
-	 * @param zf
-	 *            input zip file
-	 * @param outputFolder
-	 *            zip file output folder
-	 * @throws IOException
-	 *             thrown if there is an issue spawning the script.
-	 */
-	public static void unZipIt(String zf, String outputFolder) throws IOException {
-		String[] params = { "py", "../lib/unzip.py", zf, outputFolder };
-		Runtime.getRuntime().exec(params);
-	}
+	// public static void unZipIt(String zf, String outputFolder) throws
+	// IOException {
+	// String[] params = { "py", "../lib/unzip.py", zf, outputFolder };
+	// Runtime.getRuntime().exec(params);
+	// }
 
 	private void removeFiles() {
 		deleteDir(new File(Heart_Core.baseDir + "HeartVersion.txt"));

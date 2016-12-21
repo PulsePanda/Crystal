@@ -34,7 +34,7 @@ import javax.swing.JTabbedPane;
 
 public class Shard_Core {
 
-	public static final String SHARD_VERSION = "0.1.0";
+	public static final String SHARD_VERSION = "0.1.1";
 	public static String SHARD_VERSION_SERVER = "";
 	private ShardPatcher patcher;
 

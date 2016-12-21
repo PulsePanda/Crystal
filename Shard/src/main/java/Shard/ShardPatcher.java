@@ -8,6 +8,7 @@ package Shard;
 import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
+import Utilities.UnZip;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -123,13 +124,38 @@ public class ShardPatcher extends Thread {
 	}
 
 	private void runUpdateHelper() {
-		System.out.println("Installing update...");
-		/*
-		 * run the patcher script file. Close Shard
-		 * 
-		 * Patcher file will remove old files, replace them with new files,
-		 * launch the new shard
-		 */
+		if (!Shard_Core.SHARD_VERSION.equals(Shard_Core.SHARD_VERSION_SERVER)) {
+			System.out.println("Installing update...");
+			try {
+				new UnZip(Shard_Core.shardDir + "Shard.zip", Shard_Core.baseDir).run();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+			}
+			deleteDir(new File(Shard_Core.shardDir + "Shard.zip"));
+
+			System.out.println("Launching new version of Shard.");
+			try {
+				Runtime.getRuntime().exec(new String[] { "cmd", "/c", "start", Shard_Core.shardDir + "bin/Shard.bat" });
+			} catch (IOException e) {
+				System.err.println("Error launching updated version of Shard.");
+				e.printStackTrace();
+			}
+			System.exit(0);
+		}
+	}
+
+	public static void deleteDir(File file) {
+		File[] contents = file.listFiles();
+		if (contents != null) {
+			for (File f : contents) {
+				deleteDir(f);
+			}
+		}
+		file.delete();
 	}
 
 	public enum PATCHER_TYPE {
