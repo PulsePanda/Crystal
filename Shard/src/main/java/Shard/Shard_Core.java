@@ -36,12 +36,12 @@ import javax.swing.JTabbedPane;
 
 public class Shard_Core {
 
-	public static final String SHARD_VERSION = "0.1.1";
+	public static final String SHARD_VERSION = "0.1.0";
 	public static String SHARD_VERSION_SERVER = "";
 	private ShardPatcher patcher;
 
-	public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", logBaseDir = "Logs/",
-			configDir = "shard_config.cfg";
+	public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/",
+			shardDir = baseDir + "Shard/", logBaseDir = "Logs/", configDir = "shard_config.cfg";
 	private static boolean logActive = false, initialized = false;
 	public static boolean patched = false;
 
@@ -155,7 +155,6 @@ public class Shard_Core {
 			try {
 				Thread.sleep(5);
 			} catch (InterruptedException ex) {
-				Logger.getLogger(Shard_Core.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 
@@ -466,6 +465,10 @@ public class Shard_Core {
 	 */
 	public int getPort() {
 		return port;
+	}
+
+	public ShardPatcher getPatcher() {
+		return patcher;
 	}
 
 	// public void setInitializedToFalse() {

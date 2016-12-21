@@ -5,14 +5,14 @@
 package Heart;
 
 import java.awt.Color;
-
-// TODO get rid of the extra time stamps in logs
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
@@ -47,7 +47,7 @@ public class Heart_Core {
 	private static Log log;
 	private UUID uuid;
 	private Config cfg = null;
-	private Server server = null;
+	public Server server = null;
 	private Thread serverThread = null;
 
 	private JFrame frame;
@@ -355,9 +355,17 @@ public class Heart_Core {
 	}
 
 	public void notifyShardsOfUpdate() {
+		byte[] file = null;
+		try {
+			file = Files.readAllBytes(Paths.get(baseDir + "patch/Shard.zip"));
+		} catch (IOException e1) {
+			System.err.println("Error reading Shard.zip to send to shards. Aborting.");
+			return;
+		}
 		for (ClientConnection cc : server.clients) {
 			Packet p = new Packet(Packet.PACKET_TYPE.Message, uuid.toString());
 			p.packetString = "update";
+			p.packetByteArray = file;
 			try {
 				cc.SendPacket(p);
 			} catch (SendPacketException e) {

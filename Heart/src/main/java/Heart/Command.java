@@ -3,6 +3,10 @@ package Heart;
 import Netta.Connection.Packet;
 import Netta.Exceptions.SendPacketException;
 import Utilities.APIHandler;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Calendar;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,7 +36,7 @@ public class Command {
 	 *            command given to analyze
 	 */
 	public void AnalyzeCommand(String c) throws SendPacketException {
-		System.out.println("Received command from Shard.");
+		System.out.println("Received command from Shard. Command: " + c);
 		switch (c) {
 		case "Good Morning":
 			goodMorning();
@@ -44,7 +48,19 @@ public class Command {
 			weather();
 			break;
 		case "Patch":
-
+			byte[] file = null;
+			try {
+				file = Files.readAllBytes(Paths.get(Heart_Core.baseDir + "patch/Shard.zip"));
+			} catch (IOException e1) {
+				System.err.println("Error reading Shard.zip to send to shards. Aborting.");
+				return;
+			}
+			Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
+			p.packetString = "update";
+			p.packetByteArray = file;
+			System.out.println("Sending patch to Shard...");
+			sendToClient(p);
+			System.out.println("Sent patch to Shard.");
 			break;
 		case "Get Shard Version":
 			System.out.println("Shard requested version information.");
@@ -53,6 +69,7 @@ public class Command {
 		default:
 			break;
 		}
+
 	}
 
 	/**
@@ -152,6 +169,10 @@ public class Command {
 	private void sendToClient(String s) throws SendPacketException {
 		Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
 		p.packetString = s;
+		connection.SendPacket(p);
+	}
+
+	private void sendToClient(Packet p) throws SendPacketException {
 		connection.SendPacket(p);
 	}
 
