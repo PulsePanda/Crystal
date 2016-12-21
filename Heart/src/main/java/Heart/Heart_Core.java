@@ -25,6 +25,8 @@ import javax.swing.SwingUtilities;
 
 import Exceptions.ConfigurationException;
 import Exceptions.ServerInitializationException;
+import Netta.Connection.Packet;
+import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
 import Utilities.Log;
 
@@ -350,6 +352,18 @@ public class Heart_Core {
 	 */
 	public boolean IsServerActive() {
 		return server.IsConnectionActive();
+	}
+
+	public void notifyShardsOfUpdate() {
+		for (ClientConnection cc : server.clients) {
+			Packet p = new Packet(Packet.PACKET_TYPE.Message, uuid.toString());
+			p.packetString = "update";
+			try {
+				cc.SendPacket(p);
+			} catch (SendPacketException e) {
+				System.err.println("Error sending update notification to shard. Details: " + e.getMessage());
+			}
+		}
 	}
 
 	public void StopHeartServer() {

@@ -45,6 +45,8 @@ public class UpdateCheckerThread extends Thread {
 					System.out.println("UPDATER: Patch is ready.");
 					if (heartUpdate)
 						installHeartPatch();
+					if (shardUpdate)
+						Heart_Core.GetCore().notifyShardsOfUpdate();
 				}
 				removeFiles();
 				System.out.println("UPDATER: All software is up to date!");
