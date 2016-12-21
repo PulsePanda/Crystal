@@ -29,8 +29,6 @@ import Utilities.Config;
 import Utilities.Log;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -40,10 +38,10 @@ public class Shard_Core {
 	public static String SHARD_VERSION_SERVER = "";
 	private ShardPatcher patcher;
 
-	public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", logBaseDir = "Logs/",
-			configDir = "shard_config.cfg";
+	public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", shardDir = "Shard/",
+			logBaseDir = "Logs/", configDir = "shard_config.cfg";
 	private static boolean logActive = false, initialized = false;
-	public static boolean patched = false;
+	public static boolean patchReady = false;
 
 	private boolean headless = false;
 
@@ -125,8 +123,9 @@ public class Shard_Core {
 	 */
 	private void InitVariables() {
 		baseDir = System.getProperty("user.home") + baseDir;
-		logBaseDir = baseDir + logBaseDir;
-		configDir = baseDir + configDir;
+		shardDir = baseDir + shardDir;
+		logBaseDir = shardDir + logBaseDir;
+		configDir = shardDir + configDir;
 	}
 
 	/**
@@ -151,11 +150,10 @@ public class Shard_Core {
 		// there's no update)
 		patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.downloadUpdate);
 		patcher.start();
-		while (patched == false) {
+		while (patchReady == false) {
 			try {
 				Thread.sleep(5);
 			} catch (InterruptedException ex) {
-				Logger.getLogger(Shard_Core.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 
@@ -188,13 +186,13 @@ public class Shard_Core {
 		goodMorning.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!patched) {
+				if (!patchReady) {
 					return;
 				}
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "Good Morning";
 				try {
-					client.SendPacket(p);
+					client.SendPacket(p, true);
 				} catch (SendPacketException ex) {
 					System.err.println("Error sending Good Morning packet to Heart. Error: " + ex.getMessage());
 				}
@@ -205,13 +203,13 @@ public class Shard_Core {
 		btcPrice.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!patched) {
+				if (!patchReady) {
 					return;
 				}
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "BTC Price";
 				try {
-					client.SendPacket(p);
+					client.SendPacket(p, true);
 				} catch (SendPacketException ex) {
 					System.err.println("Error sending BTC Price packet to Heart. Error: " + ex.getMessage());
 				}
@@ -222,13 +220,13 @@ public class Shard_Core {
 		weather.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!patched) {
+				if (!patchReady) {
 					return;
 				}
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "Weather";
 				try {
-					client.SendPacket(p);
+					client.SendPacket(p, true);
 				} catch (SendPacketException ex) {
 					System.err.println("Error sending Weather packet to Heart. Error: " + ex.getMessage());
 				}
@@ -411,7 +409,7 @@ public class Shard_Core {
 		try {
 			Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
 			p.packetString = "Manual disconnect";
-			client.SendPacket(p);
+			client.SendPacket(p, true);
 			client.CloseIOStreams();
 			clientThread.join();
 			clientThread = null;
@@ -468,6 +466,10 @@ public class Shard_Core {
 		return port;
 	}
 
+	public ShardPatcher getPatcher() {
+		return patcher;
+	}
+
 	// public void setInitializedToFalse() {
 	// initialized = false;
 	// client = null;
@@ -487,7 +489,7 @@ public class Shard_Core {
 	 *             Error will be in the getMessage()
 	 */
 	public void SendPacket(Packet p) throws SendPacketException {
-		client.SendPacket(p);
+		client.SendPacket(p, true);
 	}
 
 	/**
@@ -515,7 +517,7 @@ public class Shard_Core {
 					// Log packet to Heart
 					Packet p = new Packet(Packet.PACKET_TYPE.Message, "");
 					p.packetString = msg;
-					client.SendPacket(p);
+					client.SendPacket(p, true);
 				}
 
 				log.Write(msg);

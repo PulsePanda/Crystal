@@ -36,7 +36,7 @@ public class Client extends ClientTemplate {
                     }
                     break;
                 case "Message":
-                    new HandleMessage(p.packetString);
+                    new HandleMessage(p);
                     break;
 //                case "Shard Version":
 //                    Shard_Core.SHARD_VERSION_SERVER = p.packetString;
