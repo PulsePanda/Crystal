@@ -223,6 +223,17 @@ public class Heart_Core {
 		});
 		exitButton.setBounds(new Rectangle(10, 10, 100, 40));
 
+		JButton forceUpdate = new JButton("Check for Updates");
+		forceUpdate.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new Thread(new UpdateCheckerThread(false)).start();
+				;
+			}
+		});
+		forceUpdate.setBounds(new Rectangle(120, 10, 150, 40));
+
 		textArea = new JTextArea();
 		textArea.setEditable(false);
 		textArea.setLineWrap(true);
@@ -232,6 +243,7 @@ public class Heart_Core {
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
 		frame.getContentPane().add(exitButton);
+		frame.getContentPane().add(forceUpdate);
 		frame.getContentPane().add(scrollPane);
 		frame.setVisible(true);
 	}
@@ -359,11 +371,12 @@ public class Heart_Core {
 		try {
 			file = Files.readAllBytes(Paths.get(baseDir + "patch/Shard.zip"));
 		} catch (IOException e1) {
-			System.err.println("Error reading Shard.zip to send to shards. Aborting.");
+			System.err.println(
+					"Failure notifying Shards of new version. Error reading Shard.zip to send to Shards. Aborting.");
 			return;
 		}
 		for (ClientConnection cc : server.clients) {
-			Packet p = new Packet(Packet.PACKET_TYPE.Message, uuid.toString());
+			Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
 			p.packetString = "update";
 			p.packetByteArray = file;
 			try {
