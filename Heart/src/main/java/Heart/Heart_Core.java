@@ -389,5 +389,6 @@ public class Heart_Core {
 
 	public void StopHeartServer() {
 		server.CloseConnections();
+		serverThread.stop();
 	}
 }
