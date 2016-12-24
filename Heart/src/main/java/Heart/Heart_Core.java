@@ -377,7 +377,7 @@ public class Heart_Core {
 		}
 		for (ClientConnection cc : server.clients) {
 			Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
-			p.packetString = "update";
+			p.packetString = "new patch";
 			p.packetByteArray = file;
 			try {
 				cc.SendPacket(p, true);

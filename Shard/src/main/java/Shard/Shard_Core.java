@@ -473,6 +473,10 @@ public class Shard_Core {
 		return patcher;
 	}
 
+	public Client getClient() {
+		return client;
+	}
+
 	// public void setInitializedToFalse() {
 	// initialized = false;
 	// client = null;
