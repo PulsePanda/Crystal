@@ -44,7 +44,8 @@ public class HandleMessage {
 		} else if (message.equals("update")) {
 			Shard_Core.GetShardCore().getPatcher().updateFile = packet.packetByteArray;
 		} else if (message.equals("new patch")) {
-			ShardPatcher patcher = new ShardPatcher(Shard_Core.GetShardCore().getClient(), ShardPatcher.PATCHER_TYPE.runUpdate);
+			ShardPatcher patcher = new ShardPatcher(Shard_Core.GetShardCore().getClient(),
+					ShardPatcher.PATCHER_TYPE.downloadUpdate);
 			patcher.start();
 		} else {
 			JOptionPane.showMessageDialog(null, message);

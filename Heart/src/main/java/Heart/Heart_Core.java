@@ -367,18 +367,9 @@ public class Heart_Core {
 	}
 
 	public void notifyShardsOfUpdate() {
-		byte[] file = null;
-		try {
-			file = Files.readAllBytes(Paths.get(baseDir + "patch/Shard.zip"));
-		} catch (IOException e1) {
-			System.err.println(
-					"Failure notifying Shards of new version. Error reading Shard.zip to send to Shards. Aborting.");
-			return;
-		}
 		for (ClientConnection cc : server.clients) {
 			Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
 			p.packetString = "new patch";
-			p.packetByteArray = file;
 			try {
 				cc.SendPacket(p, true);
 			} catch (SendPacketException e) {

@@ -51,7 +51,7 @@ public class UpdateCheckerThread extends Thread {
 					if (shardUpdate)
 						Heart_Core.GetCore().notifyShardsOfUpdate();
 				}
-//				removeFiles();
+				removeFiles();
 				System.out.println("UPDATER: All software is up to date!");
 				shardUpdate = false;
 				heartUpdate = false;
@@ -60,7 +60,7 @@ public class UpdateCheckerThread extends Thread {
 				ex.printStackTrace();
 				shardUpdate = false;
 				heartUpdate = false;
-//				removeFiles();
+				removeFiles();
 			}
 			try {
 				if (running) {
@@ -72,27 +72,27 @@ public class UpdateCheckerThread extends Thread {
 	}
 
 	private void checkForUpdate() throws MalformedURLException, FileNotFoundException, IOException {
-//		URL url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/HeartVersion");
-//		BufferedInputStream bis = new BufferedInputStream(url.openStream());
-//		FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "HeartVersion.txt");
-//		byte[] buffer = new byte[1024];
-//		int count = 0;
-//		while ((count = bis.read(buffer, 0, 1024)) != -1) {
-//			fis.write(buffer, 0, count);
-//		}
-//		fis.close();
-//		bis.close();
-//
-//		url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/ShardVersion");
-//		bis = new BufferedInputStream(url.openStream());
-//		fis = new FileOutputStream(Heart_Core.baseDir + "ShardVersion.txt");
-//		buffer = new byte[1024];
-//		count = 0;
-//		while ((count = bis.read(buffer, 0, 1024)) != -1) {
-//			fis.write(buffer, 0, count);
-//		}
-//		fis.close();
-//		bis.close();
+		URL url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/HeartVersion");
+		BufferedInputStream bis = new BufferedInputStream(url.openStream());
+		FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "HeartVersion.txt");
+		byte[] buffer = new byte[1024];
+		int count = 0;
+		while ((count = bis.read(buffer, 0, 1024)) != -1) {
+			fis.write(buffer, 0, count);
+		}
+		fis.close();
+		bis.close();
+
+		url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/ShardVersion");
+		bis = new BufferedInputStream(url.openStream());
+		fis = new FileOutputStream(Heart_Core.baseDir + "ShardVersion.txt");
+		buffer = new byte[1024];
+		count = 0;
+		while ((count = bis.read(buffer, 0, 1024)) != -1) {
+			fis.write(buffer, 0, count);
+		}
+		fis.close();
+		bis.close();
 
 		String heartVersion = readVersionFile(Heart_Core.baseDir + "HeartVersion.txt");
 		String shardVersion = readVersionFile(Heart_Core.baseDir + "ShardVersion.txt");

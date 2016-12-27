@@ -136,8 +136,14 @@ public class Shard_Core {
 	 * Called after clientThread is started
 	 */
 	public synchronized void InitPatcher() {
-		if (!client.IsConnectionActive())
+		if (!client.IsConnectionActive()) {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+			}
+			InitPatcher();
 			return;
+		}
 
 		// Check shard version
 		patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.checkVersion);
