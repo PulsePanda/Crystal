@@ -8,11 +8,13 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
@@ -34,7 +36,8 @@ public class Heart_Core {
 
 	public final static boolean DEBUG = false;
 
-	public final static String SHARD_VERSION = "0.1.1", HEART_VERSION = "0.1.1";
+	public final static String HEART_VERSION = "0.1.1";
+	public static String SHARD_VERSION = "";
 
 	public static String systemName = "CHS Heart", musicDir = "", movieDir = "", commandKey = "",
 			baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardLogsDir = "Logs/", configDir = "heart_config.cfg",
@@ -49,6 +52,7 @@ public class Heart_Core {
 	private Config cfg = null;
 	public Server server = null;
 	private Thread serverThread = null;
+	private Thread updateCheckerThread = null;
 
 	private JFrame frame;
 	private static JTextArea textArea;
@@ -77,13 +81,17 @@ public class Heart_Core {
 			RedirectSystemStreams();
 		}
 
-		System.out.println("HEART VERSION: " + HEART_VERSION + "\nSHARD VERSION: " + SHARD_VERSION);
-
 		InitVariables();
+
+		System.out.println("HEART VERSION: " + HEART_VERSION + "\nSHARD VERSION: " + SHARD_VERSION);
 
 		InitLog();
 
 		InitCfg();
+
+		// Init Patching Thread
+		updateCheckerThread = new UpdateCheckerThread(true);
+		updateCheckerThread.start();
 	}
 
 	/**
@@ -190,6 +198,20 @@ public class Heart_Core {
 		configDir = heartDir + configDir;
 
 		shardFileDir = heartDir + shardFileDir;
+
+		try {
+			File file = new File(heartDir + "ShardVersion");
+			if (!file.exists())
+				file.createNewFile();
+
+			FileReader fileReader = new FileReader(heartDir + "ShardVersion");
+
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			SHARD_VERSION = bufferedReader.readLine();
+			bufferedReader.close();
+		} catch (FileNotFoundException ex) {
+		} catch (IOException ex) {
+		}
 	}
 
 	/**
@@ -223,6 +245,17 @@ public class Heart_Core {
 		});
 		exitButton.setBounds(new Rectangle(10, 10, 100, 40));
 
+		JButton forceUpdate = new JButton("Check for Updates");
+		forceUpdate.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new Thread(new UpdateCheckerThread(false)).start();
+				;
+			}
+		});
+		forceUpdate.setBounds(new Rectangle(120, 10, 150, 40));
+
 		textArea = new JTextArea();
 		textArea.setEditable(false);
 		textArea.setLineWrap(true);
@@ -232,6 +265,7 @@ public class Heart_Core {
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
 		frame.getContentPane().add(exitButton);
+		frame.getContentPane().add(forceUpdate);
 		frame.getContentPane().add(scrollPane);
 		frame.setVisible(true);
 	}
@@ -355,17 +389,9 @@ public class Heart_Core {
 	}
 
 	public void notifyShardsOfUpdate() {
-		byte[] file = null;
-		try {
-			file = Files.readAllBytes(Paths.get(baseDir + "patch/Shard.zip"));
-		} catch (IOException e1) {
-			System.err.println("Error reading Shard.zip to send to shards. Aborting.");
-			return;
-		}
 		for (ClientConnection cc : server.clients) {
-			Packet p = new Packet(Packet.PACKET_TYPE.Message, uuid.toString());
-			p.packetString = "update";
-			p.packetByteArray = file;
+			Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
+			p.packetString = "new patch";
 			try {
 				cc.SendPacket(p, true);
 			} catch (SendPacketException e) {
@@ -374,7 +400,17 @@ public class Heart_Core {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public void StopHeartServer() {
 		server.CloseConnections();
+		serverThread.stop();
+		new Thread() {
+			public void run() {
+				try {
+					updateCheckerThread.join();
+				} catch (InterruptedException e) {
+				}
+			}
+		}.start();
 	}
 }
