@@ -9,6 +9,8 @@
 /.gradle/
 /.distributions/
 .gradle/
+docs/
+Common/libs/javadoc/
 bin/
 tmp/
 *.tmp
@@ -222,3 +224,4 @@ runHeart.bat
 runShard.bat
 buildHeart.bat
 buildShard.bat
+*.html

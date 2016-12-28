@@ -25,23 +25,24 @@ public class UpdateCheckerThread extends Thread {
 
 	private static final String gitAddress = "https://github.com/PulsePanda/Crystal/archive/master.zip";
 	private static final int waitDelay = 1080000; // Checks every 3 hours
-	private boolean running = false, shardUpdate = false, heartUpdate = false;
+	private boolean running = false, shardUpdate = false, heartUpdate = false, keepRunning;
 
-	public UpdateCheckerThread() {
-
+	public UpdateCheckerThread(boolean keepRunning) {
+		this.keepRunning = keepRunning;
 	}
 
 	@Override
 	public void run() {
 		running = true;
 		while (running) {
+			running = keepRunning;
 			try {
 				System.out.println("UPDATER: Checking for update...");
 				checkForUpdate();
 				if (shardUpdate || heartUpdate) {
 					System.out.println("UPDATER: There is a new version of the build. Downloading...");
 					downloadUpdate();
-					System.out.println("UPDATER: Update is downloaded. Packing for client and installing for Heart...");
+					System.out.println("UPDATER: Update is downloaded. Packing for distribution...");
 					System.out.println("UPDATER: Preparing patch...");
 					preparePatch();
 					System.out.println("UPDATER: Patch is ready.");
@@ -61,7 +62,6 @@ public class UpdateCheckerThread extends Thread {
 				heartUpdate = false;
 				removeFiles();
 			}
-
 			try {
 				if (running) {
 					Thread.sleep(waitDelay);

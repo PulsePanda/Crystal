@@ -5,7 +5,7 @@ import Exceptions.ServerInitializationException;
 public class HeartDriver {
 
 	private static Heart_Core heartCore;
-	private static UpdateCheckerThread updateCheckerThread;
+	public static UpdateCheckerThread updateCheckerThread;
 	private static int port = 6987;
 
 	public static void main(String[] args) {
@@ -33,7 +33,7 @@ public class HeartDriver {
 		}
 
 		// Init Patching Thread
-		updateCheckerThread = new UpdateCheckerThread();
+		updateCheckerThread = new UpdateCheckerThread(true);
 		updateCheckerThread.start();
 	}
 }

@@ -223,6 +223,17 @@ public class Heart_Core {
 		});
 		exitButton.setBounds(new Rectangle(10, 10, 100, 40));
 
+		JButton forceUpdate = new JButton("Check for Updates");
+		forceUpdate.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new Thread(new UpdateCheckerThread(false)).start();
+				;
+			}
+		});
+		forceUpdate.setBounds(new Rectangle(120, 10, 150, 40));
+
 		textArea = new JTextArea();
 		textArea.setEditable(false);
 		textArea.setLineWrap(true);
@@ -232,6 +243,7 @@ public class Heart_Core {
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
 		frame.getContentPane().add(exitButton);
+		frame.getContentPane().add(forceUpdate);
 		frame.getContentPane().add(scrollPane);
 		frame.setVisible(true);
 	}
@@ -355,17 +367,9 @@ public class Heart_Core {
 	}
 
 	public void notifyShardsOfUpdate() {
-		byte[] file = null;
-		try {
-			file = Files.readAllBytes(Paths.get(baseDir + "patch/Shard.zip"));
-		} catch (IOException e1) {
-			System.err.println("Error reading Shard.zip to send to shards. Aborting.");
-			return;
-		}
 		for (ClientConnection cc : server.clients) {
-			Packet p = new Packet(Packet.PACKET_TYPE.Message, uuid.toString());
-			p.packetString = "update";
-			p.packetByteArray = file;
+			Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
+			p.packetString = "new patch";
 			try {
 				cc.SendPacket(p, true);
 			} catch (SendPacketException e) {
@@ -376,5 +380,6 @@ public class Heart_Core {
 
 	public void StopHeartServer() {
 		server.CloseConnections();
+		serverThread.stop();
 	}
 }

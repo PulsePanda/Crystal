@@ -13,32 +13,31 @@ import Exceptions.ClientInitializationException;
  */
 public class ShardConnectionThread implements Runnable {
 
-    private Shard_Core sc;
-    private String IP;
-    private int port;
+	private Shard_Core sc;
+	private String IP;
+	private int port;
 
-    public ShardConnectionThread(String IP, int port) {
-        sc = Shard_Core.GetShardCore();
-        this.IP = IP;
-        this.port = port;
-    }
+	public ShardConnectionThread(String IP, int port) {
+		sc = Shard_Core.GetShardCore();
+		this.IP = IP;
+		this.port = port;
+	}
 
-    /**
-     * Run constantly. Every 5 seconds, if the Shard is not connected to the
-     * Heart, try to connect again.
-     */
-    @Override
-    public void run() {
-        while (true) {
-            try {
-				sc.StartShardClient(sc.getIP(), sc.getPort());
+	/**
+	 * Run constantly. Every 5 seconds, if the Shard is not connected to the
+	 * Heart, try to connect again.
+	 */
+	@Override
+	public void run() {
+		while (true) {
+			try {
+				sc.StartShardClient(IP, port);
 			} catch (ClientInitializationException e) {
 			}
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException ex) {
-            }
-
-        }
-    }
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException ex) {
+			}
+		}
+	}
 }
