@@ -251,12 +251,12 @@ public class Shard_Core {
 			}
 		});
 
-		JButton playMedia = new JButton("Play Media");
-		playMedia.addActionListener(new ActionListener() {
+		JButton playMusic = new JButton("Play Music");
+		playMusic.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
-				p.packetString = "Play Media";
+				p.packetString = "Play Music";
 				try {
 					client.SendPacket(p, true);
 				} catch (SendPacketException e1) {
@@ -269,7 +269,7 @@ public class Shard_Core {
 		commandPanel.add(goodMorning);
 		commandPanel.add(btcPrice);
 		commandPanel.add(weather);
-		commandPanel.add(playMedia);
+		commandPanel.add(playMusic);
 
 		// Console panel setup
 		consolePanel = new JPanel();
