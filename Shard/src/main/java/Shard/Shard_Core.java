@@ -145,6 +145,8 @@ public class Shard_Core {
 			return;
 		}
 
+		SHARD_VERSION_SERVER = "";
+
 		// Check shard version
 		patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.checkVersion);
 		patcher.start();
@@ -190,6 +192,13 @@ public class Shard_Core {
 		// Command panel setup
 		commandPanel = new JPanel();
 		commandPanel.setLayout(new FlowLayout());
+
+		JButton checkUpdate = new JButton("Check for Updates");
+		checkUpdate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				InitPatcher();
+			}
+		});
 
 		JButton goodMorning = new JButton("Good Morning");
 		goodMorning.addActionListener(new ActionListener() {
@@ -242,6 +251,7 @@ public class Shard_Core {
 			}
 		});
 
+		commandPanel.add(checkUpdate);
 		commandPanel.add(goodMorning);
 		commandPanel.add(btcPrice);
 		commandPanel.add(weather);
