@@ -11,8 +11,6 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
@@ -378,6 +376,7 @@ public class Heart_Core {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public void StopHeartServer() {
 		server.CloseConnections();
 		serverThread.stop();
