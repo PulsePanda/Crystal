@@ -255,7 +255,13 @@ public class Shard_Core {
 		playMedia.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
+				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+				p.packetString = "Play Media";
+				try {
+					client.SendPacket(p, true);
+				} catch (SendPacketException e1) {
+					System.err.println("Error sending Weather packet to Heart. Error: " + e1.getMessage());
+				}
 			}
 		});
 
