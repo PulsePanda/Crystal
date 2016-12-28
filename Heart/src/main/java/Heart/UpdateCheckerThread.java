@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -26,6 +27,7 @@ public class UpdateCheckerThread extends Thread {
 	private static final String gitAddress = "https://github.com/PulsePanda/Crystal/archive/master.zip";
 	private static final int waitDelay = 1080000; // Checks every 3 hours
 	private boolean running = false, shardUpdate = false, heartUpdate = false, keepRunning;
+	private String shardVersion;
 
 	public UpdateCheckerThread(boolean keepRunning) {
 		this.keepRunning = keepRunning;
@@ -49,7 +51,7 @@ public class UpdateCheckerThread extends Thread {
 					if (heartUpdate)
 						installHeartPatch();
 					if (shardUpdate)
-						Heart_Core.GetCore().notifyShardsOfUpdate();
+						installShardPatch();
 				}
 				removeFiles();
 				System.out.println("UPDATER: All software is up to date!");
@@ -57,7 +59,6 @@ public class UpdateCheckerThread extends Thread {
 				heartUpdate = false;
 			} catch (Exception ex) {
 				System.err.println("UPDATER: Issue downloading patch from GitHub. Aborting patch.");
-				ex.printStackTrace();
 				shardUpdate = false;
 				heartUpdate = false;
 				removeFiles();
@@ -97,9 +98,10 @@ public class UpdateCheckerThread extends Thread {
 		String heartVersion = readVersionFile(Heart_Core.baseDir + "HeartVersion.txt");
 		String shardVersion = readVersionFile(Heart_Core.baseDir + "ShardVersion.txt");
 		if (heartVersion != null || shardVersion != null) {
-
-			if (!shardVersion.equals(Heart_Core.SHARD_VERSION))
+			if (!shardVersion.equals(Heart_Core.SHARD_VERSION)) {
 				shardUpdate = true;
+				this.shardVersion = shardVersion;
+			}
 
 			if (!heartVersion.equals(Heart_Core.HEART_VERSION))
 				heartUpdate = true;
@@ -190,6 +192,17 @@ public class UpdateCheckerThread extends Thread {
 		System.exit(0);
 	}
 
+	private void installShardPatch() {
+		PrintWriter out;
+		try {
+			out = new PrintWriter(Heart_Core.heartDir + "ShardVersion");
+			out.println(shardVersion);
+		} catch (FileNotFoundException e) {
+			System.err.println("UPDATE: Error writing new Shard version to ShardVersion file!");
+		}
+		Heart_Core.GetCore().notifyShardsOfUpdate();
+	}
+
 	public static void deleteDir(File file) {
 		File[] contents = file.listFiles();
 		if (contents != null) {
@@ -199,12 +212,6 @@ public class UpdateCheckerThread extends Thread {
 		}
 		file.delete();
 	}
-
-	// public static void unZipIt(String zf, String outputFolder) throws
-	// IOException {
-	// String[] params = { "py", "../lib/unzip.py", zf, outputFolder };
-	// Runtime.getRuntime().exec(params);
-	// }
 
 	private void removeFiles() {
 		deleteDir(new File(Heart_Core.baseDir + "HeartVersion.txt"));

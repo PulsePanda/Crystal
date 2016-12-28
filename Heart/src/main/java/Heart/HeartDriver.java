@@ -31,9 +31,5 @@ public class HeartDriver {
 		} catch (ServerInitializationException e) {
 			System.err.println("Error starting Heart server! Error message: " + e.getMessage());
 		}
-
-		// Init Patching Thread
-		updateCheckerThread = new UpdateCheckerThread(true);
-		updateCheckerThread.start();
 	}
 }
