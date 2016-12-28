@@ -42,6 +42,7 @@ public class Heart_Core {
 	public static String systemName = "CHS Heart", musicDir = "", movieDir = "", commandKey = "",
 			baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardLogsDir = "Logs/", configDir = "heart_config.cfg",
 			logBaseDir = "Logs/", shardFileDir = "Shard_Files/";
+	public static boolean DEV_BUILD;
 	private static boolean cfg_set = false, logActive = false, initialized = false;
 
 	private boolean headless = false;
@@ -60,9 +61,10 @@ public class Heart_Core {
 	/**
 	 * Default Constructor. Server Port defaults to 6976
 	 */
-	public Heart_Core(boolean headless) {
+	public Heart_Core(boolean headless, boolean DEV_BUILD) {
 		heart_core = this;
 		this.headless = headless;
+		this.DEV_BUILD = DEV_BUILD;
 	}
 
 	/**

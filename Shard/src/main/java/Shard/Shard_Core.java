@@ -251,10 +251,19 @@ public class Shard_Core {
 			}
 		});
 
+		JButton playMedia = new JButton("Play Media");
+		playMedia.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});
+
 		commandPanel.add(checkUpdate);
 		commandPanel.add(goodMorning);
 		commandPanel.add(btcPrice);
 		commandPanel.add(weather);
+		commandPanel.add(playMedia);
 
 		// Console panel setup
 		consolePanel = new JPanel();
