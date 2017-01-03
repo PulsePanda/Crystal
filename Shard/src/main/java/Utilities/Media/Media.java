@@ -2,6 +2,7 @@ package Utilities.Media;
 
 abstract class Media {
 	String url;
+	
 
 	public Media(String url) {
 		this.url = url;

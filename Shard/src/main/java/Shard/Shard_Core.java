@@ -206,7 +206,7 @@ public class Shard_Core {
 			public void actionPerformed(ActionEvent e) {
 				if (!patchReady)
 					return;
-				InitPatcher();
+				new Thread(new ShardConnectionThread("", 0, false, true)).start();
 			}
 		});
 
@@ -433,7 +433,6 @@ public class Shard_Core {
 
 		clientThread = new Thread(client);
 		clientThread.start();
-		InitPatcher();
 	}
 
 	public void StartShardClientSuppressed(String IP, int port) {
