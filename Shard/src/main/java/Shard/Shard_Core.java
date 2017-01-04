@@ -431,6 +431,7 @@ public class Shard_Core {
 		} catch (ConnectionException ex) {
 		}
 
+		System.out.println("Connecting to Heart. IP: " + IP + " Port: " + port);
 		clientThread = new Thread(client);
 		clientThread.start();
 	}
