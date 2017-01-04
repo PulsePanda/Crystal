@@ -74,6 +74,9 @@ public class Command {
 			System.out.println("Shard requested version information.");
 			sendToClient("version:" + Heart_Core.SHARD_VERSION, true);
 			break;
+		case "Play Music":
+			System.out.println("Shard requested to play media.");
+			break;
 		default:
 			break;
 		}

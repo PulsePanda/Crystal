@@ -24,7 +24,8 @@ import Utilities.UnZip;
  */
 public class UpdateCheckerThread extends Thread {
 
-	private static final String gitAddress = "https://github.com/PulsePanda/Crystal/archive/master.zip";
+	private static final String gitAddressMaster = "https://github.com/PulsePanda/Crystal/archive/master.zip";
+	private static final String gitAddressDev = "https://github.com/PulsePanda/Crystal/archive/dev.zip";
 	private static final int waitDelay = 1080000; // Checks every 3 hours
 	private boolean running = false, shardUpdate = false, heartUpdate = false, keepRunning;
 	private String shardVersion;
@@ -73,7 +74,11 @@ public class UpdateCheckerThread extends Thread {
 	}
 
 	private void checkForUpdate() throws MalformedURLException, FileNotFoundException, IOException {
-		URL url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/HeartVersion");
+		URL url;
+		if (!Heart_Core.DEV_BUILD)
+			url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/HeartVersion");
+		else
+			url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/dev/HeartVersion");
 		BufferedInputStream bis = new BufferedInputStream(url.openStream());
 		FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "HeartVersion.txt");
 		byte[] buffer = new byte[1024];
@@ -84,7 +89,10 @@ public class UpdateCheckerThread extends Thread {
 		fis.close();
 		bis.close();
 
-		url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/ShardVersion");
+		if (!Heart_Core.DEV_BUILD)
+			url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/ShardVersion");
+		else
+			url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/dev/ShardVersion");
 		bis = new BufferedInputStream(url.openStream());
 		fis = new FileOutputStream(Heart_Core.baseDir + "ShardVersion.txt");
 		buffer = new byte[1024];
@@ -124,7 +132,11 @@ public class UpdateCheckerThread extends Thread {
 	}
 
 	private void downloadUpdate() throws MalformedURLException, FileNotFoundException, IOException {
-		URL url = new URL(gitAddress);
+		URL url;
+		if (!Heart_Core.DEV_BUILD)
+			url = new URL(gitAddressMaster);
+		else
+			url = new URL(gitAddressDev);
 		BufferedInputStream bis = new BufferedInputStream(url.openStream());
 		FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "patch.zip");
 		byte[] buffer = new byte[1024];

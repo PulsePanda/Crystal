@@ -7,9 +7,12 @@ package Shard;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
@@ -27,6 +30,11 @@ import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
 import Utilities.Log;
+import Utilities.Media.MediaPlayback;
+import Utilities.Media.Music;
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.Player;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import javax.swing.JPanel;
@@ -196,7 +204,9 @@ public class Shard_Core {
 		JButton checkUpdate = new JButton("Check for Updates");
 		checkUpdate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				InitPatcher();
+				if (!patchReady)
+					return;
+				new Thread(new ShardConnectionThread("", 0, false, true)).start();
 			}
 		});
 
@@ -204,9 +214,9 @@ public class Shard_Core {
 		goodMorning.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!patchReady) {
+				if (!patchReady)
 					return;
-				}
+
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "Good Morning";
 				try {
@@ -221,9 +231,9 @@ public class Shard_Core {
 		btcPrice.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!patchReady) {
+				if (!patchReady)
 					return;
-				}
+
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "BTC Price";
 				try {
@@ -238,9 +248,9 @@ public class Shard_Core {
 		weather.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!patchReady) {
+				if (!patchReady)
 					return;
-				}
+
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "Weather";
 				try {
@@ -251,10 +261,27 @@ public class Shard_Core {
 			}
 		});
 
+		JButton playMusic = new JButton("Play Music");
+		playMusic.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+				p.packetString = "Play Music";
+				// try {
+				// client.SendPacket(p, true);
+				// } catch (SendPacketException e1) {
+				// System.err.println("Error sending Weather packet to Heart.
+				// Error: " + e1.getMessage());
+				// }
+				new MediaPlayback(new Music("http://www.ntonyx.com/mp3files/Morning_Flower.mp3")).start();
+			}
+		});
+
 		commandPanel.add(checkUpdate);
 		commandPanel.add(goodMorning);
 		commandPanel.add(btcPrice);
 		commandPanel.add(weather);
+		commandPanel.add(playMusic);
 
 		// Console panel setup
 		consolePanel = new JPanel();
@@ -406,7 +433,6 @@ public class Shard_Core {
 
 		clientThread = new Thread(client);
 		clientThread.start();
-		InitPatcher();
 	}
 
 	public void StartShardClientSuppressed(String IP, int port) {

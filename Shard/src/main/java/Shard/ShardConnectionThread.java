@@ -16,11 +16,14 @@ public class ShardConnectionThread implements Runnable {
 	private Shard_Core sc;
 	private String IP;
 	private int port;
+	private boolean keepRunning, patchOnly;
 
-	public ShardConnectionThread(String IP, int port) {
+	public ShardConnectionThread(String IP, int port, boolean keepRunning, boolean patchOnly) {
 		sc = Shard_Core.GetShardCore();
 		this.IP = IP;
 		this.port = port;
+		this.keepRunning = keepRunning;
+		this.patchOnly = patchOnly;
 	}
 
 	/**
@@ -31,9 +34,13 @@ public class ShardConnectionThread implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				sc.StartShardClient(IP, port);
+				if (!patchOnly)
+					sc.StartShardClient(IP, port);
+				sc.InitPatcher();
 			} catch (ClientInitializationException e) {
 			}
+			if (!keepRunning)
+				return;
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException ex) {
