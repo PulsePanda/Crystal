@@ -257,7 +257,6 @@ public class Heart_Core {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				new Thread(new UpdateCheckerThread(false)).start();
-				;
 			}
 		});
 		forceUpdate.setBounds(new Rectangle(120, 10, 150, 40));
@@ -266,12 +265,21 @@ public class Heart_Core {
 		textArea.setEditable(false);
 		textArea.setLineWrap(true);
 
+		JButton clearLog = new JButton("Clear Log");
+		clearLog.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				textArea.setText("");
+			}
+		});
+		clearLog.setBounds(new Rectangle(280, 10, 100, 40));
+
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		scrollPane.setBounds(0, 60, frame.getWidth() - 5, frame.getHeight() - 85);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
 		frame.getContentPane().add(exitButton);
 		frame.getContentPane().add(forceUpdate);
+		frame.getContentPane().add(clearLog);
 		frame.getContentPane().add(scrollPane);
 		frame.setVisible(true);
 	}

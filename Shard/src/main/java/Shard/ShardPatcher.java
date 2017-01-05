@@ -142,6 +142,7 @@ public class ShardPatcher extends Thread {
 
 			System.out.println("Launching new version of Shard.");
 			try {
+				// TODO: This is the install script for Shards
 				if (os.equals("windows")) {
 					// Runtime.getRuntime()
 					// .exec(new String[] { "cmd", "/c", "start",
