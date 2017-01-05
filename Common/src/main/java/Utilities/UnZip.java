@@ -26,7 +26,15 @@ public class UnZip {
 	 *             thrown if there is an error spawning the script
 	 */
 	public void run() throws IOException {
-		String[] params = { "py", "../lib/unzip.py", source, destination };
+		String os = System.getProperty("os.name");
+		os = os.toLowerCase();
+
+		String[] params = null;
+		if (os.contains("windows"))
+			params = new String[] { "py", "../lib/unzip.py", source, destination };
+		else if (os.contains("linux"))
+			params = new String[] { "python3", "../lib/unzip.py", source, destination };
+
 		Runtime.getRuntime().exec(params);
 	}
 }

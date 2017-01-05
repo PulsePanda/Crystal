@@ -35,7 +35,7 @@ import Utilities.Log;
 public class Heart_Core {
 
 	public final static boolean DEBUG = false;
-	
+
 	public final static String HEART_VERSION = "0.1.1";
 	public static String SHARD_VERSION = "";
 
@@ -201,6 +201,10 @@ public class Heart_Core {
 
 		shardFileDir = heartDir + shardFileDir;
 
+		updateShardVersion();
+	}
+
+	public void updateShardVersion() {
 		try {
 			File file = new File(heartDir + "ShardVersion");
 			if (!file.exists())

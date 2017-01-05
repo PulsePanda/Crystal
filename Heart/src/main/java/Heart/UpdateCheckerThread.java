@@ -223,6 +223,8 @@ public class UpdateCheckerThread extends Thread {
 			out = new PrintWriter(Heart_Core.heartDir + "ShardVersion");
 			out.print(shardVersion);
 			out.close();
+			
+			Heart_Core.GetCore().updateShardVersion();
 		} catch (FileNotFoundException e) {
 			System.err.println("UPDATE: Error writing new Shard version to ShardVersion file!");
 		}
