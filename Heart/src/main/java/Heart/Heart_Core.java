@@ -35,7 +35,7 @@ import Utilities.Log;
 public class Heart_Core {
 
 	public final static boolean DEBUG = false;
-
+	
 	public final static String HEART_VERSION = "0.1.1";
 	public static String SHARD_VERSION = "";
 
