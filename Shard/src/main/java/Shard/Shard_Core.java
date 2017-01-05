@@ -4,21 +4,24 @@
  */
 package Shard;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
@@ -32,11 +35,6 @@ import Utilities.Config;
 import Utilities.Log;
 import Utilities.Media.MediaPlayback;
 import Utilities.Media.Music;
-
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 public class Shard_Core {
 
@@ -188,12 +186,13 @@ public class Shard_Core {
 		// Frame setup
 		frame = new JFrame(systemName);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.setSize(800, 600);
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		frame.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
 		frame.setLayout(null);
 		tabbedPane = new JTabbedPane();
-		tabbedPane.setBounds(0, 0, 800, 600);
+		tabbedPane.setBounds(0, 0, frame.getWidth(), frame.getHeight());
 
 		// Command panel setup
 		commandPanel = new JPanel();
