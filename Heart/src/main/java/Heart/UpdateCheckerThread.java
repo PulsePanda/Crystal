@@ -60,6 +60,7 @@ public class UpdateCheckerThread extends Thread {
 				heartUpdate = false;
 			} catch (Exception ex) {
 				System.err.println("UPDATER: Issue downloading patch from GitHub. Aborting patch.");
+				ex.printStackTrace();
 				shardUpdate = false;
 				heartUpdate = false;
 				removeFiles();
@@ -156,7 +157,11 @@ public class UpdateCheckerThread extends Thread {
 		} catch (InterruptedException e) {
 		}
 
-		File patchDir = new File(Heart_Core.baseDir + "patch/Crystal-master/");
+		File patchDir;
+		if (!Heart_Core.DEV_BUILD)
+			patchDir = new File(Heart_Core.baseDir + "patch/Crystal-master/");
+		else
+			patchDir = new File(Heart_Core.baseDir + "patch/Crystal-dev/");
 
 		if (shardUpdate) {
 			String[] params = new String[] { "cmd.exe", "/c", "gradlew Shard:build" };
@@ -169,7 +174,11 @@ public class UpdateCheckerThread extends Thread {
 			} catch (InterruptedException e) {
 			}
 
-			File dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Shard/build/distributions/Shard.zip");
+			File dir;
+			if (!Heart_Core.DEV_BUILD)
+				dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Shard/build/distributions/Shard.zip");
+			else
+				dir = new File(Heart_Core.baseDir + "patch/Crystal-dev/Shard/build/distributions/Shard.zip");
 			dir.renameTo(new File(Heart_Core.baseDir + "patch/Shard.zip"));
 		}
 
@@ -184,7 +193,11 @@ public class UpdateCheckerThread extends Thread {
 			} catch (InterruptedException e) {
 			}
 
-			File dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Heart/build/distributions/Heart.zip");
+			File dir;
+			if (!Heart_Core.DEV_BUILD)
+				dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Heart/build/distributions/Heart.zip");
+			else
+				dir = new File(Heart_Core.baseDir + "patch/Crystal-dev/Heart/build/distributions/Heart.zip");
 			dir.renameTo(new File(Heart_Core.baseDir + "patch/Heart.zip"));
 		}
 	}

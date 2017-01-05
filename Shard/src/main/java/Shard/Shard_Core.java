@@ -32,8 +32,6 @@ import Utilities.Config;
 import Utilities.Log;
 import Utilities.Media.MediaPlayback;
 import Utilities.Media.Music;
-import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.player.Player;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
