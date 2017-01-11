@@ -111,8 +111,8 @@ public class UpdateCheckerThread extends Thread {
 		if (heartVersion != null || shardVersion != null) {
 			if (!shardVersion.equals(Heart_Core.SHARD_VERSION)) {
 				shardUpdate = true;
-				this.shardVersion = shardVersion;
 			}
+			this.shardVersion = shardVersion;
 
 			if (!heartVersion.equals(Heart_Core.HEART_VERSION))
 				heartUpdate = true;
@@ -248,5 +248,6 @@ public class UpdateCheckerThread extends Thread {
 		deleteDir(new File(Heart_Core.baseDir + "ShardVersion.txt"));
 		deleteDir(new File(Heart_Core.baseDir + "patch.zip"));
 		deleteDir(new File(Heart_Core.baseDir + "patch/Crystal-master"));
+		deleteDir(new File(Heart_Core.baseDir + "patch/Crystal-dev"));
 	}
 }
