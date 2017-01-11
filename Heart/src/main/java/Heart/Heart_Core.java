@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
@@ -57,6 +58,7 @@ public class Heart_Core {
 
 	private JFrame frame;
 	private static JTextArea textArea;
+	private JLabel shardVersionLabel;
 
 	/**
 	 * Default Constructor. Server Port defaults to 6976
@@ -85,11 +87,11 @@ public class Heart_Core {
 
 		InitVariables();
 
-		System.out.println("HEART VERSION: " + HEART_VERSION + "\nSHARD VERSION: " + SHARD_VERSION);
-
 		InitLog();
 
 		InitCfg();
+
+		InitMediaIndex();
 
 		// Init Patching Thread
 		updateCheckerThread = new UpdateCheckerThread(true);
@@ -215,6 +217,7 @@ public class Heart_Core {
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 			SHARD_VERSION = bufferedReader.readLine();
 			bufferedReader.close();
+			shardVersionLabel.setText("Shard_Version: " + SHARD_VERSION);
 		} catch (FileNotFoundException ex) {
 		} catch (IOException ex) {
 		}
@@ -257,7 +260,6 @@ public class Heart_Core {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				new Thread(new UpdateCheckerThread(false)).start();
-				;
 			}
 		});
 		forceUpdate.setBounds(new Rectangle(120, 10, 150, 40));
@@ -266,12 +268,29 @@ public class Heart_Core {
 		textArea.setEditable(false);
 		textArea.setLineWrap(true);
 
+		JButton clearLog = new JButton("Clear Log");
+		clearLog.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				textArea.setText("");
+			}
+		});
+		clearLog.setBounds(new Rectangle(280, 10, 100, 40));
+
+		JLabel heartVersionLabel = new JLabel("Heart_Version: " + HEART_VERSION);
+		heartVersionLabel.setBounds(new Rectangle(500, 10, 150, 25));
+
+		shardVersionLabel = new JLabel("Shard_Version: " + SHARD_VERSION);
+		shardVersionLabel.setBounds(new Rectangle(650, 10, 150, 25));
+
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		scrollPane.setBounds(0, 60, frame.getWidth() - 5, frame.getHeight() - 85);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
 		frame.getContentPane().add(exitButton);
 		frame.getContentPane().add(forceUpdate);
+		frame.getContentPane().add(clearLog);
+		frame.getContentPane().add(heartVersionLabel);
+		frame.getContentPane().add(shardVersionLabel);
 		frame.getContentPane().add(scrollPane);
 		frame.setVisible(true);
 	}
@@ -323,6 +342,13 @@ public class Heart_Core {
 		} else {
 			System.err.println("Please initialize the Heart Config with Nerv before proceeding!");
 		}
+	}
+
+	/**
+	 * Initializes the media index thread to provide a usable list for shards
+	 */
+	private void InitMediaIndex() {
+
 	}
 
 	/**

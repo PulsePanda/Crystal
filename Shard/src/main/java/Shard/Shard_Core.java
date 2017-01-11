@@ -38,7 +38,7 @@ import Utilities.Media.Music;
 
 public class Shard_Core {
 
-	public static final String SHARD_VERSION = "0.1.2";
+	public static final String SHARD_VERSION = "0.1.3";
 	public static String SHARD_VERSION_SERVER = "";
 	private ShardPatcher patcher;
 
