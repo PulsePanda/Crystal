@@ -138,20 +138,22 @@ public class ShardPatcher extends Thread {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 			}
-			deleteDir(new File(Shard_Core.shardDir + "Shard.zip"));
+			// deleteDir(new File(Shard_Core.shardDir + "Shard.zip"));
 
 			System.out.println("Launching new version of Shard.");
 			try {
 				// TODO: This is the install script for Shards
 				if (os.equals("windows")) {
-					// Runtime.getRuntime()
-					// .exec(new String[] { "cmd", "/c", "start",
-					// Shard_Core.shardDir + "bin/Shard.bat" });
-					ProcessBuilder pb = new ProcessBuilder(Shard_Core.shardDir + "bin/Shard.bat");
-					pb.start();
+					Runtime.getRuntime()
+							.exec(new String[] { "cmd", "/c", "start", Shard_Core.shardDir + "bin/Shard.bat" });
+					// ProcessBuilder pb = new
+					// ProcessBuilder(Shard_Core.shardDir + "bin/Shard.bat");
+					// pb.start();
 				} else if (os.equals("linux")) {
-					// Runtime.getRuntime().exec(new String[] {});
-					ProcessBuilder pb = new ProcessBuilder(Shard_Core.shardDir + "bin/Shard.sh");
+					// Runtime.getRuntime().exec(
+					// new String[] { "/bin/bash", "-c", "sh " +
+					// Shard_Core.shardDir + "bin/Shard.sh" });
+					ProcessBuilder pb = new ProcessBuilder(Shard_Core.shardDir + "bin/Shard");
 					pb.start();
 				}
 			} catch (IOException e) {

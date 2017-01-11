@@ -91,6 +91,8 @@ public class Heart_Core {
 
 		InitCfg();
 
+		InitMediaIndex();
+
 		// Init Patching Thread
 		updateCheckerThread = new UpdateCheckerThread(true);
 		updateCheckerThread.start();
@@ -340,6 +342,13 @@ public class Heart_Core {
 		} else {
 			System.err.println("Please initialize the Heart Config with Nerv before proceeding!");
 		}
+	}
+
+	/**
+	 * Initializes the media index thread to provide a usable list for shards
+	 */
+	private void InitMediaIndex() {
+
 	}
 
 	/**
