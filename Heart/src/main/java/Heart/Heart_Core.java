@@ -94,7 +94,7 @@ public class Heart_Core {
 		InitMediaIndex();
 
 		// Init Patching Thread
-		updateCheckerThread = new UpdateCheckerThread(true);
+		updateCheckerThread = new UpdateCheckerThread(true, false);
 		updateCheckerThread.start();
 	}
 
@@ -254,15 +254,25 @@ public class Heart_Core {
 		});
 		exitButton.setBounds(new Rectangle(10, 10, 100, 40));
 
-		JButton forceUpdate = new JButton("Check for Updates");
+		JButton checkUpdate = new JButton("Check for Updates");
+		checkUpdate.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new Thread(new UpdateCheckerThread(false, false)).start();
+			}
+		});
+		checkUpdate.setBounds(new Rectangle(120, 10, 150, 40));
+
+		JButton forceUpdate = new JButton("Force Update");
 		forceUpdate.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new Thread(new UpdateCheckerThread(false)).start();
+				new Thread(new UpdateCheckerThread(false, true)).start();
 			}
 		});
-		forceUpdate.setBounds(new Rectangle(120, 10, 150, 40));
+		forceUpdate.setBounds(new Rectangle(280, 10, 100, 40));
 
 		textArea = new JTextArea();
 		textArea.setEditable(false);
@@ -274,7 +284,7 @@ public class Heart_Core {
 				textArea.setText("");
 			}
 		});
-		clearLog.setBounds(new Rectangle(280, 10, 100, 40));
+		clearLog.setBounds(new Rectangle(390, 10, 100, 40));
 
 		JLabel heartVersionLabel = new JLabel("Heart_Version: " + HEART_VERSION);
 		heartVersionLabel.setBounds(new Rectangle(500, 10, 150, 25));
@@ -287,6 +297,7 @@ public class Heart_Core {
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
 		frame.getContentPane().add(exitButton);
+		frame.getContentPane().add(checkUpdate);
 		frame.getContentPane().add(forceUpdate);
 		frame.getContentPane().add(clearLog);
 		frame.getContentPane().add(heartVersionLabel);

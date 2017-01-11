@@ -27,11 +27,13 @@ public class UpdateCheckerThread extends Thread {
 	private static final String gitAddressMaster = "https://github.com/PulsePanda/Crystal/archive/master.zip";
 	private static final String gitAddressDev = "https://github.com/PulsePanda/Crystal/archive/dev.zip";
 	private static final int waitDelay = 1080000; // Checks every 3 hours
-	private boolean running = false, shardUpdate = false, heartUpdate = false, keepRunning;
+	private boolean running = false, shardUpdate = false, heartUpdate = false, keepRunning, forceUpdate;
 	private String shardVersion;
 
-	public UpdateCheckerThread(boolean keepRunning) {
+	public UpdateCheckerThread(boolean keepRunning, boolean forceUpdate) {
 		this.keepRunning = keepRunning;
+		this.forceUpdate = forceUpdate;
+		shardUpdate = forceUpdate;
 	}
 
 	@Override
@@ -42,7 +44,7 @@ public class UpdateCheckerThread extends Thread {
 			try {
 				System.out.println("UPDATER: Checking for update...");
 				checkForUpdate();
-				if (shardUpdate || heartUpdate) {
+				if (shardUpdate || heartUpdate || forceUpdate) {
 					System.out.println("UPDATER: There is a new version of the build. Downloading...");
 					downloadUpdate();
 					System.out.println("UPDATER: Update is downloaded. Packing for distribution...");
@@ -223,7 +225,7 @@ public class UpdateCheckerThread extends Thread {
 			out = new PrintWriter(Heart_Core.heartDir + "ShardVersion");
 			out.print(shardVersion);
 			out.close();
-			
+
 			Heart_Core.GetCore().updateShardVersion();
 		} catch (FileNotFoundException e) {
 			System.err.println("UPDATE: Error writing new Shard version to ShardVersion file!");
