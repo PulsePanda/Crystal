@@ -25,7 +25,6 @@ clean.doFirst {
 
 build.doLast {
   copy {
-    sleep(4 * 1000)
     from(file('Heart/build/distributions'))
     into('.distributions')
 

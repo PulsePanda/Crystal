@@ -138,7 +138,7 @@ public class ShardPatcher extends Thread {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 			}
-			// deleteDir(new File(Shard_Core.shardDir + "Shard.zip"));
+			deleteDir(new File(Shard_Core.shardDir + "Shard.zip"));
 
 			System.out.println("Launching new version of Shard.");
 			try {
