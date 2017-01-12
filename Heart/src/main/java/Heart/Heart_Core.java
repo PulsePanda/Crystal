@@ -32,6 +32,7 @@ import Netta.Connection.Packet;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
 import Utilities.Log;
+import Utilities.Media.MediaManager;
 
 public class Heart_Core {
 
@@ -48,6 +49,7 @@ public class Heart_Core {
 
 	private boolean headless = false;
 
+	// Server elements
 	private static Heart_Core heart_core;
 	private static Log log;
 	private UUID uuid;
@@ -56,9 +58,13 @@ public class Heart_Core {
 	private Thread serverThread = null;
 	private Thread updateCheckerThread = null;
 
+	// GUI elements
 	private JFrame frame;
 	private static JTextArea textArea;
 	private JLabel shardVersionLabel;
+
+	// Media elements
+	private MediaManager mediaManager;
 
 	/**
 	 * Default Constructor. Server Port defaults to 6976
@@ -91,7 +97,7 @@ public class Heart_Core {
 
 		InitCfg();
 
-		InitMediaIndex();
+		InitMediaManager();
 
 		// Init Patching Thread
 		updateCheckerThread = new UpdateCheckerThread(true, false);
@@ -202,6 +208,10 @@ public class Heart_Core {
 		configDir = heartDir + configDir;
 
 		shardFileDir = heartDir + shardFileDir;
+
+		// TODO init music/movie Dir's based on config
+		musicDir = "/f:/Media/music";
+		movieDir = "/f:/Media/movies";
 
 		updateShardVersion();
 	}
@@ -358,8 +368,8 @@ public class Heart_Core {
 	/**
 	 * Initializes the media index thread to provide a usable list for shards
 	 */
-	private void InitMediaIndex() {
-
+	private void InitMediaManager() {
+		mediaManager = new MediaManager(musicDir, movieDir);
 	}
 
 	/**
@@ -412,6 +422,10 @@ public class Heart_Core {
 	 */
 	public UUID GetUUID() {
 		return uuid;
+	}
+
+	public MediaManager getMediaManager() {
+		return mediaManager;
 	}
 
 	/**
