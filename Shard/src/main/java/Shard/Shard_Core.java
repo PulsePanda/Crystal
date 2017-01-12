@@ -28,6 +28,7 @@ import javax.swing.SwingUtilities;
 
 import Exceptions.ClientInitializationException;
 import Exceptions.ConfigurationException;
+import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
@@ -64,6 +65,9 @@ public class Shard_Core {
 	private static JTextArea textArea;
 	private JPanel consolePanel, commandPanel;
 	private JTabbedPane tabbedPane;
+
+	// Media Elements
+	public MediaPlayback mediaPlayback;
 
 	public Shard_Core(boolean headless) throws ClientInitializationException {
 		if (shard_core != null) {
@@ -270,7 +274,12 @@ public class Shard_Core {
 				// System.err.println("Error sending Weather packet to Heart.
 				// Error: " + e1.getMessage());
 				// }
-				new MediaPlayback(new Music("http://www.ntonyx.com/mp3files/Morning_Flower.mp3")).start();
+				mediaPlayback = new MediaPlayback();
+				try {
+					mediaPlayback.start(new Music("http://www.ntonyx.com/mp3files/Morning_Flower.mp3"));
+				} catch (MediaStartException e1) {
+					System.err.println("Error starting media. Error: " + e1.getMessage());
+				}
 			}
 		});
 
