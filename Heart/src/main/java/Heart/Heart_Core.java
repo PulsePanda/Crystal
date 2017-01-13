@@ -272,7 +272,7 @@ public class Heart_Core {
 				new Thread(new UpdateCheckerThread(false, false)).start();
 			}
 		});
-		checkUpdate.setBounds(new Rectangle(120, 10, 150, 40));
+		checkUpdate.setBounds(new Rectangle(120, 10, 140, 40));
 
 		JButton forceUpdate = new JButton("Force Update");
 		forceUpdate.addActionListener(new ActionListener() {
@@ -282,7 +282,17 @@ public class Heart_Core {
 				new Thread(new UpdateCheckerThread(false, true)).start();
 			}
 		});
-		forceUpdate.setBounds(new Rectangle(280, 10, 100, 40));
+		forceUpdate.setBounds(new Rectangle(270, 10, 110, 40));
+
+		JButton forceIndex = new JButton("Force Index");
+		forceIndex.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new MediaManager(musicDir, movieDir, false);
+			}
+		});
+		forceIndex.setBounds(new Rectangle(390, 10, 100, 40));
 
 		textArea = new JTextArea();
 		textArea.setEditable(false);
@@ -294,13 +304,13 @@ public class Heart_Core {
 				textArea.setText("");
 			}
 		});
-		clearLog.setBounds(new Rectangle(390, 10, 100, 40));
+		clearLog.setBounds(new Rectangle(500, 10, 100, 40));
 
 		JLabel heartVersionLabel = new JLabel("Heart_Version: " + HEART_VERSION);
-		heartVersionLabel.setBounds(new Rectangle(500, 10, 150, 25));
+		heartVersionLabel.setBounds(new Rectangle(650, 5, 120, 25));
 
 		shardVersionLabel = new JLabel("Shard_Version: " + SHARD_VERSION);
-		shardVersionLabel.setBounds(new Rectangle(650, 10, 150, 25));
+		shardVersionLabel.setBounds(new Rectangle(650, 35, 120, 25));
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		scrollPane.setBounds(0, 60, frame.getWidth() - 5, frame.getHeight() - 85);
@@ -309,6 +319,7 @@ public class Heart_Core {
 		frame.getContentPane().add(exitButton);
 		frame.getContentPane().add(checkUpdate);
 		frame.getContentPane().add(forceUpdate);
+		frame.getContentPane().add(forceIndex);
 		frame.getContentPane().add(clearLog);
 		frame.getContentPane().add(heartVersionLabel);
 		frame.getContentPane().add(shardVersionLabel);
@@ -369,7 +380,7 @@ public class Heart_Core {
 	 * Initializes the media index thread to provide a usable list for shards
 	 */
 	private void InitMediaManager() {
-		mediaManager = new MediaManager(musicDir, movieDir);
+		mediaManager = new MediaManager(musicDir, movieDir, true);
 	}
 
 	/**

@@ -10,13 +10,14 @@ public class MediaManager {
 	MediaList mediaList;
 	private Thread indexThread;
 
-	boolean isIndexed = false;
+	boolean isIndexed = false, keepIndexing;
 
-	public MediaManager(String musicDir, String movieDir) {
+	public MediaManager(String musicDir, String movieDir, boolean keepIndexing) {
 		System.out.println("MEDIA_MANAGER: Initializing media manager...");
 
 		this.musicDir = musicDir;
 		this.movieDir = movieDir;
+		this.keepIndexing = keepIndexing;
 
 		mediaList = new MediaList();
 
@@ -29,6 +30,7 @@ public class MediaManager {
 		return isIndexed;
 	}
 
+	@SuppressWarnings("deprecation")
 	public void close() {
 		indexThread.stop();
 	}
@@ -45,7 +47,7 @@ class MediaIndexer implements Runnable {
 	}
 
 	public void run() {
-		while (true) {
+		while (mm.keepIndexing) {
 			System.out.println("MEDIA_MANAGER: Indexing movies...");
 			indexHelper(new File(mm.movieDir));
 			System.out.println("MEDIA_MANAGER: Indexing music...");
@@ -54,10 +56,11 @@ class MediaIndexer implements Runnable {
 			mm.isIndexed = true;
 			System.out.println("MEDIA_MANAGER: Index complete!");
 
-			try {
-				Thread.sleep(delay);
-			} catch (InterruptedException e) {
-			}
+			if (mm.keepIndexing)
+				try {
+					Thread.sleep(delay);
+				} catch (InterruptedException e) {
+				}
 		}
 	}
 
