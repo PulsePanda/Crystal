@@ -47,7 +47,7 @@ class MediaIndexer implements Runnable {
 	}
 
 	public void run() {
-		while (mm.keepIndexing) {
+		while (true) {
 			System.out.println("MEDIA_MANAGER: Indexing movies...");
 			indexHelper(new File(mm.movieDir));
 			System.out.println("MEDIA_MANAGER: Indexing music...");
@@ -61,6 +61,9 @@ class MediaIndexer implements Runnable {
 					Thread.sleep(delay);
 				} catch (InterruptedException e) {
 				}
+			else {
+				return;
+			}
 		}
 	}
 
