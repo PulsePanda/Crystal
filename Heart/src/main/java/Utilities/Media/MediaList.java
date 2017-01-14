@@ -52,6 +52,10 @@ public class MediaList {
 		return null;
 	}
 
+	public ListItem get(int index) {
+		return list.get(index);
+	}
+
 	public int size() {
 		return list.size();
 	}

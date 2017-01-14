@@ -34,6 +34,10 @@ public class MediaManager {
 	public void close() {
 		indexThread.stop();
 	}
+
+	public MediaList getMediaList() {
+		return mediaList;
+	}
 }
 
 class MediaIndexer implements Runnable {
@@ -56,6 +60,8 @@ class MediaIndexer implements Runnable {
 			mm.isIndexed = true;
 			System.out.println("MEDIA_MANAGER: Index complete!");
 
+			System.gc();
+
 			if (mm.keepIndexing)
 				try {
 					Thread.sleep(delay);
@@ -72,9 +78,11 @@ class MediaIndexer implements Runnable {
 			File[] listOfFiles = file.listFiles();
 			for (File item : listOfFiles) {
 				indexHelper(item);
+				item = null;
 			}
 		} else if (file.isFile()) {
 			mm.mediaList.addItem(file.getName(), file.getPath());
+			file = null;
 		}
 	}
 }

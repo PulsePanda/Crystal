@@ -47,6 +47,10 @@ public class HandleMessage {
 			ShardPatcher patcher = new ShardPatcher(Shard_Core.GetShardCore().getClient(),
 					ShardPatcher.PATCHER_TYPE.downloadUpdate);
 			patcher.start();
+		} else if (message.equals("music")) {
+			// TODO start streaming music from heart
+			String mediaPath = packet.packetStringArray[0];
+			System.out.println(mediaPath);
 		} else {
 			JOptionPane.showMessageDialog(null, message);
 		}

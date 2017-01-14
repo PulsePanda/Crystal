@@ -134,6 +134,8 @@ public class Shard_Core {
 		shardDir = baseDir + shardDir;
 		logBaseDir = shardDir + logBaseDir;
 		configDir = shardDir + configDir;
+
+		mediaPlayback = new MediaPlayback();
 	}
 
 	/**
@@ -268,18 +270,18 @@ public class Shard_Core {
 			public void actionPerformed(ActionEvent e) {
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "Play Music";
-				// try {
-				// client.SendPacket(p, true);
-				// } catch (SendPacketException e1) {
-				// System.err.println("Error sending Weather packet to Heart.
-				// Error: " + e1.getMessage());
-				// }
-				mediaPlayback = new MediaPlayback();
 				try {
-					mediaPlayback.start(new Music("http://www.ntonyx.com/mp3files/Morning_Flower.mp3"));
-				} catch (MediaStartException e1) {
-					System.err.println("Error starting media. Error: " + e1.getMessage());
+					client.SendPacket(p, true);
+				} catch (SendPacketException e1) {
+					System.err.println("Error sending Play Music packet to Heart. Error: " + e1.getMessage());
 				}
+				// try {
+				// mediaPlayback.start(new
+				// Music("http://www.ntonyx.com/mp3files/Morning_Flower.mp3"));
+				// } catch (MediaStartException e1) {
+				// System.err.println("Error starting media. Error: " +
+				// e1.getMessage());
+				// }
 			}
 		});
 
