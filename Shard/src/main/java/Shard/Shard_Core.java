@@ -268,6 +268,9 @@ public class Shard_Core {
 		playMusic.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (!patchReady)
+					return;
+
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "Play Music";
 				try {

@@ -7,7 +7,10 @@ package Shard;
 
 import javax.swing.JOptionPane;
 
+import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
+import Utilities.Media.MediaPlayback;
+import Utilities.Media.Music;
 
 /**
  * This class handles messages received from the Heart.
@@ -50,7 +53,11 @@ public class HandleMessage {
 		} else if (message.equals("music")) {
 			// TODO start streaming music from heart
 			String mediaPath = packet.packetStringArray[0];
-			System.out.println(mediaPath);
+			try {
+				new MediaPlayback().start(new Music("//SHOCKWAVE/music/A Day to Remember/Bad Vibrations/Paranoia.mp3"));
+			} catch (MediaStartException e) {
+				e.printStackTrace();
+			}
 		} else {
 			JOptionPane.showMessageDialog(null, message);
 		}
