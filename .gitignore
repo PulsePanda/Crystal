@@ -6,7 +6,9 @@
 .project
 .metadata
 /.recommenders/
+/.gradle/
 /.distributions/
+.gradle/
 docs/
 Common/libs/javadoc/
 bin/
