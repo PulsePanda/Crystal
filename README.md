@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/PulsePanda/Crystal.svg?branch=master)](https://travis-ci.org/PulsePanda/Crystal)
+[![Build Status](https://travis-ci.org/PulsePanda/Crystal.svg?branch=dev)](https://travis-ci.org/PulsePanda/Crystal)
 
 ![alt tag](http://pulsepanda.com/austinVanAlstyne_files/chs.png)
 
