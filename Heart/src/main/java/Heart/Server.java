@@ -17,8 +17,8 @@ public class Server extends MultiClientServer {
 
 	public Server(int port) throws NoSuchAlgorithmException {
 		super(port);
-		clients = new ArrayList<>();
-		clientThreads = new ArrayList<>();
+		clients = new ArrayList<ClientConnection>();
+		clientThreads = new ArrayList<Thread>();
 	}
 
 	@Override
