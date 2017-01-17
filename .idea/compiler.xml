@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <excludeFromCompile>
+      <file url="file://$PROJECT_DIR$/Heart/src/main/java/Heart/Command.java" />
+      <file url="file://$PROJECT_DIR$/Heart/src/main/java/Utilities/APIHandler.java" />
+      <file url="file://$PROJECT_DIR$/Heart/src/main/java/Heart/HeartDriver.java" />
+      <file url="file://$PROJECT_DIR$/Heart/src/main/java/Heart/ClientConnection.java" />
+    </excludeFromCompile>
+    <bytecodeTargetLevel>
+      <module name="Common_main" target="1.8" />
+      <module name="Common_test" target="1.8" />
+      <module name="Crystal_main" target="1.5" />
+      <module name="Crystal_test" target="1.5" />
+      <module name="Heart_main" target="1.5" />
+      <module name="Heart_test" target="1.5" />
+      <module name="Shard_main" target="1.8" />
+      <module name="Shard_test" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
