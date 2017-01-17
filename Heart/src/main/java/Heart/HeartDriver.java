@@ -11,6 +11,8 @@ public class HeartDriver {
 	public static void main(String[] args) {
 
 		boolean headlessArg = false;
+		// TODO set dev to default false
+		boolean dev = true;
 
 		for (String s : args) {
 			s = s.toLowerCase();
@@ -18,10 +20,12 @@ public class HeartDriver {
 			case "-h":
 				headlessArg = true;
 				break;
+			case "-dev":
+				dev = true;
 			}
 		}
 
-		heartCore = new Heart_Core(headlessArg);
+		heartCore = new Heart_Core(headlessArg, dev);
 		heartCore.Init();
 
 		// Init Heart networking, start listening for Shards

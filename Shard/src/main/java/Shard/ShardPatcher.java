@@ -27,10 +27,14 @@ public class ShardPatcher extends Thread {
 	private Client client;
 	private PATCHER_TYPE type;
 	public byte[] updateFile = null;
+	private String os;
 
 	public ShardPatcher(Client client, PATCHER_TYPE type) {
 		this.client = client;
 		this.type = type;
+		os = System.getProperty("os.name");
+		os = os.split(" ")[0];
+		os = os.toLowerCase();
 	}
 
 	@Override
@@ -108,7 +112,6 @@ public class ShardPatcher extends Thread {
 		try {
 			System.out.println("Saving update file...");
 			File file = new File(Shard_Core.shardDir + "Shard.zip");
-			System.out.println("TEMP:::: " + file.getAbsolutePath());
 			if (!file.exists())
 				file.createNewFile();
 
@@ -139,7 +142,13 @@ public class ShardPatcher extends Thread {
 
 			System.out.println("Launching new version of Shard.");
 			try {
-				Runtime.getRuntime().exec(new String[] { "cmd", "/c", "start", Shard_Core.shardDir + "bin/Shard.bat" });
+				if (os.equals("windows")) {
+					Runtime.getRuntime()
+							.exec(new String[] { "cmd", "/c", "start", Shard_Core.shardDir + "bin/Shard.bat" });
+				} else if (os.equals("linux")) {
+					ProcessBuilder pb = new ProcessBuilder(Shard_Core.shardDir + "bin/Shard");
+					pb.start();
+				}
 			} catch (IOException e) {
 				System.err.println("Error launching updated version of Shard.");
 				e.printStackTrace();

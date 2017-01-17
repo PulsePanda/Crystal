@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
+import java.util.Random;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -73,6 +75,16 @@ public class Command {
 		case "Get Shard Version":
 			System.out.println("Shard requested version information.");
 			sendToClient("version:" + Heart_Core.SHARD_VERSION, true);
+			break;
+		case "Play Music":
+			System.out.println("Shard requested to play media.");
+			Packet music = new Packet(Packet.PACKET_TYPE.Message, null);
+			music.packetString = "music";
+			Random r = new Random();
+			int index = r.nextInt(Heart_Core.GetCore().getMediaManager().getMediaList().size());
+			music.packetStringArray = new String[] {
+					Heart_Core.GetCore().getMediaManager().getMediaList().get(index).getPath() };
+			sendToClient(music, true);
 			break;
 		default:
 			break;

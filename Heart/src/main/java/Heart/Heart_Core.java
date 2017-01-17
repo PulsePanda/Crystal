@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
@@ -31,6 +32,7 @@ import Netta.Connection.Packet;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
 import Utilities.Log;
+import Utilities.Media.MediaManager;
 
 public class Heart_Core {
 
@@ -42,10 +44,12 @@ public class Heart_Core {
 	public static String systemName = "CHS Heart", musicDir = "", movieDir = "", commandKey = "",
 			baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardLogsDir = "Logs/", configDir = "heart_config.cfg",
 			logBaseDir = "Logs/", shardFileDir = "Shard_Files/";
+	public static boolean DEV_BUILD;
 	private static boolean cfg_set = false, logActive = false, initialized = false;
 
 	private boolean headless = false;
 
+	// Server elements
 	private static Heart_Core heart_core;
 	private static Log log;
 	private UUID uuid;
@@ -54,15 +58,21 @@ public class Heart_Core {
 	private Thread serverThread = null;
 	private Thread updateCheckerThread = null;
 
+	// GUI elements
 	private JFrame frame;
 	private static JTextArea textArea;
+	private JLabel shardVersionLabel;
+
+	// Media elements
+	private MediaManager mediaManager;
 
 	/**
 	 * Default Constructor. Server Port defaults to 6976
 	 */
-	public Heart_Core(boolean headless) {
+	public Heart_Core(boolean headless, boolean DEV_BUILD) {
 		heart_core = this;
 		this.headless = headless;
+		this.DEV_BUILD = DEV_BUILD;
 	}
 
 	/**
@@ -83,14 +93,14 @@ public class Heart_Core {
 
 		InitVariables();
 
-		System.out.println("HEART VERSION: " + HEART_VERSION + "\nSHARD VERSION: " + SHARD_VERSION);
-
 		InitLog();
 
 		InitCfg();
 
+		InitMediaManager();
+
 		// Init Patching Thread
-		updateCheckerThread = new UpdateCheckerThread(true);
+		updateCheckerThread = new UpdateCheckerThread(true, false);
 		updateCheckerThread.start();
 	}
 
@@ -199,6 +209,14 @@ public class Heart_Core {
 
 		shardFileDir = heartDir + shardFileDir;
 
+		// TODO init music/movie Dir's based on config
+		musicDir = "/f:/Media/music";
+		movieDir = "/f:/Media/movies";
+
+		updateShardVersion();
+	}
+
+	public void updateShardVersion() {
 		try {
 			File file = new File(heartDir + "ShardVersion");
 			if (!file.exists())
@@ -209,6 +227,7 @@ public class Heart_Core {
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 			SHARD_VERSION = bufferedReader.readLine();
 			bufferedReader.close();
+			shardVersionLabel.setText("Shard_Version: " + SHARD_VERSION);
 		} catch (FileNotFoundException ex) {
 		} catch (IOException ex) {
 		}
@@ -245,27 +264,65 @@ public class Heart_Core {
 		});
 		exitButton.setBounds(new Rectangle(10, 10, 100, 40));
 
-		JButton forceUpdate = new JButton("Check for Updates");
+		JButton checkUpdate = new JButton("Check for Updates");
+		checkUpdate.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new Thread(new UpdateCheckerThread(false, false)).start();
+			}
+		});
+		checkUpdate.setBounds(new Rectangle(120, 10, 140, 40));
+
+		JButton forceUpdate = new JButton("Force Update");
 		forceUpdate.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new Thread(new UpdateCheckerThread(false)).start();
-				;
+				new Thread(new UpdateCheckerThread(false, true)).start();
 			}
 		});
-		forceUpdate.setBounds(new Rectangle(120, 10, 150, 40));
+		forceUpdate.setBounds(new Rectangle(270, 10, 110, 40));
+
+		JButton forceIndex = new JButton("Force Index");
+		forceIndex.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new MediaManager(musicDir, movieDir, false);
+			}
+		});
+		forceIndex.setBounds(new Rectangle(390, 10, 100, 40));
 
 		textArea = new JTextArea();
 		textArea.setEditable(false);
 		textArea.setLineWrap(true);
+
+		JButton clearLog = new JButton("Clear Log");
+		clearLog.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				textArea.setText("");
+			}
+		});
+		clearLog.setBounds(new Rectangle(500, 10, 100, 40));
+
+		JLabel heartVersionLabel = new JLabel("Heart_Version: " + HEART_VERSION);
+		heartVersionLabel.setBounds(new Rectangle(650, 5, 120, 25));
+
+		shardVersionLabel = new JLabel("Shard_Version: " + SHARD_VERSION);
+		shardVersionLabel.setBounds(new Rectangle(650, 35, 120, 25));
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		scrollPane.setBounds(0, 60, frame.getWidth() - 5, frame.getHeight() - 85);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
 		frame.getContentPane().add(exitButton);
+		frame.getContentPane().add(checkUpdate);
 		frame.getContentPane().add(forceUpdate);
+		frame.getContentPane().add(forceIndex);
+		frame.getContentPane().add(clearLog);
+		frame.getContentPane().add(heartVersionLabel);
+		frame.getContentPane().add(shardVersionLabel);
 		frame.getContentPane().add(scrollPane);
 		frame.setVisible(true);
 	}
@@ -320,6 +377,13 @@ public class Heart_Core {
 	}
 
 	/**
+	 * Initializes the media index thread to provide a usable list for shards
+	 */
+	private void InitMediaManager() {
+		mediaManager = new MediaManager(musicDir, movieDir, true);
+	}
+
+	/**
 	 * Writes to the Standard Output Stream, as well as calls 'write' on the
 	 * local log object
 	 *
@@ -369,6 +433,10 @@ public class Heart_Core {
 	 */
 	public UUID GetUUID() {
 		return uuid;
+	}
+
+	public MediaManager getMediaManager() {
+		return mediaManager;
 	}
 
 	/**

@@ -1,1 +1,5 @@
-include ":Heart", ":Shard", ":Common"
+rootProject.name = 'Crystal'
+include ':Shard'
+include ':Common'
+include ':Heart'
+

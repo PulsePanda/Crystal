@@ -24,13 +24,16 @@ import Utilities.UnZip;
  */
 public class UpdateCheckerThread extends Thread {
 
-	private static final String gitAddress = "https://github.com/PulsePanda/Crystal/archive/master.zip";
+	private static final String gitAddressMaster = "https://github.com/PulsePanda/Crystal/archive/master.zip";
+	private static final String gitAddressDev = "https://github.com/PulsePanda/Crystal/archive/dev.zip";
 	private static final int waitDelay = 1080000; // Checks every 3 hours
-	private boolean running = false, shardUpdate = false, heartUpdate = false, keepRunning;
+	private boolean running = false, shardUpdate = false, heartUpdate = false, keepRunning, forceUpdate;
 	private String shardVersion;
 
-	public UpdateCheckerThread(boolean keepRunning) {
+	public UpdateCheckerThread(boolean keepRunning, boolean forceUpdate) {
 		this.keepRunning = keepRunning;
+		this.forceUpdate = forceUpdate;
+		shardUpdate = forceUpdate;
 	}
 
 	@Override
@@ -41,7 +44,7 @@ public class UpdateCheckerThread extends Thread {
 			try {
 				System.out.println("UPDATER: Checking for update...");
 				checkForUpdate();
-				if (shardUpdate || heartUpdate) {
+				if (shardUpdate || heartUpdate || forceUpdate) {
 					System.out.println("UPDATER: There is a new version of the build. Downloading...");
 					downloadUpdate();
 					System.out.println("UPDATER: Update is downloaded. Packing for distribution...");
@@ -59,6 +62,7 @@ public class UpdateCheckerThread extends Thread {
 				heartUpdate = false;
 			} catch (Exception ex) {
 				System.err.println("UPDATER: Issue downloading patch from GitHub. Aborting patch.");
+				ex.printStackTrace();
 				shardUpdate = false;
 				heartUpdate = false;
 				removeFiles();
@@ -73,7 +77,11 @@ public class UpdateCheckerThread extends Thread {
 	}
 
 	private void checkForUpdate() throws MalformedURLException, FileNotFoundException, IOException {
-		URL url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/HeartVersion");
+		URL url;
+		if (!Heart_Core.DEV_BUILD)
+			url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/HeartVersion");
+		else
+			url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/dev/HeartVersion");
 		BufferedInputStream bis = new BufferedInputStream(url.openStream());
 		FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "HeartVersion.txt");
 		byte[] buffer = new byte[1024];
@@ -84,7 +92,10 @@ public class UpdateCheckerThread extends Thread {
 		fis.close();
 		bis.close();
 
-		url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/ShardVersion");
+		if (!Heart_Core.DEV_BUILD)
+			url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/ShardVersion");
+		else
+			url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/dev/ShardVersion");
 		bis = new BufferedInputStream(url.openStream());
 		fis = new FileOutputStream(Heart_Core.baseDir + "ShardVersion.txt");
 		buffer = new byte[1024];
@@ -100,8 +111,8 @@ public class UpdateCheckerThread extends Thread {
 		if (heartVersion != null || shardVersion != null) {
 			if (!shardVersion.equals(Heart_Core.SHARD_VERSION)) {
 				shardUpdate = true;
-				this.shardVersion = shardVersion;
 			}
+			this.shardVersion = shardVersion;
 
 			if (!heartVersion.equals(Heart_Core.HEART_VERSION))
 				heartUpdate = true;
@@ -124,7 +135,11 @@ public class UpdateCheckerThread extends Thread {
 	}
 
 	private void downloadUpdate() throws MalformedURLException, FileNotFoundException, IOException {
-		URL url = new URL(gitAddress);
+		URL url;
+		if (!Heart_Core.DEV_BUILD)
+			url = new URL(gitAddressMaster);
+		else
+			url = new URL(gitAddressDev);
 		BufferedInputStream bis = new BufferedInputStream(url.openStream());
 		FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "patch.zip");
 		byte[] buffer = new byte[1024];
@@ -144,7 +159,11 @@ public class UpdateCheckerThread extends Thread {
 		} catch (InterruptedException e) {
 		}
 
-		File patchDir = new File(Heart_Core.baseDir + "patch/Crystal-master/");
+		File patchDir;
+		if (!Heart_Core.DEV_BUILD)
+			patchDir = new File(Heart_Core.baseDir + "patch/Crystal-master/");
+		else
+			patchDir = new File(Heart_Core.baseDir + "patch/Crystal-dev/");
 
 		if (shardUpdate) {
 			String[] params = new String[] { "cmd.exe", "/c", "gradlew Shard:build" };
@@ -157,7 +176,11 @@ public class UpdateCheckerThread extends Thread {
 			} catch (InterruptedException e) {
 			}
 
-			File dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Shard/build/distributions/Shard.zip");
+			File dir;
+			if (!Heart_Core.DEV_BUILD)
+				dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Shard/build/distributions/Shard.zip");
+			else
+				dir = new File(Heart_Core.baseDir + "patch/Crystal-dev/Shard/build/distributions/Shard.zip");
 			dir.renameTo(new File(Heart_Core.baseDir + "patch/Shard.zip"));
 		}
 
@@ -172,7 +195,11 @@ public class UpdateCheckerThread extends Thread {
 			} catch (InterruptedException e) {
 			}
 
-			File dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Heart/build/distributions/Heart.zip");
+			File dir;
+			if (!Heart_Core.DEV_BUILD)
+				dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Heart/build/distributions/Heart.zip");
+			else
+				dir = new File(Heart_Core.baseDir + "patch/Crystal-dev/Heart/build/distributions/Heart.zip");
 			dir.renameTo(new File(Heart_Core.baseDir + "patch/Heart.zip"));
 		}
 	}
@@ -198,6 +225,8 @@ public class UpdateCheckerThread extends Thread {
 			out = new PrintWriter(Heart_Core.heartDir + "ShardVersion");
 			out.print(shardVersion);
 			out.close();
+
+			Heart_Core.GetCore().updateShardVersion();
 		} catch (FileNotFoundException e) {
 			System.err.println("UPDATE: Error writing new Shard version to ShardVersion file!");
 		}
@@ -219,5 +248,6 @@ public class UpdateCheckerThread extends Thread {
 		deleteDir(new File(Heart_Core.baseDir + "ShardVersion.txt"));
 		deleteDir(new File(Heart_Core.baseDir + "patch.zip"));
 		deleteDir(new File(Heart_Core.baseDir + "patch/Crystal-master"));
+		deleteDir(new File(Heart_Core.baseDir + "patch/Crystal-dev"));
 	}
 }

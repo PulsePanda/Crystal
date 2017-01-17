@@ -4,7 +4,11 @@
  */
 package Shard;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -15,26 +19,27 @@ import java.util.UUID;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
 import Exceptions.ClientInitializationException;
 import Exceptions.ConfigurationException;
+import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
 import Utilities.Log;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
+import Utilities.Media.MediaPlayback;
+import Utilities.Media.Music;
 
 public class Shard_Core {
 
-	public static final String SHARD_VERSION = "0.1.1";
+	public static final String SHARD_VERSION = "0.1.3";
 	public static String SHARD_VERSION_SERVER = "";
 	private ShardPatcher patcher;
 
@@ -60,6 +65,9 @@ public class Shard_Core {
 	private static JTextArea textArea;
 	private JPanel consolePanel, commandPanel;
 	private JTabbedPane tabbedPane;
+
+	// Media Elements
+	public MediaPlayback mediaPlayback;
 
 	public Shard_Core(boolean headless) throws ClientInitializationException {
 		if (shard_core != null) {
@@ -126,6 +134,8 @@ public class Shard_Core {
 		shardDir = baseDir + shardDir;
 		logBaseDir = shardDir + logBaseDir;
 		configDir = shardDir + configDir;
+
+		mediaPlayback = new MediaPlayback();
 	}
 
 	/**
@@ -182,12 +192,13 @@ public class Shard_Core {
 		// Frame setup
 		frame = new JFrame(systemName);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.setSize(800, 600);
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		frame.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
 		frame.setLayout(null);
 		tabbedPane = new JTabbedPane();
-		tabbedPane.setBounds(0, 0, 800, 600);
+		tabbedPane.setBounds(0, 0, frame.getWidth(), frame.getHeight());
 
 		// Command panel setup
 		commandPanel = new JPanel();
@@ -196,7 +207,9 @@ public class Shard_Core {
 		JButton checkUpdate = new JButton("Check for Updates");
 		checkUpdate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				InitPatcher();
+				if (!patchReady)
+					return;
+				new Thread(new ShardConnectionThread("", 0, false, true)).start();
 			}
 		});
 
@@ -204,9 +217,9 @@ public class Shard_Core {
 		goodMorning.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!patchReady) {
+				if (!patchReady)
 					return;
-				}
+
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "Good Morning";
 				try {
@@ -221,9 +234,9 @@ public class Shard_Core {
 		btcPrice.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!patchReady) {
+				if (!patchReady)
 					return;
-				}
+
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "BTC Price";
 				try {
@@ -238,9 +251,9 @@ public class Shard_Core {
 		weather.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!patchReady) {
+				if (!patchReady)
 					return;
-				}
+
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "Weather";
 				try {
@@ -251,10 +264,35 @@ public class Shard_Core {
 			}
 		});
 
+		JButton playMusic = new JButton("Play Music");
+		playMusic.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!patchReady)
+					return;
+
+				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+				p.packetString = "Play Music";
+				try {
+					client.SendPacket(p, true);
+				} catch (SendPacketException e1) {
+					System.err.println("Error sending Play Music packet to Heart. Error: " + e1.getMessage());
+				}
+				// try {
+				// mediaPlayback.start(new
+				// Music("http://www.ntonyx.com/mp3files/Morning_Flower.mp3"));
+				// } catch (MediaStartException e1) {
+				// System.err.println("Error starting media. Error: " +
+				// e1.getMessage());
+				// }
+			}
+		});
+
 		commandPanel.add(checkUpdate);
 		commandPanel.add(goodMorning);
 		commandPanel.add(btcPrice);
 		commandPanel.add(weather);
+		commandPanel.add(playMusic);
 
 		// Console panel setup
 		consolePanel = new JPanel();
@@ -404,9 +442,9 @@ public class Shard_Core {
 		} catch (ConnectionException ex) {
 		}
 
+		System.out.println("Connecting to Heart. IP: " + IP + " Port: " + port);
 		clientThread = new Thread(client);
 		clientThread.start();
-		InitPatcher();
 	}
 
 	public void StartShardClientSuppressed(String IP, int port) {

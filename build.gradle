@@ -5,71 +5,71 @@ allprojects {
 }
 
 subprojects {
-  apply plugin: 'java'
-  apply plugin: 'eclipse'
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
 
-  task copyLicense {
-      outputs.file new File("$buildDir/LICENSE")
-      doLast {
-          copy {
-              from "../LICENSE"
-              into "$buildDir"
-          }
-      }
-  }
+    task copyLicense {
+        outputs.file new File("$buildDir/LICENSE")
+        doLast {
+            copy {
+                from "../LICENSE"
+                into "$buildDir"
+            }
+        }
+    }
 }
 
 clean.doFirst {
-  delete ".distributions"
+    delete ".distributions"
 }
 
 build.doLast {
-  copy {
-    from(file('Heart/build/distributions'))
-    into('.distributions')
+    copy {
+        from(file('Heart/build/distributions'))
+        into('.distributions')
 
-    from(file('Shard/build/distributions'))
-    into('.distributions')
-  }
+        from(file('Shard/build/distributions'))
+        into('.distributions')
+    }
 }
 
 //Common specific stuff
 project(':Common') {
-  dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar', '*.py'])
-  }
+    dependencies {
+        compile fileTree(dir: 'libs', include: ['*.jar', '*.py'])
+    }
 }
 
 //Heart specific stuff
 project(':Heart') {
-  apply plugin: 'application'
+    apply plugin: 'application'
 
-  mainClassName = 'Heart.HeartDriver'
+    mainClassName = 'Heart.HeartDriver'
 
-  dependencies {
-	 compile fileTree(dir: 'libs', include: ['*.jar'])
-   compile project(':Common')
-  }
+    dependencies {
+        compile fileTree(dir: 'libs', include: ['*.jar'])
+        compile project(':Common')
+    }
 
-  applicationDistribution.from(copyLicense) {
-      into ""
-  }
+    applicationDistribution.from(copyLicense) {
+        into ""
+    }
 }
 
 //Shard specific stuff
 project(':Shard') {
-  apply plugin: 'application'
+    apply plugin: 'application'
 
-  mainClassName = 'Shard.ShardDriver'
+    mainClassName = 'Shard.ShardDriver'
 
-  dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile fileTree(dir: 'libs/Sphinx', include: ['*.jar'])
-	  compile fileTree(dir: 'libs/TTS', include: ['*.jar'])
-    compile project(':Common')
-  }
+    dependencies {
+        compile fileTree(dir: 'libs', include: ['*.jar'])
+        compile fileTree(dir: 'libs/Sphinx', include: ['*.jar'])
+        compile fileTree(dir: 'libs/TTS', include: ['*.jar'])
+        compile project(':Common')
+    }
 
-  applicationDistribution.from(copyLicense) {
-      into ""
-  }
+    applicationDistribution.from(copyLicense) {
+        into ""
+    }
 }
