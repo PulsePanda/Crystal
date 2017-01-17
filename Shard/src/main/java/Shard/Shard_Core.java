@@ -28,6 +28,7 @@ import javax.swing.SwingUtilities;
 
 import Exceptions.ClientInitializationException;
 import Exceptions.ConfigurationException;
+import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
@@ -64,6 +65,9 @@ public class Shard_Core {
 	private static JTextArea textArea;
 	private JPanel consolePanel, commandPanel;
 	private JTabbedPane tabbedPane;
+
+	// Media Elements
+	public MediaPlayback mediaPlayback;
 
 	public Shard_Core(boolean headless) throws ClientInitializationException {
 		if (shard_core != null) {
@@ -130,6 +134,8 @@ public class Shard_Core {
 		shardDir = baseDir + shardDir;
 		logBaseDir = shardDir + logBaseDir;
 		configDir = shardDir + configDir;
+
+		mediaPlayback = new MediaPlayback();
 	}
 
 	/**
@@ -262,15 +268,23 @@ public class Shard_Core {
 		playMusic.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (!patchReady)
+					return;
+
 				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
 				p.packetString = "Play Music";
+				try {
+					client.SendPacket(p, true);
+				} catch (SendPacketException e1) {
+					System.err.println("Error sending Play Music packet to Heart. Error: " + e1.getMessage());
+				}
 				// try {
-				// client.SendPacket(p, true);
-				// } catch (SendPacketException e1) {
-				// System.err.println("Error sending Weather packet to Heart.
-				// Error: " + e1.getMessage());
+				// mediaPlayback.start(new
+				// Music("http://www.ntonyx.com/mp3files/Morning_Flower.mp3"));
+				// } catch (MediaStartException e1) {
+				// System.err.println("Error starting media. Error: " +
+				// e1.getMessage());
 				// }
-				new MediaPlayback(new Music("http://www.ntonyx.com/mp3files/Morning_Flower.mp3")).start();
 			}
 		});
 
