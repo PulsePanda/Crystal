@@ -7,6 +7,7 @@
 .metadata
 /.recommenders/
 /.gradle/
+.idea/
 /.distributions/
 .gradle/
 docs/

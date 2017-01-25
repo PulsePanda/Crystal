@@ -1,4 +1,5 @@
 apply plugin: 'base'
+apply plugin: 'idea'
 
 allprojects {
 
