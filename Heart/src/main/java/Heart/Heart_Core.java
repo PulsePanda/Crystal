@@ -248,7 +248,6 @@ public class Heart_Core {
 		exitButton.addActionListener(new ActionListener() {
 			boolean allowShutdown = true;
 
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (!allowShutdown) {
 					return;
@@ -267,7 +266,6 @@ public class Heart_Core {
 		JButton checkUpdate = new JButton("Check for Updates");
 		checkUpdate.addActionListener(new ActionListener() {
 
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				new Thread(new UpdateCheckerThread(false, false)).start();
 			}
@@ -277,7 +275,6 @@ public class Heart_Core {
 		JButton forceUpdate = new JButton("Force Update");
 		forceUpdate.addActionListener(new ActionListener() {
 
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				new Thread(new UpdateCheckerThread(false, true)).start();
 			}
@@ -287,9 +284,8 @@ public class Heart_Core {
 		JButton forceIndex = new JButton("Force Index");
 		forceIndex.addActionListener(new ActionListener() {
 
-			@Override
 			public void actionPerformed(ActionEvent e) {
-				new MediaManager(musicDir, movieDir, false);
+				mediaManager.index(false);
 			}
 		});
 		forceIndex.setBounds(new Rectangle(390, 10, 100, 40));
@@ -380,7 +376,8 @@ public class Heart_Core {
 	 * Initializes the media index thread to provide a usable list for shards
 	 */
 	private void InitMediaManager() {
-		mediaManager = new MediaManager(musicDir, movieDir, true);
+		mediaManager = new MediaManager(musicDir, movieDir);
+		mediaManager.index(true);
 	}
 
 	/**
@@ -391,7 +388,7 @@ public class Heart_Core {
 	 *            Message to be displayed and written
 	 * @return Returns TRUE if successful at writing to the log, FALSE if not
 	 */
-	private boolean Write(String msg, Color color) {
+	private boolean Write(final String msg, Color color) {
 		boolean success = true;
 
 		SwingUtilities.invokeLater(new Runnable() {
