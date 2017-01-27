@@ -9,7 +9,7 @@ public class HeartDriver {
 
     private static Heart_Core heartCore;
     public static UpdateCheckerThread updateCheckerThread;
-    private static int corePort = 6987, dnsPort = 6980;
+    private static int corePort = 6987;
 
     public static void main(String[] args) {
         boolean headlessArg = false;
@@ -26,10 +26,6 @@ public class HeartDriver {
                     dev = true;
             }
         }
-
-        DNSSD dnssd = new DNSSD();
-        dnssd.registerService("_heartServer", "Heart Core Server", dnsPort, "Heart Core Test Service");
-		dnssd.discoverService("_heartServer");
 
         heartCore = new Heart_Core(headlessArg, dev);
         heartCore.Init();

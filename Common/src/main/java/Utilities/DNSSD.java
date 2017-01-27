@@ -4,6 +4,7 @@ package Utilities;
  * Created by Austin on 1/25/2017.
  */
 
+
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
@@ -17,18 +18,29 @@ public class DNSSD {
     private RegisterService registerService;
     private DiscoverService discoverService;
 
-    public DNSSD(){
-
+    public DNSSD() {
     }
 
     public void registerService(String serviceType, String serviceName, int port, String serviceDescription) {
+        System.out.println("DNSSD: Registering dns_sd service. Details: ServiceType-" + serviceType + "; ServiceName-"
+                + serviceName + "; Port-" + port + "; ServiceDescription-" + serviceDescription);
         registerService = new RegisterService(serviceType, serviceName, port, serviceDescription);
         registerService.start();
     }
 
-    public void discoverService(String serviceType){
+    public void discoverService(String serviceType) {
+        System.out.println("DNSSD: Searching for dns_sd service. ServiceType-" + serviceType);
         discoverService = new DiscoverService(serviceType);
         discoverService.start();
+    }
+
+    public String getServiceInfo() {
+        return discoverService.getServiceInfo();
+    }
+
+    public void closeRegisteredService() {
+        System.out.println("DNSSD: Unregistering service.");
+        registerService.close();
     }
 }
 
@@ -36,8 +48,9 @@ class RegisterService extends Thread {
 
     private String serviceType, serviceName, serviceDescription;
     private int port;
+    private JmDNS jmdns = null;
 
-    public RegisterService(String serviceType, String serviceName, int port, String serviceDescription){
+    public RegisterService(String serviceType, String serviceName, int port, String serviceDescription) {
         this.serviceType = serviceType;
         this.serviceName = serviceName;
         this.serviceDescription = serviceDescription;
@@ -45,21 +58,23 @@ class RegisterService extends Thread {
     }
 
     @Override
-    public void run(){
-        JmDNS jmdns = null;
+    public void run() {
         try {
             jmdns = JmDNS.create(InetAddress.getLocalHost());
-        } catch (IOException e) {
-            // TODO
-            e.printStackTrace();
-        }
-
-        ServiceInfo service = ServiceInfo.create(serviceType, serviceName, port, serviceDescription);
-        try {
+            ServiceInfo service = ServiceInfo.create(serviceType, serviceName, port, serviceDescription);
             jmdns.registerService(service);
+            System.out.println("DNSSD: Service registered.");
         } catch (IOException e) {
-            // TODO
-            e.printStackTrace();
+            System.err.println("DNSSD: Error setting up dns_sd for service broadcast. Details: " + e.getMessage());
+        }
+    }
+
+    public void close() {
+        jmdns.unregisterAllServices();
+        try {
+            jmdns.close();
+        } catch (IOException e) {
+            System.err.println("DNSSD: Error deregistering service. Details: " + e.getMessage());
         }
     }
 }
@@ -67,44 +82,50 @@ class RegisterService extends Thread {
 class DiscoverService extends Thread {
 
     private String serviceType;
+    private String serviceInfo;
 
-    public DiscoverService(String serviceType){
+    public DiscoverService(String serviceType) {
         this.serviceType = serviceType;
     }
 
     @Override
-    public void run(){
+    public void run() {
         try {
             // Create a JmDNS instance
-            JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
+            JmDNS mdnsService = JmDNS.create();
+
+            ServiceListener mdnsServiceListener = new ServiceListener() {
+                public void serviceAdded(ServiceEvent serviceEvent) {
+                    // Test service is discovered. requestServiceInfo() will trigger serviceResolved() callback.
+                    mdnsService.requestServiceInfo(serviceType, serviceEvent.getName());
+                }
+
+                public void serviceRemoved(ServiceEvent serviceEvent) {
+                    // Test service is disappeared.
+                }
+
+                public void serviceResolved(ServiceEvent serviceEvent) {
+                    // Test service info is resolved.
+                    serviceInfo = serviceEvent.getInfo().getURL();
+                    // serviceURL is usually something like http://192.168.11.2:6666/my-service-name
+                }
+            };
 
             // Add a service listener
-            jmdns.addServiceListener(serviceType, new SampleListener());
+            mdnsService.addServiceListener(serviceType, mdnsServiceListener);
 
-            // Wait a bit
-            Thread.sleep(30000);
+//            ServiceInfo[] infos = mdnsService.list(serviceType);
+
+            mdnsService.removeServiceListener(serviceType, mdnsServiceListener);
+            mdnsService.close();
         } catch (UnknownHostException e) {
-            System.out.println(e.getMessage());
+            System.err.println("DNSSD: Error setting up dns_sd service discovery. Details: " + e.getMessage());
         } catch (IOException e) {
-            System.out.println(e.getMessage());
-        } catch (InterruptedException e) {
+            System.err.println("DNSSD: Error setting up dns_sd service discovery. Details: " + e.getMessage());
         }
     }
-}
 
-class SampleListener implements ServiceListener {
-    @Override
-    public void serviceAdded(ServiceEvent event) {
-        System.out.println("Service added: " + event.getInfo());
-    }
-
-    @Override
-    public void serviceRemoved(ServiceEvent event) {
-        System.out.println("Service removed: " + event.getInfo());
-    }
-
-    @Override
-    public void serviceResolved(ServiceEvent event) {
-        System.out.println("Service resolved: " + event.getInfo());
+    public String getServiceInfo() {
+        return serviceInfo;
     }
 }

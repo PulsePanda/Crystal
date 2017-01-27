@@ -33,6 +33,7 @@ import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
+import Utilities.DNSSD;
 import Utilities.Log;
 import Utilities.Media.MediaPlayback;
 import Utilities.Media.Music;
@@ -59,6 +60,8 @@ public class Shard_Core {
 	private Thread clientThread = null;
 	private String IP = "localhost";
 	private int port = 6987;
+	private final int dnssdPort = 6980;
+	private DNSSD dnssd;
 
 	// GUI elements
 	private JFrame frame;
@@ -98,6 +101,9 @@ public class Shard_Core {
 		InitLog();
 
 		InitCfg();
+
+		dnssd = new DNSSD();
+		dnssd.discoverService("_heartServer");
 	}
 
 	/**
