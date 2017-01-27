@@ -82,7 +82,7 @@ class RegisterService extends Thread {
 class DiscoverService extends Thread {
 
     private String serviceType;
-    private String serviceInfo;
+    private String serviceInfo = "";
 
     public DiscoverService(String serviceType) {
         this.serviceType = serviceType;
@@ -107,6 +107,7 @@ class DiscoverService extends Thread {
                 public void serviceResolved(ServiceEvent serviceEvent) {
                     // Test service info is resolved.
                     serviceInfo = serviceEvent.getInfo().getURL();
+                    System.out.println("DNSSD: Service discovered. Info: " + serviceInfo);
                     // serviceURL is usually something like http://192.168.11.2:6666/my-service-name
                 }
             };

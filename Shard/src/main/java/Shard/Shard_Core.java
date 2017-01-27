@@ -58,8 +58,8 @@ public class Shard_Core {
 	private UUID uuid;
 	private Client client = null;
 	private Thread clientThread = null;
-	private String IP = "localhost";
-	private int port = 6987;
+	private String IP = null;
+	private int port;
 	private final int dnssdPort = 6980;
 	private DNSSD dnssd;
 
@@ -443,6 +443,13 @@ public class Shard_Core {
 			// ((re)-initialize below)
 		} catch (ConnectionException ex) {
 		}
+
+		while(dnssd.getServiceInfo().equals("")){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
+        }
 
 		System.out.println("Connecting to Heart. IP: " + IP + " Port: " + port);
 		clientThread = new Thread(client);
