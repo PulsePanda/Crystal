@@ -215,7 +215,7 @@ public class Shard_Core {
 			public void actionPerformed(ActionEvent e) {
 				if (!patchReady)
 					return;
-				new Thread(new ShardConnectionThread("", 0, false, true)).start();
+				new Thread(new ShardConnectionThread(false, true)).start();
 			}
 		});
 
@@ -410,15 +410,11 @@ public class Shard_Core {
 	 * Used to start the Shard, create connection to it's Heart and initialize
 	 * the running thread.
 	 *
-	 * @param IP
-	 *            IP address to connect to
-	 * @param port
-	 *            port to connect to
 	 * @throws ClientInitializationException
 	 *             thrown if there is an error creating the Client. Error
 	 *             details will be in the getMessage()
 	 */
-	public void StartShardClient(String IP, int port) throws ClientInitializationException {
+	public void StartShardClient() throws ClientInitializationException {
 		try {
 			if (client.IsConnectionActive()) {
 				throw new ClientInitializationException(
@@ -453,9 +449,9 @@ public class Shard_Core {
 		clientThread.start();
 	}
 
-	public void StartShardClientSuppressed(String IP, int port) {
+	public void StartShardClientSuppressed() {
 		try {
-			StartShardClient(IP, port);
+			StartShardClient();
 		} catch (ClientInitializationException ex) {
 		}
 	}
