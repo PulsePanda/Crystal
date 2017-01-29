@@ -15,6 +15,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
@@ -100,14 +102,11 @@ public class Heart_Core {
 
         InitCfg();
 
-        dnssd = new DNSSD();
-        dnssd.registerService("_http._tcp.local.", "Crystal Heart Server", port, "Heart Core Server DNS Service");
+        InitDNSSD();
 
         InitMediaManager();
 
-        // Init Patching Thread
-        updateCheckerThread = new UpdateCheckerThread(true, false);
-        updateCheckerThread.start();
+        InitPatchThread();
     }
 
     /**
@@ -379,6 +378,21 @@ public class Heart_Core {
     private void InitMediaManager() {
         mediaManager = new MediaManager(musicDir, movieDir);
         mediaManager.index(true);
+    }
+
+    // TODO javadoc
+    private void InitDNSSD() {
+        dnssd = new DNSSD();
+        try {
+            dnssd.registerService("_http._tcp.local.", "Crystal Heart Server", port, "Heart Core Server DNS Service", InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+        }
+    }
+
+    // TODO javadoc
+    private void InitPatchThread(){
+        updateCheckerThread = new UpdateCheckerThread(true, false);
+        updateCheckerThread.start();
     }
 
     /**

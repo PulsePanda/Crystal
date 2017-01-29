@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+
+// TODO javadoc
 public class DNSSD {
 
     private RegisterService registerService;
