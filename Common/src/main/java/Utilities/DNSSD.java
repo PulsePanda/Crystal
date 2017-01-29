@@ -42,6 +42,11 @@ public class DNSSD {
         System.out.println("DNSSD: Unregistering service.");
         registerService.close();
     }
+
+    public void closeServiceDiscovery(){
+        discoverService.closeServiceDiscovery();
+        System.out.println("DNSSD: mdnsService discovery has been closed");
+    }
 }
 
 class RegisterService extends Thread {
@@ -83,6 +88,8 @@ class DiscoverService extends Thread {
 
     private String serviceType;
     private String serviceInfo = "";
+    private JmDNS mdnsService;
+    private ServiceListener mdnsServiceListener;
 
     public DiscoverService(String serviceType) {
         this.serviceType = serviceType;
@@ -92,22 +99,24 @@ class DiscoverService extends Thread {
     public void run() {
         try {
             // Create a JmDNS instance
-            JmDNS mdnsService = JmDNS.create();
+            mdnsService = JmDNS.create();
 
-            ServiceListener mdnsServiceListener = new ServiceListener() {
+            mdnsServiceListener = new ServiceListener() {
                 public void serviceAdded(ServiceEvent serviceEvent) {
+                    System.out.println("Service added   : " + serviceEvent.getName() + "." + serviceEvent.getType());
                     // Test service is discovered. requestServiceInfo() will trigger serviceResolved() callback.
                     mdnsService.requestServiceInfo(serviceType, serviceEvent.getName());
                 }
 
                 public void serviceRemoved(ServiceEvent serviceEvent) {
                     // Test service is disappeared.
+                    System.out.println("Service removed : " + serviceEvent.getName() + "." + serviceEvent.getType());
                 }
 
                 public void serviceResolved(ServiceEvent serviceEvent) {
                     // Test service info is resolved.
+                    System.out.println("DNSSD: Service discovered. Info: " + serviceEvent.getInfo().getURL());
                     serviceInfo = serviceEvent.getInfo().getURL();
-                    System.out.println("DNSSD: Service discovered. Info: " + serviceInfo);
                     // serviceURL is usually something like http://192.168.11.2:6666/my-service-name
                 }
             };
@@ -115,14 +124,24 @@ class DiscoverService extends Thread {
             // Add a service listener
             mdnsService.addServiceListener(serviceType, mdnsServiceListener);
 
-//            ServiceInfo[] infos = mdnsService.list(serviceType);
+            ServiceInfo[] infos = mdnsService.list(serviceType);
 
-            mdnsService.removeServiceListener(serviceType, mdnsServiceListener);
-            mdnsService.close();
+            for(ServiceInfo i : infos){
+                System.out.println("TEST: " + i.getURL());
+            }
         } catch (UnknownHostException e) {
             System.err.println("DNSSD: Error setting up dns_sd service discovery. Details: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("DNSSD: Error setting up dns_sd service discovery. Details: " + e.getMessage());
+        }
+    }
+
+    public void closeServiceDiscovery(){
+        mdnsService.removeServiceListener(serviceType, mdnsServiceListener);
+        try {
+            mdnsService.close();
+        } catch (IOException e) {
+            System.err.println("DNSSD: Error closing service discovery. Details: " + e.getMessage());
         }
     }
 

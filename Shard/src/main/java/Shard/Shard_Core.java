@@ -28,7 +28,6 @@ import javax.swing.SwingUtilities;
 
 import Exceptions.ClientInitializationException;
 import Exceptions.ConfigurationException;
-import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
@@ -36,7 +35,6 @@ import Utilities.Config;
 import Utilities.DNSSD;
 import Utilities.Log;
 import Utilities.Media.MediaPlayback;
-import Utilities.Media.Music;
 
 public class Shard_Core {
 
@@ -101,9 +99,6 @@ public class Shard_Core {
 		InitLog();
 
 		InitCfg();
-
-		dnssd = new DNSSD();
-		dnssd.discoverService("_heartServer");
 	}
 
 	/**
@@ -140,6 +135,8 @@ public class Shard_Core {
 		shardDir = baseDir + shardDir;
 		logBaseDir = shardDir + logBaseDir;
 		configDir = shardDir + configDir;
+
+		dnssd = new DNSSD();
 
 		mediaPlayback = new MediaPlayback();
 	}
@@ -444,12 +441,28 @@ public class Shard_Core {
 		} catch (ConnectionException ex) {
 		}
 
-		while(dnssd.getServiceInfo().equals("")){
+        // Start the search for dnssd service
+        dnssd.discoverService("_heartServer");
+		while(dnssd.getServiceInfo().equals("")){ // TODO not working
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
             }
         }
+
+        // after search has finished, close the search
+        dnssd.closeServiceDiscovery();
+
+		// load the service info
+        // service will be loaded as http://192.168.0.2:6666/serviceName
+        String serviceInfo = dnssd.getServiceInfo();
+        String[] serviceSplit = serviceInfo.split("http://");
+        String ipPort = serviceSplit[1]; // removes http://
+        String[] ipPortSplit = ipPort.split("/");
+        ipPort = ipPortSplit[0]; // removes /serviceName
+        ipPortSplit = ipPort.split(":"); // splits IP and port
+        IP = ipPortSplit[0];
+        port = Integer.parseInt(ipPortSplit[1]);
 
 		System.out.println("Connecting to Heart. IP: " + IP + " Port: " + port);
 		clientThread = new Thread(client);
