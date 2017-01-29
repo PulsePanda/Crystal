@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="aefe4568-abe2-4e58-810e-a94565ee6b0f" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/Heart/Heart_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/Heart/Heart_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Common/src/main/java/Utilities/DNSSD.java" afterPath="$PROJECT_DIR$/Common/src/main/java/Utilities/DNSSD.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Heart/src/main/java/Heart/HeartDriver.java" afterPath="$PROJECT_DIR$/Heart/src/main/java/Heart/HeartDriver.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Heart/src/main/java/Heart/Heart_Core.java" afterPath="$PROJECT_DIR$/Heart/src/main/java/Heart/Heart_Core.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Shard/src/main/java/Shard/ShardDriver.java" afterPath="$PROJECT_DIR$/Shard/src/main/java/Shard/ShardDriver.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Shard/src/main/java/Shard/Shard_Core.java" afterPath="$PROJECT_DIR$/Shard/src/main/java/Shard/Shard_Core.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -86,10 +81,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Heart_Core.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Heart_Core.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Heart/src/main/java/Heart/Heart_Core.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="451">
+            <state relative-caret-position="400">
               <caret line="101" column="0" lean-forward="true" selection-start-line="101" selection-start-column="0" selection-end-line="101" selection-end-column="0" />
               <folding />
             </state>
@@ -100,25 +95,23 @@
         <entry file="file://$PROJECT_DIR$/Shard/src/main/java/Shard/Shard_Core.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="239">
-              <caret line="446" column="17" lean-forward="true" selection-start-line="446" selection-start-column="17" selection-end-line="446" selection-end-column="17" />
+              <caret line="449" column="9" lean-forward="true" selection-start-line="449" selection-start-column="9" selection-end-line="449" selection-end-column="9" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DNSSD.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="DNSSD.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Common/src/main/java/Utilities/DNSSD.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="570">
-              <caret line="145" column="75" lean-forward="false" selection-start-line="145" selection-start-column="75" selection-end-line="145" selection-end-column="75" />
+            <state relative-caret-position="587">
+              <caret line="76" column="5" lean-forward="true" selection-start-line="76" selection-start-column="5" selection-end-line="76" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1180#1181#0" expanded="true" />
-                <element signature="e#1235#1236#0" expanded="true" />
-                <element signature="e#2978#2979#0" expanded="true" />
-                <element signature="e#3024#3025#0" expanded="true" />
-                <element signature="e#5956#5957#0" expanded="true" />
-                <element signature="e#5990#5991#0" expanded="true" />
+                <element signature="e#1265#1266#0" expanded="true" />
+                <element signature="e#1320#1321#0" expanded="true" />
+                <element signature="e#5558#5559#0" expanded="true" />
+                <element signature="e#5592#5593#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -1087,10 +1080,10 @@
         <option value="$PROJECT_DIR$/Heart/src/main/java/Utilities/Media/MediaManager.java" />
         <option value="$PROJECT_DIR$/Shard/src/main/java/Shard/ShardConnectionThread.java" />
         <option value="$PROJECT_DIR$/Shard/src/main/java/Shard/ShardDriver.java" />
-        <option value="$PROJECT_DIR$/Common/src/main/java/Utilities/DNSSD.java" />
         <option value="$PROJECT_DIR$/Heart/src/main/java/Heart/HeartDriver.java" />
-        <option value="$PROJECT_DIR$/Shard/src/main/java/Shard/Shard_Core.java" />
         <option value="$PROJECT_DIR$/Heart/src/main/java/Heart/Heart_Core.java" />
+        <option value="$PROJECT_DIR$/Shard/src/main/java/Shard/Shard_Core.java" />
+        <option value="$PROJECT_DIR$/Common/src/main/java/Utilities/DNSSD.java" />
       </list>
     </option>
   </component>
@@ -1840,12 +1833,10 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1180#1181#0" expanded="true" />
-            <element signature="e#1235#1236#0" expanded="true" />
-            <element signature="e#2978#2979#0" expanded="true" />
-            <element signature="e#3024#3025#0" expanded="true" />
-            <element signature="e#5956#5957#0" expanded="true" />
-            <element signature="e#5990#5991#0" expanded="true" />
+            <element signature="e#1265#1266#0" expanded="true" />
+            <element signature="e#1320#1321#0" expanded="true" />
+            <element signature="e#5558#5559#0" expanded="true" />
+            <element signature="e#5592#5593#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1889,12 +1880,10 @@
           <caret line="29" column="59" lean-forward="true" selection-start-line="29" selection-start-column="59" selection-end-line="29" selection-end-column="59" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1180#1181#0" expanded="true" />
-            <element signature="e#1235#1236#0" expanded="true" />
-            <element signature="e#2978#2979#0" expanded="true" />
-            <element signature="e#3024#3025#0" expanded="true" />
-            <element signature="e#5956#5957#0" expanded="true" />
-            <element signature="e#5990#5991#0" expanded="true" />
+            <element signature="e#1265#1266#0" expanded="true" />
+            <element signature="e#1320#1321#0" expanded="true" />
+            <element signature="e#5558#5559#0" expanded="true" />
+            <element signature="e#5592#5593#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2022,35 +2011,33 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Common/src/main/java/Utilities/DNSSD.java">
+    <entry file="file://$PROJECT_DIR$/Heart/src/main/java/Heart/Heart_Core.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="570">
-          <caret line="145" column="75" lean-forward="false" selection-start-line="145" selection-start-column="75" selection-end-line="145" selection-end-column="75" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1180#1181#0" expanded="true" />
-            <element signature="e#1235#1236#0" expanded="true" />
-            <element signature="e#2978#2979#0" expanded="true" />
-            <element signature="e#3024#3025#0" expanded="true" />
-            <element signature="e#5956#5957#0" expanded="true" />
-            <element signature="e#5990#5991#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="400">
+          <caret line="101" column="0" lean-forward="true" selection-start-line="101" selection-start-column="0" selection-end-line="101" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Shard/src/main/java/Shard/Shard_Core.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="239">
-          <caret line="446" column="17" lean-forward="true" selection-start-line="446" selection-start-column="17" selection-end-line="446" selection-end-column="17" />
+          <caret line="449" column="9" lean-forward="true" selection-start-line="449" selection-start-column="9" selection-end-line="449" selection-end-column="9" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Heart/src/main/java/Heart/Heart_Core.java">
+    <entry file="file://$PROJECT_DIR$/Common/src/main/java/Utilities/DNSSD.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="451">
-          <caret line="101" column="0" lean-forward="true" selection-start-line="101" selection-start-column="0" selection-end-line="101" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="587">
+          <caret line="76" column="5" lean-forward="true" selection-start-line="76" selection-start-column="5" selection-end-line="76" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1265#1266#0" expanded="true" />
+            <element signature="e#1320#1321#0" expanded="true" />
+            <element signature="e#5558#5559#0" expanded="true" />
+            <element signature="e#5592#5593#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

@@ -21,16 +21,16 @@ public class DNSSD {
     public DNSSD() {
     }
 
-    public void registerService(String serviceType, String serviceName, int port, String serviceDescription) {
+    public void registerService(String serviceType, String serviceName, int port, String serviceDescription, InetAddress address) {
         System.out.println("DNSSD: Registering dns_sd service. Details: ServiceType-" + serviceType + "; ServiceName-"
-                + serviceName + "; Port-" + port + "; ServiceDescription-" + serviceDescription);
-        registerService = new RegisterService(serviceType, serviceName, port, serviceDescription);
+                + serviceName + "; Port-" + port + "; ServiceDescription-" + serviceDescription + "; Address-" + address);
+        registerService = new RegisterService(serviceType, serviceName, port, serviceDescription, address);
         registerService.start();
     }
 
-    public void discoverService(String serviceType) {
+    public void discoverService(String serviceType, InetAddress address) {
         System.out.println("DNSSD: Searching for dns_sd service. ServiceType-" + serviceType);
-        discoverService = new DiscoverService(serviceType);
+        discoverService = new DiscoverService(serviceType, address);
         discoverService.start();
     }
 
@@ -54,18 +54,20 @@ class RegisterService extends Thread {
     private String serviceType, serviceName, serviceDescription;
     private int port;
     private JmDNS jmdns = null;
+    private InetAddress address;
 
-    public RegisterService(String serviceType, String serviceName, int port, String serviceDescription) {
+    public RegisterService(String serviceType, String serviceName, int port, String serviceDescription, InetAddress address) {
         this.serviceType = serviceType;
         this.serviceName = serviceName;
         this.serviceDescription = serviceDescription;
         this.port = port;
+        this.address = address;
     }
 
     @Override
     public void run() {
         try {
-            jmdns = JmDNS.create(InetAddress.getLocalHost());
+            jmdns = JmDNS.create(address);
             ServiceInfo service = ServiceInfo.create(serviceType, serviceName, port, serviceDescription);
             jmdns.registerService(service);
             System.out.println("DNSSD: Service registered.");
@@ -90,33 +92,18 @@ class DiscoverService extends Thread {
     private String serviceInfo = "";
     private JmDNS mdnsService;
     private ServiceListener mdnsServiceListener;
+    private InetAddress address;
 
-    public DiscoverService(String serviceType) {
+    public DiscoverService(String serviceType, InetAddress address) {
         this.serviceType = serviceType;
+        this.address = address;
     }
 
     @Override
     public void run() {
-//        class SampleListener implements ServiceListener {
-//            @Override
-//            public void serviceAdded(ServiceEvent event) {
-//                System.out.println("Service added: " + event.getInfo());
-//            }
-//
-//            @Override
-//            public void serviceRemoved(ServiceEvent event) {
-//                System.out.println("Service removed: " + event.getInfo());
-//            }
-//
-//            @Override
-//            public void serviceResolved(ServiceEvent event) {
-//                System.out.println("Service resolved: " + event.getInfo());
-//            }
-//        }
-
         try {
             // Create a JmDNS instance
-            mdnsService = JmDNS.create(InetAddress.getLocalHost());
+            mdnsService = JmDNS.create(address);
 
 
             mdnsServiceListener = new ServiceListener() {

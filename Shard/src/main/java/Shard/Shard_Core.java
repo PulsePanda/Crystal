@@ -14,6 +14,8 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
@@ -442,8 +444,11 @@ public class Shard_Core {
 		}
 
         // Start the search for dnssd service
-        dnssd.discoverService("_http._tcp.local.");
-		while(dnssd.getServiceInfo().equals("")){
+        try {
+            dnssd.discoverService("_http._tcp.local.", InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+        }
+        while(dnssd.getServiceInfo().equals("")){
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
