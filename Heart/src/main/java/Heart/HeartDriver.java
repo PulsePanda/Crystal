@@ -1,14 +1,10 @@
 package Heart;
 
 import Exceptions.ServerInitializationException;
-import Utilities.DNSSD;
-
-import java.io.IOException;
 
 public class HeartDriver {
 
     private static Heart_Core heartCore;
-    public static UpdateCheckerThread updateCheckerThread;
     private static int corePort = 6987;
 
     public static void main(String[] args) {
@@ -27,13 +23,13 @@ public class HeartDriver {
             }
         }
 
-        heartCore = new Heart_Core(headlessArg, dev);
+        heartCore = new Heart_Core(headlessArg, dev, corePort);
         heartCore.Init();
 
         // Init Heart networking, start listening for Shards
         try {
             System.out.println("Starting Heart server on corePort " + corePort);
-            heartCore.StartServer(corePort);
+            heartCore.StartServer();
         } catch (ServerInitializationException e) {
             System.err.println("Error starting Heart server! Error message: " + e.getMessage());
         }

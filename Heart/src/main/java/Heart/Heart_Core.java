@@ -59,7 +59,7 @@ public class Heart_Core {
     private Thread serverThread = null;
     private Thread updateCheckerThread = null;
     private DNSSD dnssd;
-    private final int dnsPort = 6980;
+    private int port;
 
     // GUI elements
     private JFrame frame;
@@ -72,10 +72,11 @@ public class Heart_Core {
     /**
      * Default Constructor. Server Port defaults to 6976
      */
-    public Heart_Core(boolean headless, boolean DEV_BUILD) {
+    public Heart_Core(boolean headless, boolean DEV_BUILD, int port) {
         heart_core = this;
         this.headless = headless;
         this.DEV_BUILD = DEV_BUILD;
+        this.port = port;
     }
 
     /**
@@ -100,7 +101,7 @@ public class Heart_Core {
         InitCfg();
 
         dnssd = new DNSSD();
-        dnssd.registerService("_heartServer", "Heart Core Server", dnsPort, "Heart Core Test Service");
+        dnssd.registerService("_http._tcp.local.", "Crystal Heart Server", port, "Heart Core Server DNS Service");
 
         InitMediaManager();
 
@@ -112,11 +113,10 @@ public class Heart_Core {
     /**
      * Starts up the Server for this Heart Core object.
      *
-     * @param port the server needs to host on.
      * @throws ServerInitializationException if there is an error creating the server for any reason. If
      *                                       the exception is thrown, abort attempt to create server
      */
-    public void StartServer(int port) throws ServerInitializationException {
+    public void StartServer() throws ServerInitializationException {
         try {
             if (server != null || server.IsConnectionActive()) {
                 throw new ServerInitializationException(

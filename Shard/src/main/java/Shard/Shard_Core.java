@@ -442,8 +442,8 @@ public class Shard_Core {
 		}
 
         // Start the search for dnssd service
-        dnssd.discoverService("_heartServer");
-		while(dnssd.getServiceInfo().equals("")){ // TODO not working
+        dnssd.discoverService("_http._tcp.local.");
+		while(dnssd.getServiceInfo().equals("")){
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -454,13 +454,11 @@ public class Shard_Core {
         dnssd.closeServiceDiscovery();
 
 		// load the service info
-        // service will be loaded as http://192.168.0.2:6666/serviceName
+        // service will be loaded as http://192.168.0.2:6666
         String serviceInfo = dnssd.getServiceInfo();
         String[] serviceSplit = serviceInfo.split("http://");
         String ipPort = serviceSplit[1]; // removes http://
-        String[] ipPortSplit = ipPort.split("/");
-        ipPort = ipPortSplit[0]; // removes /serviceName
-        ipPortSplit = ipPort.split(":"); // splits IP and port
+        String[] ipPortSplit = ipPort.split(":"); // splits IP and port
         IP = ipPortSplit[0];
         port = Integer.parseInt(ipPortSplit[1]);
 
