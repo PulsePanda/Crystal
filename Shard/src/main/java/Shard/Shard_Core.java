@@ -14,6 +14,8 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
@@ -28,14 +30,13 @@ import javax.swing.SwingUtilities;
 
 import Exceptions.ClientInitializationException;
 import Exceptions.ConfigurationException;
-import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Config;
+import Utilities.DNSSD;
 import Utilities.Log;
 import Utilities.Media.MediaPlayback;
-import Utilities.Media.Music;
 
 public class Shard_Core {
 
@@ -57,8 +58,10 @@ public class Shard_Core {
 	private UUID uuid;
 	private Client client = null;
 	private Thread clientThread = null;
-	private String IP = "localhost";
-	private int port = 6987;
+	private String IP = null;
+	private int port;
+	private final int dnssdPort = 6980;
+	private DNSSD dnssd;
 
 	// GUI elements
 	private JFrame frame;
@@ -135,6 +138,8 @@ public class Shard_Core {
 		logBaseDir = shardDir + logBaseDir;
 		configDir = shardDir + configDir;
 
+		dnssd = new DNSSD();
+
 		mediaPlayback = new MediaPlayback();
 	}
 
@@ -209,7 +214,7 @@ public class Shard_Core {
 			public void actionPerformed(ActionEvent e) {
 				if (!patchReady)
 					return;
-				new Thread(new ShardConnectionThread("", 0, false, true)).start();
+				new Thread(new ShardConnectionThread(false, true)).start();
 			}
 		});
 
@@ -404,15 +409,11 @@ public class Shard_Core {
 	 * Used to start the Shard, create connection to it's Heart and initialize
 	 * the running thread.
 	 *
-	 * @param IP
-	 *            IP address to connect to
-	 * @param port
-	 *            port to connect to
 	 * @throws ClientInitializationException
 	 *             thrown if there is an error creating the Client. Error
 	 *             details will be in the getMessage()
 	 */
-	public void StartShardClient(String IP, int port) throws ClientInitializationException {
+	public void StartShardClient() throws ClientInitializationException {
 		try {
 			if (client.IsConnectionActive()) {
 				throw new ClientInitializationException(
@@ -421,13 +422,35 @@ public class Shard_Core {
 		} catch (NullPointerException e) {
 			// If client is not initialized, initialize it
 			try {
+                // Start the search for dnssd service
+                try {
+                    dnssd.discoverService("_http._tcp.local.", InetAddress.getLocalHost());
+                } catch (UnknownHostException e1) {
+                }
+                while(!dnssd.getServiceName().equals("Crystal Heart Server")){
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e1) {
+                    }
+                }
+
+                // after search has finished, close the search
+                dnssd.closeServiceDiscovery();
+
+                // load the service info
+                // service will be loaded as http://192.168.0.2:6666
+                String serviceInfo = dnssd.getServiceInfo();
+                String[] serviceSplit = serviceInfo.split("http://");
+                String ipPort = serviceSplit[1]; // removes http://
+                String[] ipPortSplit = ipPort.split(":"); // splits IP and port
+                IP = ipPortSplit[0];
+                port = Integer.parseInt(ipPortSplit[1]);
+
 				client = new Client(IP, port);
 			} catch (NoSuchAlgorithmException e1) {
 				throw new ClientInitializationException(
 						"Unable to initialize client. Likely an issue loading RSA cipher. Aborting creation.");
 			}
-			this.IP = IP;
-			this.port = port;
 		}
 
 		try {
@@ -447,9 +470,9 @@ public class Shard_Core {
 		clientThread.start();
 	}
 
-	public void StartShardClientSuppressed(String IP, int port) {
+	public void StartShardClientSuppressed() {
 		try {
-			StartShardClient(IP, port);
+			StartShardClient();
 		} catch (ClientInitializationException ex) {
 		}
 	}
