@@ -422,6 +422,7 @@ public class Shard_Core {
 		} catch (NullPointerException e) {
 			// If client is not initialized, initialize it
 			try {
+			    // TODO implement the DNSSD into netta, and have a simpler implementation
                 // Start the search for dnssd service
                 try {
                     dnssd.discoverService("_http._tcp.local.", InetAddress.getLocalHost());
