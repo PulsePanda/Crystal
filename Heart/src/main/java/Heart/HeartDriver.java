@@ -28,7 +28,7 @@ public class HeartDriver {
 
         // Init Heart networking, start listening for Shards
         try {
-            System.out.println("Starting Heart server on corePort " + corePort);
+            System.out.println("Starting Heart server on port " + corePort);
             heartCore.StartServer();
         } catch (ServerInitializationException e) {
             System.err.println("Error starting Heart server! Error message: " + e.getMessage());

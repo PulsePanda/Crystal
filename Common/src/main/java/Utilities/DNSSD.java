@@ -40,6 +40,10 @@ public class DNSSD {
         return discoverService.getServiceInfo();
     }
 
+    public String getServiceName() {
+        return discoverService.getServiceName();
+    }
+
     public void closeRegisteredService() {
         System.out.println("DNSSD: Unregistering service.");
         registerService.close();
@@ -92,6 +96,7 @@ class DiscoverService extends Thread {
 
     private String serviceType;
     private String serviceInfo = "";
+    private String serviceName = "";
     private JmDNS mdnsService;
     private ServiceListener mdnsServiceListener;
     private InetAddress address;
@@ -107,11 +112,9 @@ class DiscoverService extends Thread {
             // Create a JmDNS instance
             mdnsService = JmDNS.create(address);
 
-
             mdnsServiceListener = new ServiceListener() {
                 @Override
                 public void serviceAdded(ServiceEvent serviceEvent) {
-                    System.out.println("Service added   : " + serviceEvent.getName() + "." + serviceEvent.getType());
                     // Test service is discovered. requestServiceInfo() will trigger serviceResolved() callback.
                     mdnsService.requestServiceInfo(serviceType, serviceEvent.getName());
                 }
@@ -119,15 +122,13 @@ class DiscoverService extends Thread {
                 @Override
                 public void serviceRemoved(ServiceEvent serviceEvent) {
                     // Test service is disappeared.
-                    System.out.println("Service removed : " + serviceEvent.getName() + "." + serviceEvent.getType());
                 }
 
                 @Override
                 public void serviceResolved(ServiceEvent serviceEvent) {
                     // Test service info is resolved.
-                    System.out.println("DNSSD: Service discovered. Info: " + serviceEvent.getInfo().getURL());
                     serviceInfo = serviceEvent.getInfo().getURL();
-                    // serviceURL is usually something like http://192.168.11.2:6666/my-service-name
+                    serviceName = serviceEvent.getName();
                 }
             };
 
@@ -156,5 +157,9 @@ class DiscoverService extends Thread {
 
     public String getServiceInfo() {
         return serviceInfo;
+    }
+
+    public String getServiceName() {
+        return serviceName;
     }
 }

@@ -422,13 +422,35 @@ public class Shard_Core {
 		} catch (NullPointerException e) {
 			// If client is not initialized, initialize it
 			try {
+                // Start the search for dnssd service
+                try {
+                    dnssd.discoverService("_http._tcp.local.", InetAddress.getLocalHost());
+                } catch (UnknownHostException e1) {
+                }
+                while(!dnssd.getServiceName().equals("Crystal Heart Server")){
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e1) {
+                    }
+                }
+
+                // after search has finished, close the search
+                dnssd.closeServiceDiscovery();
+
+                // load the service info
+                // service will be loaded as http://192.168.0.2:6666
+                String serviceInfo = dnssd.getServiceInfo();
+                String[] serviceSplit = serviceInfo.split("http://");
+                String ipPort = serviceSplit[1]; // removes http://
+                String[] ipPortSplit = ipPort.split(":"); // splits IP and port
+                IP = ipPortSplit[0];
+                port = Integer.parseInt(ipPortSplit[1]);
+
 				client = new Client(IP, port);
 			} catch (NoSuchAlgorithmException e1) {
 				throw new ClientInitializationException(
 						"Unable to initialize client. Likely an issue loading RSA cipher. Aborting creation.");
 			}
-			this.IP = IP;
-			this.port = port;
 		}
 
 		try {
@@ -442,30 +464,6 @@ public class Shard_Core {
 			// ((re)-initialize below)
 		} catch (ConnectionException ex) {
 		}
-
-        // Start the search for dnssd service
-        try {
-            dnssd.discoverService("_http._tcp.local.", InetAddress.getLocalHost());
-        } catch (UnknownHostException e) {
-        }
-        while(dnssd.getServiceInfo().equals("")){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-            }
-        }
-
-        // after search has finished, close the search
-        dnssd.closeServiceDiscovery();
-
-		// load the service info
-        // service will be loaded as http://192.168.0.2:6666
-        String serviceInfo = dnssd.getServiceInfo();
-        String[] serviceSplit = serviceInfo.split("http://");
-        String ipPort = serviceSplit[1]; // removes http://
-        String[] ipPortSplit = ipPort.split(":"); // splits IP and port
-        IP = ipPortSplit[0];
-        port = Integer.parseInt(ipPortSplit[1]);
 
 		System.out.println("Connecting to Heart. IP: " + IP + " Port: " + port);
 		clientThread = new Thread(client);

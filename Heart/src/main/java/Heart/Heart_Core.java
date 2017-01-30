@@ -384,13 +384,14 @@ public class Heart_Core {
     private void InitDNSSD() {
         dnssd = new DNSSD();
         try {
-            dnssd.registerService("_http._tcp.local.", "Crystal Heart Server", port, "Heart Core Server DNS Service", InetAddress.getLocalHost());
+            dnssd.registerService("_http._tcp.local.", "Crystal Heart Server", port,
+                    "Heart Core Server DNS Service", InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
         }
     }
 
     // TODO javadoc
-    private void InitPatchThread(){
+    private void InitPatchThread() {
         updateCheckerThread = new UpdateCheckerThread(true, false);
         updateCheckerThread.start();
     }
