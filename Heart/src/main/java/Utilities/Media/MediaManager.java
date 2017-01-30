@@ -12,7 +12,7 @@ public class MediaManager {
 
 	boolean isIndexed = false, keepIndexing;
 
-	public MediaManager(String musicDir, String movieDir, boolean keepIndexing) {
+	public MediaManager(String musicDir, String movieDir) {
 		System.out.println("MEDIA_MANAGER: Initializing media manager...");
 
 		this.musicDir = musicDir;
@@ -20,8 +20,12 @@ public class MediaManager {
 		this.keepIndexing = keepIndexing;
 
 		mediaList = new MediaList();
+	}
 
-		mediaIndexer = new MediaIndexer(this, 30 * 60 * 1000);
+	public void index(boolean keepIndexing){
+		this.keepIndexing = keepIndexing;
+
+		mediaIndexer = new MediaIndexer(this, 30 * 60 * 1000); // 30 minutes
 		indexThread = new Thread(mediaIndexer);
 		indexThread.start();
 	}

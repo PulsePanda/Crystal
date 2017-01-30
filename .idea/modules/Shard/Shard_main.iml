@@ -145,5 +145,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="jmdns-3.4.1" level="project" />
   </component>
 </module>
