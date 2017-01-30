@@ -29,8 +29,7 @@ public class Client extends ClientTemplate {
                             "Server requested connection termination. Reason: " + p.packetString + ". Closing connection.");
                     try {
                         CloseIOStreams();
-//                    Shard_Core.GetShardCore().setInitializedToFalse();
-//                    new Thread(new ReconnectShard()).start();
+                        Shard_Core.GetShardCore().resetConnectionData();
                     } catch (ConnectionException e) {
                         System.err.println("Error closing connection with Heart. Error: " + e.getMessage());
                     }
@@ -38,9 +37,6 @@ public class Client extends ClientTemplate {
                 case "Message":
                     new HandleMessage(p);
                     break;
-//                case "Shard Version":
-//                    Shard_Core.SHARD_VERSION_SERVER = p.packetString;
-//                    break;
             }
         } else {
 

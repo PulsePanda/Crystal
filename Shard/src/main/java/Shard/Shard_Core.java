@@ -278,14 +278,15 @@ public class Shard_Core {
                 if (!patchReady)
                     return;
 
-				Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
-				p.packetString = "Play Music";
-				try {
-					client.SendPacket(p, true);
-				} catch (SendPacketException e1) {
-					System.err.println("Error sending Play Music packet to Heart. Error: " + e1.getMessage());
-				}
-				// TODO remove this after music is working from Heart
+                Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+                p.packetString = "Play Music";
+                try {
+                    client.SendPacket(p, true);
+                } catch (SendPacketException e1) {
+                    System.err.println("Error sending Play Music packet to Heart. Error: " + e1.getMessage());
+                }
+
+                // TODO remove this after music is working from Heart
 //                try {
 //                    mediaPlayback.start(new
 //                            Music("http://www.ntonyx.com/mp3files/Morning_Flower.mp3"));
@@ -300,7 +301,7 @@ public class Shard_Core {
         stopMusic.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(!patchReady)
+                if (!patchReady)
                     return;
 
                 mediaPlayback.stop();
@@ -506,10 +507,18 @@ public class Shard_Core {
             client.CloseIOStreams();
             clientThread.join();
             clientThread = null;
+            IP = "";
+            port = 0;
         } catch (SendPacketException e) {
             System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
         } catch (InterruptedException ex) {
         }
+    }
+
+    // TODO javadoc
+    public void resetConnectionData(){
+        IP = "";
+        port = 0;
     }
 
     /**

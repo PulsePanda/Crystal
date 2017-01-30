@@ -44,7 +44,7 @@ public class Heart_Core {
     public final static String HEART_VERSION = "0.1.2";
     public static String SHARD_VERSION = "";
 
-    public static String systemName = "CHS Heart", musicDir = "", movieDir = "", commandKey = "",
+    public static String systemName = "CHS Heart", mediaDir = "", musicDir = "", movieDir = "", commandKey = "",
             baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardLogsDir = "Logs/", configDir = "heart_config.cfg",
             logBaseDir = "Logs/", shardFileDir = "Shard_Files/";
     public static boolean DEV_BUILD;
@@ -211,6 +211,7 @@ public class Heart_Core {
         shardFileDir = heartDir + shardFileDir;
 
         // TODO init music/movie Dir's based on config
+        mediaDir = "/f:/Media";
         musicDir = "/f:/Media/music";
         movieDir = "/f:/Media/movies";
 
@@ -376,7 +377,7 @@ public class Heart_Core {
      * Initializes the media index thread to provide a usable list for shards
      */
     private void InitMediaManager() {
-        mediaManager = new MediaManager(musicDir, movieDir);
+        mediaManager = new MediaManager(mediaDir, musicDir, movieDir);
         mediaManager.index(true);
     }
 

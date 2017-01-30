@@ -1,10 +1,11 @@
 package Utilities.Media;
 
 import java.io.File;
+import java.net.MalformedURLException;
 
 public class MediaManager {
 
-	String musicDir, movieDir;
+	protected String mediaDir, musicDir, movieDir;
 
 	private MediaIndexer mediaIndexer;
 	MediaList mediaList;
@@ -12,12 +13,13 @@ public class MediaManager {
 
 	boolean isIndexed = false, keepIndexing;
 
-	public MediaManager(String musicDir, String movieDir) {
+	public MediaManager(String mediaDir, String musicDir, String movieDir) {
 		System.out.println("MEDIA_MANAGER: Initializing media manager...");
 
+		String[] temp = mediaDir.substring(1).split("/");
+		this.mediaDir = temp[0];
 		this.musicDir = musicDir;
 		this.movieDir = movieDir;
-		this.keepIndexing = keepIndexing;
 
 		mediaList = new MediaList();
 	}
@@ -64,8 +66,6 @@ class MediaIndexer implements Runnable {
 			mm.isIndexed = true;
 			System.out.println("MEDIA_MANAGER: Index complete!");
 
-			System.gc();
-
 			if (mm.keepIndexing)
 				try {
 					Thread.sleep(delay);
@@ -82,11 +82,14 @@ class MediaIndexer implements Runnable {
 			File[] listOfFiles = file.listFiles();
 			for (File item : listOfFiles) {
 				indexHelper(item);
-				item = null;
 			}
 		} else if (file.isFile()) {
-			mm.mediaList.addItem(file.getName(), file.getPath());
-			file = null;
+		    // TODO make a list of all valid media files
+		    if(file.getName().endsWith(".mp3") || file.getName().endsWith(".wav") || file.getName().endsWith("") || file.getName().endsWith(".mkv")) {
+                String filePath = file.getPath();
+                filePath = filePath.replaceFirst(mm.mediaDir, "");
+                mm.mediaList.addItem(file.getName(), filePath);
+            }
 		}
 	}
 }

@@ -16,10 +16,6 @@ public class Music extends Media {
 
     @Override
     public void play() {
-        /*
-		 * TODO This works to play music from the internet. However the
-		 * song keeps playing unless i kill the process manually
-		 */
         String song = url;
         Player mp3player = null;
         BufferedInputStream in = null;
