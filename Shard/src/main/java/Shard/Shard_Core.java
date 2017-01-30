@@ -40,7 +40,7 @@ import Utilities.Media.MediaPlayback;
 
 public class Shard_Core {
 
-	public static final String SHARD_VERSION = "0.1.3";
+	public static final String SHARD_VERSION = "0.1.4";
 	public static String SHARD_VERSION_SERVER = "";
 	private ShardPatcher patcher;
 
