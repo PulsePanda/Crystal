@@ -11,8 +11,8 @@ public class MediaList {
     }
 
     public boolean addItem(String name, String path) {
-//        if (contains(name))
-//            return false;
+        if (contains(path))
+            return false;
 
         list.add(new ListItem(name, path));
         return true;
