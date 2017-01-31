@@ -498,6 +498,7 @@ public class Heart_Core {
         server = null;
         serverThread.stop();
         serverThread = null;
+        mediaManager.close();
         new Thread() {
             public void run() {
                 try {
