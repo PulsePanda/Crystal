@@ -8,13 +8,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
@@ -36,6 +30,7 @@ import Utilities.Config;
 import Utilities.DNSSD;
 import Utilities.Log;
 import Utilities.Media.MediaManager;
+import Utilities.SystemInfo;
 
 public class Heart_Core {
 
@@ -70,6 +65,9 @@ public class Heart_Core {
 
     // Media elements
     private MediaManager mediaManager;
+
+    // System elements
+    public final static SystemInfo systemInfo = new SystemInfo();
 
     /**
      * Default Constructor. Server Port defaults to 6976
@@ -211,9 +209,21 @@ public class Heart_Core {
         shardFileDir = heartDir + shardFileDir;
 
         // TODO init music/movie Dir's based on config
-        mediaDir = "/f:/Media";
-        musicDir = "/f:/Media/music";
-        movieDir = "/f:/Media/movies";
+        mediaDir = "F:/Media";
+        musicDir = "F:/Media/music";
+        movieDir = "F:/Media/movies";
+
+        // Share media folder with the network
+        if (SystemInfo.system_os == SystemInfo.SYSTEM_OS.Windows) {
+            String shareMediaFolder = "net share Media=" + mediaDir.replace("/", "\\") + " /GRANT:Everyone,FULL";
+            try {
+                Runtime.getRuntime().exec(shareMediaFolder);
+            } catch (IOException e) {
+                System.err.println("Error sharing the media folder with the network! Media access may not be available for Shards!");
+            }
+        } else if (SystemInfo.system_os == SystemInfo.SYSTEM_OS.Linux) {
+            // TODO add linux folder sharing
+        }
 
         updateShardVersion();
     }

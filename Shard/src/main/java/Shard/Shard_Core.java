@@ -39,6 +39,7 @@ import Utilities.DNSSD;
 import Utilities.Log;
 import Utilities.Media.MediaPlayback;
 import Utilities.Media.Music;
+import Utilities.SystemInfo;
 
 public class Shard_Core {
 
@@ -73,6 +74,9 @@ public class Shard_Core {
 
     // Media Elements
     public MediaPlayback mediaPlayback;
+
+    // System elements
+    public final static SystemInfo systemInfo = new SystemInfo();
 
     public Shard_Core(boolean headless) throws ClientInitializationException {
         if (shard_core != null) {

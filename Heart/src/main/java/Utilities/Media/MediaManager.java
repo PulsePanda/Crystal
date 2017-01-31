@@ -1,11 +1,10 @@
 package Utilities.Media;
 
 import java.io.File;
-import java.net.MalformedURLException;
 
 public class MediaManager {
 
-	protected String mediaDir, musicDir, movieDir;
+	protected String mediaDriveLetter, musicDir, movieDir;
 
 	private MediaIndexer mediaIndexer;
 	MediaList mediaList;
@@ -16,8 +15,8 @@ public class MediaManager {
 	public MediaManager(String mediaDir, String musicDir, String movieDir) {
 		System.out.println("MEDIA_MANAGER: Initializing media manager...");
 
-		String[] temp = mediaDir.substring(1).split("/");
-		this.mediaDir = temp[0];
+		String[] driveLetter = mediaDir.split("/"); // separates out the drive letter
+		this.mediaDriveLetter = driveLetter[0];
 		this.musicDir = musicDir;
 		this.movieDir = movieDir;
 
@@ -64,7 +63,7 @@ class MediaIndexer implements Runnable {
 			indexHelper(new File(mm.musicDir));
 
 			mm.isIndexed = true;
-			System.out.println("MEDIA_MANAGER: Index complete!");
+			System.out.println("MEDIA_MANAGER: Index complete! List size: " + mm.mediaList.size());
 
 			if (mm.keepIndexing)
 				try {
@@ -87,7 +86,8 @@ class MediaIndexer implements Runnable {
 		    // TODO make a list of all valid media files
 		    if(file.getName().endsWith(".mp3") || file.getName().endsWith(".wav") || file.getName().endsWith("") || file.getName().endsWith(".mkv")) {
                 String filePath = file.getPath();
-                filePath = filePath.replaceFirst(mm.mediaDir, "");
+                // removes the drive letter from the file's path, as the folder is shared and the drive isn't needed
+                filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
                 mm.mediaList.addItem(file.getName(), filePath);
             }
 		}
