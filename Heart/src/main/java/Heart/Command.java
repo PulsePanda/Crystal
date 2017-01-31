@@ -37,8 +37,10 @@ public class Command {
      *
      * @param c command given to analyze
      */
-    public void AnalyzeCommand(String c) throws SendPacketException {
+    public void AnalyzeCommand(Packet packet) throws SendPacketException {
+        String c = packet.packetString;
         System.out.println("Received command from Shard. Command: " + c);
+
         switch (c) {
             case "Good Morning":
                 goodMorning();
@@ -80,13 +82,14 @@ public class Command {
                 System.out.println("Shard requested to play media.");
                 Packet music = new Packet(Packet.PACKET_TYPE.Message, null);
                 music.packetString = "music";
-                Random r = new Random();
-                int index = r.nextInt(Heart_Core.GetCore().getMediaManager().getMediaList().size());
+                String requestedSong = packet.packetStringArray[0];
+                String mediaPath = Heart_Core.GetCore().getMediaManager().getMedia(requestedSong);
                 try {
-                    music.packetStringArray = new String[]{
-                            "file://" + InetAddress.getLocalHost().getHostName() + Heart_Core.GetCore().getMediaManager().getMediaList().get(index).getPath()};
+                    if (!mediaPath.equals(""))
+                        music.packetStringArray = new String[]{
+                                "file://" + InetAddress.getLocalHost().getHostName() + mediaPath};
                 } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                    System.err.println("Error getting local hostname! Unable to provide correct path for Shard media playback!");
                 }
                 sendToClient(music, true);
                 break;

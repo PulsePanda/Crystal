@@ -48,9 +48,8 @@ public class HandleMessage {
                     ShardPatcher.PATCHER_TYPE.downloadUpdate);
             patcher.start();
         } else if (message.equals("music")) {
-            // TODO start streaming music from heart
             String mediaPath = packet.packetStringArray[0];
-            System.out.println(mediaPath);
+            System.out.println(mediaPath); // TODO remove after I'm done testing the media selection
             try {
                 new MediaPlayback().start(new Music(mediaPath));
             } catch (MediaStartException e) {

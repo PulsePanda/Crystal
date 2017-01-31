@@ -19,14 +19,7 @@ import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import Exceptions.ClientInitializationException;
 import Exceptions.ConfigurationException;
@@ -216,100 +209,76 @@ public class Shard_Core {
         commandPanel.setLayout(new FlowLayout());
 
         JButton checkUpdate = new JButton("Check for Updates");
-        checkUpdate.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (!patchReady)
-                    return;
-                new Thread(new ShardConnectionThread(false, true)).start();
-            }
+        checkUpdate.addActionListener(e -> {
+            if (!patchReady)
+                return;
+            new Thread(new ShardConnectionThread(false, true)).start();
         });
 
         JButton goodMorning = new JButton("Good Morning");
-        goodMorning.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!patchReady)
-                    return;
+        goodMorning.addActionListener(e -> {
+            if (!patchReady)
+                return;
 
-                Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
-                p.packetString = "Good Morning";
-                try {
-                    client.SendPacket(p, true);
-                } catch (SendPacketException ex) {
-                    System.err.println("Error sending Good Morning packet to Heart. Error: " + ex.getMessage());
-                }
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            p.packetString = "Good Morning";
+            try {
+                client.SendPacket(p, true);
+            } catch (SendPacketException ex) {
+                System.err.println("Error sending Good Morning packet to Heart. Error: " + ex.getMessage());
             }
         });
 
         JButton btcPrice = new JButton("BTC Price");
-        btcPrice.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!patchReady)
-                    return;
+        btcPrice.addActionListener(e -> {
+            if (!patchReady)
+                return;
 
-                Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
-                p.packetString = "BTC Price";
-                try {
-                    client.SendPacket(p, true);
-                } catch (SendPacketException ex) {
-                    System.err.println("Error sending BTC Price packet to Heart. Error: " + ex.getMessage());
-                }
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            p.packetString = "BTC Price";
+            try {
+                client.SendPacket(p, true);
+            } catch (SendPacketException ex) {
+                System.err.println("Error sending BTC Price packet to Heart. Error: " + ex.getMessage());
             }
         });
 
         JButton weather = new JButton("Weather");
-        weather.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!patchReady)
-                    return;
+        weather.addActionListener(e -> {
+            if (!patchReady)
+                return;
 
-                Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
-                p.packetString = "Weather";
-                try {
-                    client.SendPacket(p, true);
-                } catch (SendPacketException ex) {
-                    System.err.println("Error sending Weather packet to Heart. Error: " + ex.getMessage());
-                }
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            p.packetString = "Weather";
+            try {
+                client.SendPacket(p, true);
+            } catch (SendPacketException ex) {
+                System.err.println("Error sending Weather packet to Heart. Error: " + ex.getMessage());
             }
         });
 
         JButton playMusic = new JButton("Play Music");
-        playMusic.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!patchReady)
-                    return;
+        playMusic.addActionListener(e -> {
+            if (!patchReady)
+                return;
 
-                Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
-                p.packetString = "Play Music";
-                try {
-                    client.SendPacket(p, true);
-                } catch (SendPacketException e1) {
-                    System.err.println("Error sending Play Music packet to Heart. Error: " + e1.getMessage());
-                }
-
-                // TODO remove this after music is working from Heart
-//                try {
-//                    mediaPlayback.start(new
-//                            Music("http://www.ntonyx.com/mp3files/Morning_Flower.mp3"));
-//                } catch (MediaStartException e1) {
-//                    System.err.println("Error starting media. Error: " +
-//                            e1.getMessage());
-//                }
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            p.packetString = "Play Music";
+            String song = JOptionPane.showInputDialog(null, "Song name");
+            p.packetStringArray = new String[]{song};
+            try {
+                client.SendPacket(p, true);
+            } catch (SendPacketException e1) {
+                System.err.println("Error sending Play Music packet to Heart. Error: " + e1.getMessage());
             }
         });
 
         JButton stopMusic = new JButton("Stop Music");
-        stopMusic.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!patchReady)
-                    return;
+        stopMusic.addActionListener(e -> {
+            if (!patchReady)
+                return;
 
-                mediaPlayback.stop();
-            }
+            mediaPlayback.stop();
         });
 
         commandPanel.add(checkUpdate);
@@ -520,7 +489,7 @@ public class Shard_Core {
     }
 
     // TODO javadoc
-    public void resetConnectionData(){
+    public void resetConnectionData() {
         IP = "";
         port = 0;
     }
