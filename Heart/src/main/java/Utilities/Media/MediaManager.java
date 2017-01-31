@@ -1,5 +1,6 @@
 package Utilities.Media;
 
+import javax.print.attribute.standard.Media;
 import java.io.File;
 
 public class MediaManager {
@@ -7,7 +8,7 @@ public class MediaManager {
     protected String mediaDriveLetter, musicDir, movieDir;
 
     private MediaIndexer mediaIndexer;
-    protected MediaList mediaList;
+    protected MediaList songList, movieList;
     private Thread indexThread;
 
     boolean isIndexed = false, keepIndexing;
@@ -20,7 +21,8 @@ public class MediaManager {
         this.musicDir = musicDir;
         this.movieDir = movieDir;
 
-        mediaList = new MediaList();
+        movieList = new MediaList();
+        songList = new MediaList();
     }
 
     public void index(boolean keepIndexing) {
@@ -40,17 +42,29 @@ public class MediaManager {
         indexThread.stop();
     }
 
-    public MediaList getMediaList() {
-        return mediaList;
+    public MediaList getSongList() {
+        return songList;
     }
 
-    public String[] getMedia(String mediaName) {
-        ListItem[] items = mediaList.get(mediaName);
+    public String[] getSong(String songName) {
+        ListItem[] items = songList.get(songName);
         String[] files = new String[items.length];
         for (int i = 0; i < files.length; i++) {
             files[i] = items[i].getPath();
         }
-//        return mediaList.get(mediaName).getPath();
+        return files;
+    }
+
+    public MediaList getMovieList(){
+        return movieList;
+    }
+
+    public String[] getMovie(String movieName){
+        ListItem[] items = movieList.get(movieName);
+        String[] files = new String[items.length];
+        for (int i = 0; i < files.length; i++) {
+            files[i] = items[i].getPath();
+        }
         return files;
     }
 }
@@ -68,12 +82,12 @@ class MediaIndexer implements Runnable {
     public void run() {
         while (true) {
             System.out.println("MEDIA_MANAGER: Indexing movies...");
-            indexHelper(new File(mm.movieDir));
+            movieIndexHelper(new File(mm.movieDir));
             System.out.println("MEDIA_MANAGER: Indexing music...");
-            indexHelper(new File(mm.musicDir));
+            songIndexHelper(new File(mm.musicDir));
 
             mm.isIndexed = true;
-            System.out.println("MEDIA_MANAGER: Index complete! List size: " + mm.mediaList.size());
+            System.out.println("MEDIA_MANAGER: Index complete! List size: " + (mm.songList.size() + mm.movieList.size()));
 
             if (mm.keepIndexing)
                 try {
@@ -86,18 +100,34 @@ class MediaIndexer implements Runnable {
         }
     }
 
-    private void indexHelper(File file) {
+    private void movieIndexHelper(File file) {
         if (file.isDirectory()) {
             File[] listOfFiles = file.listFiles();
             for (File item : listOfFiles) {
-                indexHelper(item);
+                movieIndexHelper(item);
             }
         } else if (file.isFile()) {
             if (isMovieOrMusic(file.getName())) {
                 String filePath = file.getPath();
                 // removes the drive letter from the file's path, as the folder is shared and the drive isn't needed
                 filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
-                mm.mediaList.addItem(file.getName(), filePath);
+                mm.movieList.addItem(file.getName(), filePath);
+            }
+        }
+    }
+
+    private void songIndexHelper(File file) {
+        if (file.isDirectory()) {
+            File[] listOfFiles = file.listFiles();
+            for (File item : listOfFiles) {
+                songIndexHelper(item);
+            }
+        } else if (file.isFile()) {
+            if (isMovieOrMusic(file.getName())) {
+                String filePath = file.getPath();
+                // removes the drive letter from the file's path, as the folder is shared and the drive isn't needed
+                filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
+                mm.songList.addItem(file.getName(), filePath);
             }
         }
     }

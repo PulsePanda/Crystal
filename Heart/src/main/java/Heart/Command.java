@@ -83,7 +83,7 @@ public class Command {
                 Packet music = new Packet(Packet.PACKET_TYPE.Message, null);
                 music.packetString = "music";
                 String requestedSong = packet.packetStringArray[0];
-                String[] mediaPaths = Heart_Core.GetCore().getMediaManager().getMedia(requestedSong);
+                String[] mediaPaths = Heart_Core.GetCore().getMediaManager().getSong(requestedSong);
                 for (int i = 0; i < mediaPaths.length; i++) { // edit each path to be a reachable address
                     try {
                         mediaPaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + mediaPaths[i];

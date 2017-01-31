@@ -50,6 +50,7 @@ public class HandleMessage {
         } else if (message.equals("music")) {
             try {
                 String mediaPath = packet.packetStringArray[0];
+                System.out.println(mediaPath);
                 try {
                     new MediaPlayback().start(new Music(mediaPath));
                 } catch (MediaStartException e) {
