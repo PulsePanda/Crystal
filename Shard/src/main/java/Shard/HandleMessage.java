@@ -48,12 +48,16 @@ public class HandleMessage {
                     ShardPatcher.PATCHER_TYPE.downloadUpdate);
             patcher.start();
         } else if (message.equals("music")) {
-            String mediaPath = packet.packetStringArray[0];
-            System.out.println(mediaPath); // TODO remove after I'm done testing the media selection
             try {
-                new MediaPlayback().start(new Music(mediaPath));
-            } catch (MediaStartException e) {
-                System.err.println("Error starting music playback. Details: " + e.getMessage());
+                String mediaPath = packet.packetStringArray[0];
+                try {
+                    new MediaPlayback().start(new Music(mediaPath));
+                } catch (MediaStartException e) {
+                    System.err.println("Error starting music playback. Details: " + e.getMessage());
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                JOptionPane.showMessageDialog(null, "Heart was unable to find a song matching that name!");
+                System.err.println("Heart was unable to find a song matching that name!");
             }
         } else {
             JOptionPane.showMessageDialog(null, message);

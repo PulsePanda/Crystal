@@ -83,14 +83,15 @@ public class Command {
                 Packet music = new Packet(Packet.PACKET_TYPE.Message, null);
                 music.packetString = "music";
                 String requestedSong = packet.packetStringArray[0];
-                String mediaPath = Heart_Core.GetCore().getMediaManager().getMedia(requestedSong);
-                try {
-                    if (!mediaPath.equals(""))
-                        music.packetStringArray = new String[]{
-                                "file://" + InetAddress.getLocalHost().getHostName() + mediaPath};
-                } catch (UnknownHostException e) {
-                    System.err.println("Error getting local hostname! Unable to provide correct path for Shard media playback!");
+                String[] mediaPaths = Heart_Core.GetCore().getMediaManager().getMedia(requestedSong);
+                for (int i = 0; i < mediaPaths.length; i++) { // edit each path to be a reachable address
+                    try {
+                        mediaPaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + mediaPaths[i];
+                    } catch (UnknownHostException e) {
+                        System.err.println("Error getting local hostname! Unable to provide correct path for Shard media playback!");
+                    }
                 }
+                music.packetStringArray = mediaPaths;
                 sendToClient(music, true);
                 break;
             default:

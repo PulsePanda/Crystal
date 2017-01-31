@@ -72,11 +72,10 @@ public class Heart_Core {
     /**
      * Default Constructor. Server Port defaults to 6976
      */
-    public Heart_Core(boolean headless, boolean DEV_BUILD, int port) {
+    public Heart_Core(boolean headless, boolean DEV_BUILD) {
         heart_core = this;
         this.headless = headless;
         this.DEV_BUILD = DEV_BUILD;
-        this.port = port;
     }
 
     /**
@@ -100,8 +99,6 @@ public class Heart_Core {
 
         InitCfg();
 
-        InitDNSSD();
-
         InitMediaManager();
 
         InitPatchThread();
@@ -113,7 +110,8 @@ public class Heart_Core {
      * @throws ServerInitializationException if there is an error creating the server for any reason. If
      *                                       the exception is thrown, abort attempt to create server
      */
-    public void StartServer() throws ServerInitializationException {
+    public void StartServer(int port) throws ServerInitializationException {
+        this.port = port;
         try {
             if (server != null || server.IsConnectionActive()) {
                 throw new ServerInitializationException(
@@ -146,7 +144,6 @@ public class Heart_Core {
 
         serverThread = new Thread(server);
         serverThread.start();
-
     }
 
     /**
@@ -392,7 +389,7 @@ public class Heart_Core {
     }
 
     // TODO javadoc
-    private void InitDNSSD() {
+    public void InitDNSSD() {
         dnssd = new DNSSD();
         try {
             dnssd.registerService("_http._tcp.local.", "Crystal Heart Server", port,
@@ -492,9 +489,15 @@ public class Heart_Core {
 
     @SuppressWarnings("deprecation")
     public void StopHeartServer() {
-        dnssd.closeRegisteredService();
+        try {
+            dnssd.closeRegisteredService();
+        } catch (NullPointerException e) {
+        }
         server.CloseConnections();
+        dnssd = null;
+        server = null;
         serverThread.stop();
+        serverThread = null;
         new Thread() {
             public void run() {
                 try {

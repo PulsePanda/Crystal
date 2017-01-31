@@ -19,6 +19,7 @@ public class MediaList {
     }
 
     public boolean removeItem(String nameOrPath) {
+        nameOrPath = nameOrPath.toLowerCase();
         for (int i = 0; i < list.size(); i++) {
             ListItem li = list.get(i);
             if (li.getName().toLowerCase().equals(nameOrPath) || li.getPath().toLowerCase().equals(nameOrPath)) {
@@ -31,6 +32,7 @@ public class MediaList {
     }
 
     public boolean contains(String nameOrPath) {
+        nameOrPath = nameOrPath.toLowerCase();
         for (ListItem li : list) {
             if (li.getName().toLowerCase().equals(nameOrPath))
                 return true;
@@ -41,15 +43,21 @@ public class MediaList {
         return false;
     }
 
-    public ListItem get(String nameOrPath) {
+    public ListItem[] get(String nameOrPath) {
+        nameOrPath = nameOrPath.toLowerCase();
+        ArrayList<ListItem> items = new ArrayList<>();
         for (ListItem li : list) {
             if (li.getName().toLowerCase().equals(nameOrPath))
-                return li;
+                items.add(li);
             if (li.getPath().toLowerCase().equals(nameOrPath))
-                return li;
+                items.add(li);
         }
 
-        return null;
+        ListItem[] listItems = new ListItem[items.size()];
+
+        listItems = items.toArray(listItems);
+
+        return listItems;
     }
 
     public ListItem get(int index) {

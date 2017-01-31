@@ -44,11 +44,14 @@ public class MediaManager {
         return mediaList;
     }
 
-    public String getMedia(String mediaName) {
-        if (mediaList.contains(mediaName))
-            return mediaList.get(mediaName).getPath();
-        else
-            return "";
+    public String[] getMedia(String mediaName) {
+        ListItem[] items = mediaList.get(mediaName);
+        String[] files = new String[items.length];
+        for (int i = 0; i < files.length; i++) {
+            files[i] = items[i].getPath();
+        }
+//        return mediaList.get(mediaName).getPath();
+        return files;
     }
 }
 
