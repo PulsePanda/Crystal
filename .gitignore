@@ -9,6 +9,7 @@
 /.gradle/
 /.distributions/
 .gradle/
+.idea/
 docs/
 Common/libs/javadoc/
 bin/
