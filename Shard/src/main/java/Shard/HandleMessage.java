@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
 import Utilities.Media.MediaPlayback;
+import Utilities.Media.Movie;
 import Utilities.Media.Music;
 
 /**
@@ -49,16 +50,29 @@ public class HandleMessage {
             patcher.start();
         } else if (message.equals("music")) {
             try {
-                String mediaPath = packet.packetStringArray[0];
-                System.out.println(mediaPath);
+                String songPath = packet.packetStringArray[0];
+                System.out.println(songPath);
                 try {
-                    new MediaPlayback().start(new Music(mediaPath));
+                    new MediaPlayback().start(new Music(songPath));
                 } catch (MediaStartException e) {
                     System.err.println("Error starting music playback. Details: " + e.getMessage());
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
                 JOptionPane.showMessageDialog(null, "Heart was unable to find a song matching that name!");
                 System.err.println("Heart was unable to find a song matching that name!");
+            }
+        } else if (message.equals("movie")) {
+            try {
+                String moviePath = packet.packetStringArray[0];
+                System.out.println(moviePath);
+                try {
+                    new MediaPlayback().start(new Movie(moviePath));
+                } catch (MediaStartException e) {
+                    System.err.println("Error starting music playback. Details: " + e.getMessage());
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                JOptionPane.showMessageDialog(null, "Heart was unable to find a movie matching that name!");
+                System.err.println("Heart was unable to find a movie matching that name!");
             }
         } else {
             JOptionPane.showMessageDialog(null, message);

@@ -273,8 +273,24 @@ public class Shard_Core {
             }
         });
 
-        JButton stopMusic = new JButton("Stop Music");
-        stopMusic.addActionListener(e -> {
+        JButton playMovie = new JButton("Play Movie");
+        playMovie.addActionListener(e -> {
+            if (!patchReady)
+                return;
+
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            p.packetString = "Play Movie";
+            String movie = JOptionPane.showInputDialog(null, "Movie name");
+            p.packetStringArray = new String[]{movie};
+            try {
+                client.SendPacket(p, true);
+            } catch (SendPacketException e1) {
+                System.err.println("Error sending Play Movie packet to Heart. Error: " + e1.getMessage());
+            }
+        });
+
+        JButton stopMedia = new JButton("Stop Media");
+        stopMedia.addActionListener(e -> {
             if (!patchReady)
                 return;
 
@@ -286,7 +302,8 @@ public class Shard_Core {
         commandPanel.add(btcPrice);
         commandPanel.add(weather);
         commandPanel.add(playMusic);
-        commandPanel.add(stopMusic);
+        commandPanel.add(playMovie);
+        commandPanel.add(stopMedia);
 
         // Console panel setup
         consolePanel = new JPanel();

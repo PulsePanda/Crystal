@@ -4,7 +4,7 @@ abstract class Media {
     String url;
 
     public Media(String url) {
-        this.url = url;
+        this.url = url.replace("/", "\\");
     }
 
     public void play() {

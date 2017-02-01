@@ -79,20 +79,36 @@ public class Command {
                 sendToClient("version:" + Heart_Core.SHARD_VERSION, true);
                 break;
             case "Play Music":
-                System.out.println("Shard requested to play media.");
+                System.out.println("Shard requested to play music. Song Name: " + packet.packetStringArray[0]);
                 Packet music = new Packet(Packet.PACKET_TYPE.Message, null);
                 music.packetString = "music";
                 String requestedSong = packet.packetStringArray[0];
-                String[] mediaPaths = Heart_Core.GetCore().getMediaManager().getSong(requestedSong);
-                for (int i = 0; i < mediaPaths.length; i++) { // edit each path to be a reachable address
+                String[] musicPaths = Heart_Core.GetCore().getMediaManager().getSong(requestedSong);
+                for (int i = 0; i < musicPaths.length; i++) { // edit each path to be a reachable address
                     try {
-                        mediaPaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + mediaPaths[i];
+                        musicPaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + musicPaths[i];
                     } catch (UnknownHostException e) {
-                        System.err.println("Error getting local hostname! Unable to provide correct path for Shard media playback!");
+                        System.err.println("Error getting local hostname! Unable to provide correct path for Shard music playback!");
                     }
                 }
-                music.packetStringArray = mediaPaths;
+                music.packetStringArray = musicPaths;
                 sendToClient(music, true);
+                break;
+            case "Play Movie":
+                System.out.println("Shard requested to play a movie. Movie Name: " + packet.packetStringArray[0]);
+                Packet movie = new Packet(Packet.PACKET_TYPE.Message, null);
+                movie.packetString = "movie";
+                String requestedMovie = packet.packetStringArray[0];
+                String[] moviePaths = Heart_Core.GetCore().getMediaManager().getMovie(requestedMovie);
+                for (int i = 0; i < moviePaths.length; i++) {
+                    try {
+                        moviePaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + moviePaths[i];
+                    } catch (UnknownHostException e) {
+                        System.err.println("Error getting local hostname! Unable to provide correct path for Shard movie playback!");
+                    }
+                }
+                movie.packetStringArray = moviePaths;
+                sendToClient(movie, true);
                 break;
             default:
                 break;

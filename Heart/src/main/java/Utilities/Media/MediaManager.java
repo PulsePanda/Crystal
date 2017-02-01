@@ -124,10 +124,16 @@ class MediaIndexer implements Runnable {
             }
         } else if (file.isFile()) {
             if (isMovieOrMusic(file.getName())) {
+                // Remove the drive letter from the path
                 String filePath = file.getPath();
-                // removes the drive letter from the file's path, as the folder is shared and the drive isn't needed
                 filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
-                mm.songList.addItem(file.getName(), filePath);
+
+                // Remove the file extension from the name
+                String fileName = file.getName();
+//                String[] fileNameSplit = fileName.split(".");
+//                fileName = fileNameSplit[0];
+
+                mm.songList.addItem(fileName, filePath);
             }
         }
     }

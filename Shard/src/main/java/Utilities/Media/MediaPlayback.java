@@ -1,8 +1,8 @@
 package Utilities.Media;
 
-import javax.swing.JOptionPane;
-
 import Exceptions.MediaStartException;
+
+import javax.swing.*;
 
 public class MediaPlayback {
 
@@ -15,9 +15,7 @@ public class MediaPlayback {
     }
 
     public void start(Media media) throws MediaStartException {
-        this.media = media;
-
-        if (media == null)
+        if (media == null || media.url.equals(""))
             throw new MediaStartException("Media to play hasn't been selected!");
         if (mphThread != null) {
             int reply = JOptionPane.showConfirmDialog(null,
@@ -29,6 +27,8 @@ public class MediaPlayback {
             } else {
                 return;
             }
+        } else {
+            this.media = media;
         }
         mphThread = new Thread(mph);
         mphThread.start();

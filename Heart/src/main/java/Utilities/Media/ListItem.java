@@ -34,6 +34,6 @@ public class ListItem {
 	}
 
 	public enum MEDIA_TYPE {
-		Movie, Music;
+		Movie, Music
 	}
 }
