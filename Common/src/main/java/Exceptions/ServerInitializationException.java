@@ -2,12 +2,14 @@ package Exceptions;
 
 public class ServerInitializationException extends Exception {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * Server Initialization Exception
+     * <p>
+     * Used when there is an error initializing server connection
+     */
+    private static final long serialVersionUID = 1L;
 
-	public ServerInitializationException(String message) {
-		super(message);
-	}
+    public ServerInitializationException(String message) {
+        super(message);
+    }
 }

@@ -1,9 +1,5 @@
 package Utilities;
 
-/**
- * Created by Austin on 1/25/2017.
- */
-
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
@@ -14,41 +10,85 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 
-// TODO javadoc
+/**
+ * DNSSD
+ * <p>
+ * Utility for DNS_SD services
+ */
 public class DNSSD {
 
     private RegisterService registerService;
     private DiscoverService discoverService;
 
+    /**
+     * Default constructor
+     */
     public DNSSD() {
     }
 
-    public void registerService(String serviceType, String serviceName, int port, String serviceDescription, InetAddress address) {
+    /**
+     * Register a DNS_SD service on the network.
+     *
+     * @param serviceType        Service type to be registered. Must use valid service type, such as _html._tcp.local.
+     * @param serviceName        Name of the service being registered
+     * @param port               Port the service broadcasts
+     * @param serviceDescription Description of the service being registered
+     * @param address            Address to register the service for. InetAddress.getLocalHost() is used if null is provided
+     * @throws UnknownHostException if unable to resolve localHost
+     */
+    public void registerService(String serviceType, String serviceName, int port, String serviceDescription, InetAddress address) throws UnknownHostException {
+        if (address == null)
+            address = InetAddress.getLocalHost();
         System.out.println("DNSSD: Registering dns_sd service. Details: ServiceType-" + serviceType + "; ServiceName-"
                 + serviceName + "; Port-" + port + "; ServiceDescription-" + serviceDescription + "; Address-" + address);
         registerService = new RegisterService(serviceType, serviceName, port, serviceDescription, address);
         registerService.start();
     }
 
-    public void discoverService(String serviceType, InetAddress address) {
+    /**
+     * Discover a DNS_SD service on the network.
+     *
+     * @param serviceType Service type to be registered. Must use valid service type, such as _html._tcp.local.
+     * @param address     Address to start searching for service. InetAddress.getLocalHost() is used if null is provided
+     * @throws UnknownHostException if unable to resolve localHost
+     */
+    public void discoverService(String serviceType, InetAddress address) throws UnknownHostException {
+        if (address == null)
+            address = InetAddress.getLocalHost();
         System.out.println("DNSSD: Searching for dns_sd service. ServiceType-" + serviceType);
         discoverService = new DiscoverService(serviceType, address);
         discoverService.start();
     }
 
+    /**
+     * Get the service info of a resolved service when discovering
+     *
+     * @return String service info of resolved service discovery
+     */
     public String getServiceInfo() {
         return discoverService.getServiceInfo();
     }
 
+    /**
+     * Get the service name of a resolved service when discovering
+     *
+     * @return String service name of resolved service discovery
+     */
     public String getServiceName() {
         return discoverService.getServiceName();
     }
 
+    /**
+     * Unregister active DNS_SD service
+     */
     public void closeRegisteredService() {
         System.out.println("DNSSD: Unregistering service.");
         registerService.close();
     }
 
+    /**
+     * Stop discovering services
+     */
     public void closeServiceDiscovery() {
         discoverService.closeServiceDiscovery();
         System.out.println("DNSSD: mdnsService discovery has been closed");
