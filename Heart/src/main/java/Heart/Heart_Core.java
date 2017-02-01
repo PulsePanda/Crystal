@@ -4,24 +4,6 @@
  */
 package Heart;
 
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingUtilities;
-
 import Exceptions.ConfigurationException;
 import Exceptions.ServerInitializationException;
 import Netta.Connection.Packet;
@@ -32,11 +14,21 @@ import Utilities.Log;
 import Utilities.Media.MediaManager;
 import Utilities.SystemInfo;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
+
 public class Heart_Core {
 
     public final static boolean DEBUG = false;
 
-    public final static String HEART_VERSION = "0.1.2";
+    public final static String HEART_VERSION = "0.1.3";
     public static String SHARD_VERSION = "";
 
     public static String systemName = "CHS Heart", mediaDir = "", musicDir = "", movieDir = "", commandKey = "",

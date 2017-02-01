@@ -4,11 +4,19 @@
  */
 package Shard;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
+import Exceptions.ClientInitializationException;
+import Exceptions.ConfigurationException;
+import Netta.Connection.Packet;
+import Netta.Exceptions.ConnectionException;
+import Netta.Exceptions.SendPacketException;
+import Utilities.Config;
+import Utilities.DNSSD;
+import Utilities.Log;
+import Utilities.Media.MediaPlayback;
+import Utilities.SystemInfo;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -19,24 +27,9 @@ import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
-import javax.swing.*;
-
-import Exceptions.ClientInitializationException;
-import Exceptions.ConfigurationException;
-import Exceptions.MediaStartException;
-import Netta.Connection.Packet;
-import Netta.Exceptions.ConnectionException;
-import Netta.Exceptions.SendPacketException;
-import Utilities.Config;
-import Utilities.DNSSD;
-import Utilities.Log;
-import Utilities.Media.MediaPlayback;
-import Utilities.Media.Music;
-import Utilities.SystemInfo;
-
 public class Shard_Core {
 
-    public static final String SHARD_VERSION = "0.1.4";
+    public static final String SHARD_VERSION = "0.1.5";
     public static String SHARD_VERSION_SERVER = "";
     private ShardPatcher patcher;
 
