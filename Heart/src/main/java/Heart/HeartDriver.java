@@ -23,13 +23,20 @@ public class HeartDriver {
             }
         }
 
-        heartCore = new Heart_Core(headlessArg, dev, corePort);
+        heartCore = new Heart_Core(headlessArg, dev);
         heartCore.Init();
 
         // Init Heart networking, start listening for Shards
         try {
             System.out.println("Starting Heart server on port " + corePort);
-            heartCore.StartServer();
+            heartCore.StartServer(corePort);
+
+//            while(!heartCore.IsServerActive()){
+//                heartCore.StopHeartServer();
+//                heartCore.StartServer(++corePort);
+//            }
+
+            heartCore.InitDNSSD();
         } catch (ServerInitializationException e) {
             System.err.println("Error starting Heart server! Error message: " + e.getMessage());
         }

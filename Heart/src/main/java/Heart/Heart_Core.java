@@ -4,30 +4,6 @@
  */
 package Heart;
 
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingUtilities;
-
 import Exceptions.ConfigurationException;
 import Exceptions.ServerInitializationException;
 import Netta.Connection.Packet;
@@ -36,15 +12,26 @@ import Utilities.Config;
 import Utilities.DNSSD;
 import Utilities.Log;
 import Utilities.Media.MediaManager;
+import Utilities.SystemInfo;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 public class Heart_Core {
 
     public final static boolean DEBUG = false;
 
-    public final static String HEART_VERSION = "0.1.2";
+    public final static String HEART_VERSION = "0.1.3";
     public static String SHARD_VERSION = "";
 
-    public static String systemName = "CHS Heart", musicDir = "", movieDir = "", commandKey = "",
+    public static String systemName = "CHS Heart", mediaDir = "", musicDir = "", movieDir = "", commandKey = "",
             baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardLogsDir = "Logs/", configDir = "heart_config.cfg",
             logBaseDir = "Logs/", shardFileDir = "Shard_Files/";
     public static boolean DEV_BUILD;
@@ -71,14 +58,16 @@ public class Heart_Core {
     // Media elements
     private MediaManager mediaManager;
 
+    // System elements
+    public final static SystemInfo systemInfo = new SystemInfo();
+
     /**
      * Default Constructor. Server Port defaults to 6976
      */
-    public Heart_Core(boolean headless, boolean DEV_BUILD, int port) {
+    public Heart_Core(boolean headless, boolean DEV_BUILD) {
         heart_core = this;
         this.headless = headless;
         this.DEV_BUILD = DEV_BUILD;
-        this.port = port;
     }
 
     /**
@@ -102,8 +91,6 @@ public class Heart_Core {
 
         InitCfg();
 
-        InitDNSSD();
-
         InitMediaManager();
 
         InitPatchThread();
@@ -115,7 +102,8 @@ public class Heart_Core {
      * @throws ServerInitializationException if there is an error creating the server for any reason. If
      *                                       the exception is thrown, abort attempt to create server
      */
-    public void StartServer() throws ServerInitializationException {
+    public void StartServer(int port) throws ServerInitializationException {
+        this.port = port;
         try {
             if (server != null || server.IsConnectionActive()) {
                 throw new ServerInitializationException(
@@ -148,7 +136,6 @@ public class Heart_Core {
 
         serverThread = new Thread(server);
         serverThread.start();
-
     }
 
     /**
@@ -211,8 +198,21 @@ public class Heart_Core {
         shardFileDir = heartDir + shardFileDir;
 
         // TODO init music/movie Dir's based on config
-        musicDir = "/f:/Media/music";
-        movieDir = "/f:/Media/movies";
+        mediaDir = "F:/Media";
+        musicDir = "F:/Media/music";
+        movieDir = "F:/Media/movies";
+
+        // Share media folder with the network
+        if (SystemInfo.system_os == SystemInfo.SYSTEM_OS.Windows) {
+            String shareMediaFolder = "net share Media=" + mediaDir.replace("/", "\\") + " /GRANT:Everyone,FULL";
+            try {
+                Runtime.getRuntime().exec(shareMediaFolder);
+            } catch (IOException e) {
+                System.err.println("Error sharing the media folder with the network! Media access may not be available for Shards!");
+            }
+        } else if (SystemInfo.system_os == SystemInfo.SYSTEM_OS.Linux) {
+            // TODO add linux folder sharing
+        }
 
         updateShardVersion();
     }
@@ -376,12 +376,12 @@ public class Heart_Core {
      * Initializes the media index thread to provide a usable list for shards
      */
     private void InitMediaManager() {
-        mediaManager = new MediaManager(musicDir, movieDir);
+        mediaManager = new MediaManager(mediaDir, musicDir, movieDir);
         mediaManager.index(true);
     }
 
     // TODO javadoc
-    private void InitDNSSD() {
+    public void InitDNSSD() {
         dnssd = new DNSSD();
         try {
             dnssd.registerService("_http._tcp.local.", "Crystal Heart Server", port,
@@ -481,9 +481,16 @@ public class Heart_Core {
 
     @SuppressWarnings("deprecation")
     public void StopHeartServer() {
-        dnssd.closeRegisteredService();
+        try {
+            dnssd.closeRegisteredService();
+        } catch (NullPointerException e) {
+        }
         server.CloseConnections();
+        dnssd = null;
+        server = null;
         serverThread.stop();
+        serverThread = null;
+        mediaManager.close();
         new Thread() {
             public void run() {
                 try {

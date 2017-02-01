@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
 import Utilities.Media.MediaPlayback;
+import Utilities.Media.Movie;
 import Utilities.Media.Music;
 
 /**
@@ -19,47 +20,62 @@ import Utilities.Media.Music;
  */
 public class HandleMessage {
 
-	private String message;
-	private Packet packet;
+    private String message;
+    private Packet packet;
 
-	/**
-	 * Default constructor
-	 *
-	 * Currently only shows the results of the message in a JOptionPane Message
-	 * box
-	 *
-	 * @param message
-	 *            String message to be handled from Heart.
-	 */
-	public HandleMessage(Packet packet) {
-		this.message = packet.packetString;
-		this.packet = packet;
-		System.out.println("Message from server: " + message);
-		handle();
-	}
+    /**
+     * Default constructor
+     * <p>
+     * Currently only shows the results of the message in a JOptionPane Message
+     * box
+     */
+    public HandleMessage(Packet packet) {
+        this.message = packet.packetString;
+        this.packet = packet;
+        System.out.println("Message from server: " + message);
+        handle();
+    }
 
-	private void handle() {
-		if (message.startsWith("version:")) {
-			String[] split = message.split(":");
-			String version = split[1];
-			Shard_Core.SHARD_VERSION_SERVER = version;
-			// Shard_Core.GetShardCore().InitPatcher();
-		} else if (message.equals("update")) {
-			Shard_Core.GetShardCore().getPatcher().updateFile = packet.packetByteArray;
-		} else if (message.equals("new patch")) {
-			ShardPatcher patcher = new ShardPatcher(Shard_Core.GetShardCore().getClient(),
-					ShardPatcher.PATCHER_TYPE.downloadUpdate);
-			patcher.start();
-		} else if (message.equals("music")) {
-			// TODO start streaming music from heart
-			String mediaPath = packet.packetStringArray[0];
-			try {
-				new MediaPlayback().start(new Music("//SHOCKWAVE/music/A Day to Remember/Bad Vibrations/Paranoia.mp3"));
-			} catch (MediaStartException e) {
-				e.printStackTrace();
-			}
-		} else {
-			JOptionPane.showMessageDialog(null, message);
-		}
-	}
+    private void handle() {
+        if (message.startsWith("version:")) {
+            String[] split = message.split(":");
+            String version = split[1];
+            Shard_Core.SHARD_VERSION_SERVER = version;
+            // Shard_Core.GetShardCore().InitPatcher();
+        } else if (message.equals("update")) {
+            Shard_Core.GetShardCore().getPatcher().updateFile = packet.packetByteArray;
+        } else if (message.equals("new patch")) {
+            ShardPatcher patcher = new ShardPatcher(Shard_Core.GetShardCore().getClient(),
+                    ShardPatcher.PATCHER_TYPE.downloadUpdate);
+            patcher.start();
+        } else if (message.equals("music")) {
+            try {
+                String songPath = packet.packetStringArray[0];
+                System.out.println(songPath);
+                try {
+                    new MediaPlayback().start(new Music(songPath));
+                } catch (MediaStartException e) {
+                    System.err.println("Error starting music playback. Details: " + e.getMessage());
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                JOptionPane.showMessageDialog(null, "Heart was unable to find a song matching that name!");
+                System.err.println("Heart was unable to find a song matching that name!");
+            }
+        } else if (message.equals("movie")) {
+            try {
+                String moviePath = packet.packetStringArray[0];
+                System.out.println(moviePath);
+                try {
+                    new MediaPlayback().start(new Movie(moviePath));
+                } catch (MediaStartException e) {
+                    System.err.println("Error starting music playback. Details: " + e.getMessage());
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                JOptionPane.showMessageDialog(null, "Heart was unable to find a movie matching that name!");
+                System.err.println("Heart was unable to find a movie matching that name!");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, message);
+        }
+    }
 }

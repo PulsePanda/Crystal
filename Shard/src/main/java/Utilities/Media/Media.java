@@ -1,42 +1,41 @@
 package Utilities.Media;
 
 abstract class Media {
-	String url;
-	
+    String url;
 
-	public Media(String url) {
-		this.url = url;
-	}
+    public Media(String url) {
+        this.url = url.replace("/", "\\");
+    }
 
-	public void play() {
+    public void play() {
 
-	}
+    }
 
-	public void stop() {
+    public void stop() {
 
-	}
+    }
 
-	public void pause() {
+    public void pause() {
 
-	}
+    }
 
-	public void restart() {
+    public void restart() {
 
-	}
+    }
 
-	public void next() {
+    public void next() {
 
-	}
+    }
 
-	public void previous() {
+    public void previous() {
 
-	}
+    }
 
-	public void volumeDown() {
+    public void volumeDown() {
 
-	}
+    }
 
-	public void volumeUp() {
+    public void volumeUp() {
 
-	}
+    }
 }
