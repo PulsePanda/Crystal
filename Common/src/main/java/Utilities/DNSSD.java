@@ -61,7 +61,7 @@ public class DNSSD {
     }
 
     /**
-     * Get the service info of a resolved service when discovering
+     * get the service info of a resolved service when discovering
      *
      * @return String service info of resolved service discovery
      */
@@ -70,7 +70,7 @@ public class DNSSD {
     }
 
     /**
-     * Get the service name of a resolved service when discovering
+     * get the service name of a resolved service when discovering
      *
      * @return String service name of resolved service discovery
      */

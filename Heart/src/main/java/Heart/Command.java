@@ -85,7 +85,7 @@ public class Command {
                 Packet blank2 = new Packet(Packet.PACKET_TYPE.NULL, null);
                 sendToClient(blank2, false);
                 break;
-            case "Get Shard Version":
+            case "get Shard Version":
                 System.out.println("Shard requested version information.");
                 sendToClient("version:" + Heart_Core.SHARD_VERSION, true);
                 break;
@@ -195,7 +195,7 @@ public class Command {
 
             int apiDate = obj.getInt("dt"); // Date pulled from forecast
 
-            // Set up the calendar object for the given date
+            // set up the calendar object for the given date
             Calendar date = Calendar.getInstance();
             java.util.Date time = new java.util.Date((long) apiDate * 1000);
             date.setTime(time);

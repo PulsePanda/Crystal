@@ -140,7 +140,7 @@ public class Heart_Core {
     }
 
     /**
-     * Function to redirect standard output streams to the Write function
+     * Function to redirect standard output streams to the write function
      */
     private void RedirectSystemStreams() {
         OutputStream out = new OutputStream() {
@@ -315,12 +315,12 @@ public class Heart_Core {
     }
 
     /**
-     * Set up the logging system
+     * set up the logging system
      */
     private void InitLog() {
         log = new Log();
         try {
-            log.CreateLog(logBaseDir);
+            log.createLog(logBaseDir);
             logActive = true;
 
             // Start the log and initialize the text
@@ -336,7 +336,7 @@ public class Heart_Core {
     }
 
     /**
-     * Set up the configuration file(s) for the server
+     * set up the configuration file(s) for the server
      *
      * @throws ConfigurationException if there is an issue creating the configuration file. Details
      *                                will be in the exceptions message.
@@ -349,13 +349,13 @@ public class Heart_Core {
             // TODO if the configuration isn't found, create and init it
         }
 
-        // cfg_set = Boolean.parseBoolean(cfg.Get("cfg_set"));
+        // cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
         if (cfg_set) {
-            systemName = cfg.Get("systemName");
-            musicDir = cfg.Get("musicDir");
-            movieDir = cfg.Get("moveDir");
-            commandKey = cfg.Get("commandKey");
-            uuid = UUID.fromString(cfg.Get("uuid"));
+            systemName = cfg.get("systemName");
+            musicDir = cfg.get("musicDir");
+            movieDir = cfg.get("moveDir");
+            commandKey = cfg.get("commandKey");
+            uuid = UUID.fromString(cfg.get("uuid"));
             System.out.println("Configuration file loaded.");
         } else {
             System.err.println("Please initialize the Heart Config with Nerv before proceeding!");
@@ -408,7 +408,7 @@ public class Heart_Core {
 
         if (logActive) {
             try {
-                log.Write(msg);
+                log.write(msg);
             } catch (IOException e) {
                 logActive = false;
                 System.err.println(
@@ -421,7 +421,7 @@ public class Heart_Core {
     }
 
     /**
-     * Get the Heart_Core object
+     * get the Heart_Core object
      *
      * @return Heart_Core object
      */
@@ -430,7 +430,7 @@ public class Heart_Core {
     }
 
     /**
-     * Get the Heart's UUID value
+     * get the Heart's UUID value
      *
      * @return UUID object that is equal to the Heart's UUID
      */

@@ -31,7 +31,7 @@ public class ClientConnection extends ConnectedClient {
         command = new Command(this);
         clientLog = new Log();
         try {
-            clientLog.CreateLog(Heart_Core.shardLogsDir);
+            clientLog.createLog(Heart_Core.shardLogsDir);
             clientLogCreated = true;
         } catch (IOException ex) {
             System.err.println("Unable to create log for connected Shard. Ignoring logging.");
@@ -71,7 +71,7 @@ public class ClientConnection extends ConnectedClient {
                 case "Message":
                     if (clientLogCreated) {
                         try {
-                            clientLog.Write(p.packetString);
+                            clientLog.write(p.packetString);
                         } catch (IOException ex) {
                             System.err.println("Unable to write to Shard Log.");
                         }

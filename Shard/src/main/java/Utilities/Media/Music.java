@@ -1,15 +1,20 @@
 package Utilities.Media;
 
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.Player;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.player.Player;
-
 public class Music extends Media {
 
+    /**
+     * Music default constructor
+     *
+     * @param url String url of the music
+     */
     public Music(String url) {
         super(url);
     }

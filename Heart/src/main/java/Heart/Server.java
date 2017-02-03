@@ -47,7 +47,7 @@ public class Server extends MultiClientServer {
     }
 
     /**
-     * Close all server connections
+     * close all server connections
      */
     public void CloseConnections() {
         Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
@@ -58,7 +58,7 @@ public class Server extends MultiClientServer {
             try {
                 temp.SendPacket(p, true);
             } catch (SendPacketException e) {
-                System.err.println("Unable to send Close Connection Packet to Shard. Error: " + e.getMessage());
+                System.err.println("Unable to send close Connection Packet to Shard. Error: " + e.getMessage());
             }
             try {
                 temp.CloseIOStreams();

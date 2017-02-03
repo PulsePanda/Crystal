@@ -29,6 +29,7 @@ import java.util.UUID;
 
 public class Shard_Core {
 
+    // TODO I STOPPED HERE ----------------------------
     public static final String SHARD_VERSION = "0.1.5";
     public static String SHARD_VERSION_SERVER = "";
     private ShardPatcher patcher;
@@ -96,7 +97,7 @@ public class Shard_Core {
     }
 
     /**
-     * Function to redirect standard output streams to the Write function
+     * Function to redirect standard output streams to the write function
      */
     private void RedirectSystemStreams() {
         OutputStream out = new OutputStream() {
@@ -362,7 +363,7 @@ public class Shard_Core {
     private void InitLog() {
         log = new Log();
         try {
-            log.CreateLog(logBaseDir);
+            log.createLog(logBaseDir);
             logActive = true;
 
             // Start the log and initialize the text
@@ -395,7 +396,7 @@ public class Shard_Core {
             // TODO if the configuration isn't found, create and init it
         }
 
-        // uuid = UUID.fromString(cfg.Get("uuid"));
+        // uuid = UUID.fromString(cfg.get("uuid"));
         if (uuid != null) {
             System.out.println("Configuration file loaded.");
         } else {
@@ -534,7 +535,7 @@ public class Shard_Core {
     }
 
     /**
-     * Get the IP address being connected to by the Shard
+     * get the IP address being connected to by the Shard
      *
      * @return String IP address being connected to
      */
@@ -543,7 +544,7 @@ public class Shard_Core {
     }
 
     /**
-     * Get the Port being connected to by the Shard
+     * get the Port being connected to by the Shard
      *
      * @return int Port being connected to
      */
@@ -607,7 +608,7 @@ public class Shard_Core {
                     client.SendPacket(p, true);
                 }
 
-                log.Write(msg);
+                log.write(msg);
             } catch (IOException e) {
                 logActive = false;
                 System.err.println(
