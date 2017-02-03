@@ -99,7 +99,11 @@ class MediaPlaybackHelper implements Runnable {
      * Thread run method. Starts playing the media
      */
     public void run() {
-        mp.media.play();
+        try {
+            mp.media.play();
+        } catch (Exception e) {
+            System.err.println("Unable to play media. Details: " + e.getMessage());
+        }
     }
 
 }

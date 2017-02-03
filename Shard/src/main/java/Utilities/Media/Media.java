@@ -15,56 +15,56 @@ abstract class Media {
     /**
      * Play the media
      */
-    public void play() {
+    public void play() throws Exception {
 
     }
 
     /**
      * Stops the media
      */
-    public void stop() {
+    public void stop() throws Exception {
 
     }
 
     /**
      * Pause the media
      */
-    public void pause() {
+    public void pause() throws Exception {
 
     }
 
     /**
      * Restarts the media
      */
-    public void restart() {
+    public void restart() throws Exception {
 
     }
 
     /**
      * Plays the next media file
      */
-    public void next() {
+    public void next() throws Exception {
 
     }
 
     /**
      * Plays the previous media file
      */
-    public void previous() {
+    public void previous() throws Exception {
 
     }
 
     /**
      * Lowers the volume of the media
      */
-    public void volumeDown() {
+    public void volumeDown() throws Exception {
 
     }
 
     /**
      * Raises the volume of the media
      */
-    public void volumeUp() {
+    public void volumeUp() throws Exception {
 
     }
 }
