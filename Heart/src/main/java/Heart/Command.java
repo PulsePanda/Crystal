@@ -3,6 +3,8 @@ package Heart;
 import Netta.Connection.Packet;
 import Netta.Exceptions.SendPacketException;
 import Utilities.APIHandler;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -10,10 +12,6 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
-import java.util.Random;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class Command {
 
@@ -31,11 +29,9 @@ public class Command {
     }
 
     /**
-     * Built to analyze any command given, to determine what to do with it. For
-     * now, it will directly handle it without interpretation, because commands
-     * are given with GUI buttons
+     * Analyze given packet, and determine what to do with it
      *
-     * @param c command given to analyze
+     * @param packet Packet to analyze
      */
     public void AnalyzeCommand(Packet packet) throws SendPacketException {
         String c = packet.packetString;
@@ -43,13 +39,28 @@ public class Command {
 
         switch (c) {
             case "Good Morning":
-                goodMorning();
+                try {
+                    goodMorning();
+                } catch (IOException e) {
+                    System.err.println("Error retrieving API information for goodMorning command!");
+                    // TODO have error packet sent to shard
+                }
                 break;
             case "BTC Price":
-                btcPrice();
+                try {
+                    btcPrice();
+                } catch (IOException e) {
+                    System.err.println("Error retrieving API information for btcPrice command!");
+                    // TODO have error packet sent to shard
+                }
                 break;
             case "Weather":
-                weather();
+                try {
+                    weather();
+                } catch (IOException e) {
+                    System.err.println("Error retrieving API information for weather command!");
+                    // TODO have error packet sent to shard
+                }
                 break;
             case "Patch":
                 byte[] file = null;
@@ -123,8 +134,9 @@ public class Command {
      *
      * @throws SendPacketException thrown if there is an issue sending the packet to the Shard.
      *                             Details will be in the getMessage()
+     * @throws IOException         thrown if there is an error with APIHandler
      */
-    private void goodMorning() throws SendPacketException {
+    private void goodMorning() throws SendPacketException, IOException {
         System.out.println("Shard requested Good Morning info.");
 
         // Bitcoin price
@@ -146,8 +158,9 @@ public class Command {
      *
      * @throws SendPacketException thrown if there is an error sending the packet to the Shard.
      *                             Details will be in the getMessage()
+     * @throws IOException         thrown if there is an error with APIHandler
      */
-    private void btcPrice() throws SendPacketException {
+    private void btcPrice() throws SendPacketException, IOException {
         System.out.println("Shard requested BTC Price info.");
 
         api = new APIHandler("https://blockchain.info/ticker");
@@ -163,8 +176,9 @@ public class Command {
      *
      * @throws SendPacketException thrown if there is an issue sending the packet to the Shard.
      *                             Details will be in the getMessage()
+     * @throws IOException         thrown if there is an error with API handler
      */
-    private void weather() throws SendPacketException {
+    private void weather() throws SendPacketException, IOException {
         System.out.println("Shard requested Weather info.");
         api = new APIHandler(
                 "http://api.openweathermap.org/data/2.5/forecast?id=5275191&appid=70546178bd3fbec19e717d754e53b129");
@@ -199,9 +213,9 @@ public class Command {
     }
 
     /**
-     * Sends the string generated from each command to the Shard.
+     * Send a string to the Shard.
      *
-     * @param s string being sent to the Shard
+     * @param s String being sent to the Shard
      * @throws SendPacketException thrown if there is an issue sending the packet to the Shard.
      *                             Details will be in the getMessage()
      */
@@ -211,6 +225,14 @@ public class Command {
         connection.SendPacket(p, encrypted);
     }
 
+    /**
+     * Send a packet to the Shard.
+     *
+     * @param p         Packet being sent to the shard
+     * @param encrypted
+     * @throws SendPacketException thrown if there is an issue sending the packet to the Shard.
+     *                             Details will be in the getMessage()
+     */
     private void sendToClient(Packet p, boolean encrypted) throws SendPacketException {
         connection.SendPacket(p, encrypted);
     }
