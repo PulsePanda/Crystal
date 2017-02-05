@@ -1,7 +1,5 @@
 package Heart;
 
-import java.net.Socket;
-
 import Kript.Kript;
 import Netta.Connection.Packet;
 import Netta.Connection.Server.ConnectedClient;
@@ -11,6 +9,7 @@ import Netta.Exceptions.SendPacketException;
 import Utilities.Log;
 
 import java.io.IOException;
+import java.net.Socket;
 
 public class ClientConnection extends ConnectedClient {
 
@@ -18,13 +17,21 @@ public class ClientConnection extends ConnectedClient {
     private Log clientLog;
     private boolean clientLogCreated = false, conversation = false;
 
+    /**
+     * Client Connection default constructor
+     *
+     * @param socket Socket client socket
+     * @param kript  Kript kript object for connection encryption
+     * @throws ConnectionInitializationException thrown if there is an error initializing client.
+     *                                           Details will be in the getMessage()
+     */
     public ClientConnection(Socket socket, Kript kript) throws ConnectionInitializationException {
         super(socket, kript);
 
         command = new Command(this);
         clientLog = new Log();
         try {
-            clientLog.CreateLog(Heart_Core.shardLogsDir);
+            clientLog.createLog(Heart_Core.shardLogsDir);
             clientLogCreated = true;
         } catch (IOException ex) {
             System.err.println("Unable to create log for connected Shard. Ignoring logging.");
@@ -34,10 +41,9 @@ public class ClientConnection extends ConnectedClient {
     }
 
     /**
-     * This method is called every time the shard receives a packet from it's
-     * heart.
+     * This method is called every time the shard receives a packet from the heart.
      *
-     * @param p packet received from the heart
+     * @param p Packet received from the heart
      */
     @Override
     public void ThreadAction(Packet p) {
@@ -50,14 +56,14 @@ public class ClientConnection extends ConnectedClient {
                     System.out.println(
                             "Shard requested connection closure. Reason: " + p.packetString + ". Closing connection.");
                     try {
-                        CloseIOStreams();
+                        closeIOStreams();
                     } catch (ConnectionException e) {
                         System.err.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
                     }
                     break;
                 case "Command":
                     try {
-                        command.AnalyzeCommand(p);
+                        command.analyzeCommand(p);
                     } catch (SendPacketException ex) {
                         System.err.println("Error sending response packet to Shard. Error: " + ex.getMessage());
                     }
@@ -65,7 +71,7 @@ public class ClientConnection extends ConnectedClient {
                 case "Message":
                     if (clientLogCreated) {
                         try {
-                            clientLog.Write(p.packetString);
+                            clientLog.write(p.packetString);
                         } catch (IOException ex) {
                             System.err.println("Unable to write to Shard Log.");
                         }
@@ -77,10 +83,12 @@ public class ClientConnection extends ConnectedClient {
         }
     }
 
+    @Deprecated
     public void setConversation(boolean b) {
         conversation = b;
     }
 
+    @Deprecated
     public boolean getConversation() {
         return conversation;
     }

@@ -28,7 +28,7 @@ public class Heart_Core {
 
     public final static boolean DEBUG = false;
 
-    public final static String HEART_VERSION = "0.1.3";
+    public final static String HEART_VERSION = "0.1.4";
     public static String SHARD_VERSION = "";
 
     public static String systemName = "CHS Heart", mediaDir = "", musicDir = "", movieDir = "", commandKey = "",
@@ -62,7 +62,10 @@ public class Heart_Core {
     public final static SystemInfo systemInfo = new SystemInfo();
 
     /**
-     * Default Constructor. Server Port defaults to 6976
+     * Heart Core Default Constructor
+     *
+     * @param headless  boolean run in GUI mode
+     * @param DEV_BUILD boolean run on dev build
      */
     public Heart_Core(boolean headless, boolean DEV_BUILD) {
         heart_core = this;
@@ -72,28 +75,26 @@ public class Heart_Core {
 
     /**
      * Initialize the Heart Server
-     *
-     * @throws ConfigurationException if there is an issue creating the Configuration file
      */
-    public void Init() {
+    public void init() {
         if (initialized) {
             return;
         }
 
         if (!headless) {
-            InitGUI();
-            RedirectSystemStreams();
+            initGUI();
+            redirectSystemStreams();
         }
 
-        InitVariables();
+        initVariables();
 
-        InitLog();
+        initLog();
 
-        InitCfg();
+        initCfg();
 
-        InitMediaManager();
+        initMediaManager();
 
-        InitPatchThread();
+        initPatchThread();
     }
 
     /**
@@ -102,10 +103,11 @@ public class Heart_Core {
      * @throws ServerInitializationException if there is an error creating the server for any reason. If
      *                                       the exception is thrown, abort attempt to create server
      */
-    public void StartServer(int port) throws ServerInitializationException {
+    public void startHeartServer(int port) throws ServerInitializationException {
         this.port = port;
         try {
-            if (server != null || server.IsConnectionActive()) {
+            // If the server object already has been initialized, or the server object has active connection
+            if (server != null || server.isServerActive()) {
                 throw new ServerInitializationException(
                         "Server is already initialized. Cannot create new server on this object. Aborting creation.");
             }
@@ -119,38 +121,37 @@ public class Heart_Core {
             }
         }
         try {
+            // If the server thread is initialized or alive
             if (serverThread != null || serverThread.isAlive()) {
                 System.err.println(
                         "This instance of Heart Core already has an active Server Thread. Attempting to close the thread...");
-                try {
-                    serverThread.join();
-                } catch (InterruptedException e) {
-                    throw new ServerInitializationException(
-                            "Unable to close Server Thread object within Heart Core. Aborting Creation.");
-                }
+                // Try to close the server thread
+                // TODO using a depreciated method to stop the server, not necissarily the best option
+                serverThread.stop();
             }
         } catch (NullPointerException e) {
             // If serverThread is not set, this will throw.
-            // That's fine, we dont need it to do anything
+            // That's fine, we don't need to do anything
         }
 
+        // Start the server
         serverThread = new Thread(server);
         serverThread.start();
     }
 
     /**
-     * Function to redirect standard output streams to the Write function
+     * Function to redirect standard output streams to the write function
      */
-    private void RedirectSystemStreams() {
+    private void redirectSystemStreams() {
         OutputStream out = new OutputStream() {
             @Override
             public void write(int b) throws IOException {
-                Write(String.valueOf((char) b), Color.BLACK);
+                println(String.valueOf((char) b), Color.BLACK);
             }
 
             @Override
             public void write(byte[] b, int off, int len) throws IOException {
-                Write(new String(b, off, len), Color.BLACK);
+                println(new String(b, off, len), Color.BLACK);
             }
 
             @Override
@@ -159,15 +160,16 @@ public class Heart_Core {
             }
         };
 
+        // TODO have the error stream print red text
         OutputStream err = new OutputStream() {
             @Override
             public void write(int b) throws IOException {
-                Write(String.valueOf((char) b), Color.RED);
+                println(String.valueOf((char) b), Color.RED);
             }
 
             @Override
             public void write(byte[] b, int off, int len) throws IOException {
-                Write(new String(b, off, len), Color.RED);
+                println(new String(b, off, len), Color.RED);
             }
 
             @Override
@@ -183,7 +185,7 @@ public class Heart_Core {
     /**
      * Sets up the initial variables for directories
      */
-    private void InitVariables() {
+    private void initVariables() {
         // Sets the baseDir to the home directory
         baseDir = System.getProperty("user.home") + baseDir;
 
@@ -197,26 +199,31 @@ public class Heart_Core {
 
         shardFileDir = heartDir + shardFileDir;
 
-        // TODO init music/movie Dir's based on config
+        // TODO init music/movie dir's based on config
         mediaDir = "F:/Media";
         musicDir = "F:/Media/music";
         movieDir = "F:/Media/movies";
 
         // Share media folder with the network
-        if (SystemInfo.system_os == SystemInfo.SYSTEM_OS.Windows) {
+        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
             String shareMediaFolder = "net share Media=" + mediaDir.replace("/", "\\") + " /GRANT:Everyone,FULL";
             try {
                 Runtime.getRuntime().exec(shareMediaFolder);
             } catch (IOException e) {
                 System.err.println("Error sharing the media folder with the network! Media access may not be available for Shards!");
             }
-        } else if (SystemInfo.system_os == SystemInfo.SYSTEM_OS.Linux) {
+        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
             // TODO add linux folder sharing
+        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
+            // TODO if not on a valid system
         }
 
         updateShardVersion();
     }
 
+    /**
+     * Pull the Shard version from the local ShardVersion file and apply it to the local variable for use
+     */
     public void updateShardVersion() {
         try {
             File file = new File(heartDir + "ShardVersion");
@@ -230,14 +237,16 @@ public class Heart_Core {
             bufferedReader.close();
             shardVersionLabel.setText("Shard_Version: " + SHARD_VERSION);
         } catch (FileNotFoundException ex) {
+            System.err.println("Unable to find local ShardVersion file located at: " + heartDir + "ShardVersion");
         } catch (IOException ex) {
+            System.err.println("Unable to read local ShardVersion file located at: " + heartDir + "ShardVersion");
         }
     }
 
     /**
      * Sets up and starts the GUI associated with the Heart
      */
-    private void InitGUI() {
+    private void initGUI() {
         frame = new JFrame(systemName);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(800, 600);
@@ -256,7 +265,7 @@ public class Heart_Core {
 
                 allowShutdown = false;
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                StopHeartServer();
+                stopHeartServer();
                 System.out.println("");
                 System.out.println("IT IS NOW SAFE TO CLOSE THE WINDOW");
                 System.out.println("");
@@ -265,30 +274,15 @@ public class Heart_Core {
         exitButton.setBounds(new Rectangle(10, 10, 100, 40));
 
         JButton checkUpdate = new JButton("Check for Updates");
-        checkUpdate.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                new Thread(new UpdateCheckerThread(false, false)).start();
-            }
-        });
+        checkUpdate.addActionListener(e -> new Thread(new UpdateCheckerThread(false, false)).start());
         checkUpdate.setBounds(new Rectangle(120, 10, 140, 40));
 
         JButton forceUpdate = new JButton("Force Update");
-        forceUpdate.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                new Thread(new UpdateCheckerThread(false, true)).start();
-            }
-        });
+        forceUpdate.addActionListener(e -> new Thread(new UpdateCheckerThread(false, true)).start());
         forceUpdate.setBounds(new Rectangle(270, 10, 110, 40));
 
         JButton forceIndex = new JButton("Force Index");
-        forceIndex.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                mediaManager.index(false);
-            }
-        });
+        forceIndex.addActionListener(e -> mediaManager.index(false, 0));
         forceIndex.setBounds(new Rectangle(390, 10, 100, 40));
 
         textArea = new JTextArea();
@@ -296,11 +290,7 @@ public class Heart_Core {
         textArea.setLineWrap(true);
 
         JButton clearLog = new JButton("Clear Log");
-        clearLog.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                textArea.setText("");
-            }
-        });
+        clearLog.addActionListener(e -> textArea.setText(""));
         clearLog.setBounds(new Rectangle(500, 10, 100, 40));
 
         JLabel heartVersionLabel = new JLabel("Heart_Version: " + HEART_VERSION);
@@ -325,12 +315,12 @@ public class Heart_Core {
     }
 
     /**
-     * Sets up the log system
+     * set up the logging system
      */
-    private void InitLog() {
+    private void initLog() {
         log = new Log();
         try {
-            log.CreateLog(logBaseDir);
+            log.createLog(logBaseDir);
             logActive = true;
 
             // Start the log and initialize the text
@@ -346,12 +336,12 @@ public class Heart_Core {
     }
 
     /**
-     * Sets up the configuration file(s) for the server
+     * set up the configuration file(s) for the server
      *
      * @throws ConfigurationException if there is an issue creating the configuration file. Details
      *                                will be in the exceptions message.
      */
-    private void InitCfg() {
+    private void initCfg() {
         System.out.println("Loading configuration file...");
         try {
             cfg = new Config(configDir);
@@ -359,13 +349,13 @@ public class Heart_Core {
             // TODO if the configuration isn't found, create and init it
         }
 
-        // cfg_set = Boolean.parseBoolean(cfg.Get("cfg_set"));
+        // cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
         if (cfg_set) {
-            systemName = cfg.Get("systemName");
-            musicDir = cfg.Get("musicDir");
-            movieDir = cfg.Get("moveDir");
-            commandKey = cfg.Get("commandKey");
-            uuid = UUID.fromString(cfg.Get("uuid"));
+            systemName = cfg.get("systemName");
+            musicDir = cfg.get("musicDir");
+            movieDir = cfg.get("moveDir");
+            commandKey = cfg.get("commandKey");
+            uuid = UUID.fromString(cfg.get("uuid"));
             System.out.println("Configuration file loaded.");
         } else {
             System.err.println("Please initialize the Heart Config with Nerv before proceeding!");
@@ -375,13 +365,15 @@ public class Heart_Core {
     /**
      * Initializes the media index thread to provide a usable list for shards
      */
-    private void InitMediaManager() {
+    private void initMediaManager() {
         mediaManager = new MediaManager(mediaDir, musicDir, movieDir);
-        mediaManager.index(true);
+        mediaManager.index(true, 30);
     }
 
-    // TODO javadoc
-    public void InitDNSSD() {
+    /**
+     * Initialize and register the DNS_SD for the server
+     */
+    public void initDNSSD() {
         dnssd = new DNSSD();
         try {
             dnssd.registerService("_http._tcp.local.", "Crystal Heart Server", port,
@@ -390,8 +382,10 @@ public class Heart_Core {
         }
     }
 
-    // TODO javadoc
-    private void InitPatchThread() {
+    /**
+     * Initialize and start the UpdateCheckerThread for on-launch use
+     */
+    private void initPatchThread() {
         updateCheckerThread = new UpdateCheckerThread(true, false);
         updateCheckerThread.start();
     }
@@ -400,24 +394,21 @@ public class Heart_Core {
      * Writes to the Standard Output Stream, as well as calls 'write' on the
      * local log object
      *
-     * @param msg Message to be displayed and written
+     * @param msg   String message to be displayed and written
+     * @param color Color to set the line of text
      * @return Returns TRUE if successful at writing to the log, FALSE if not
      */
-    private boolean Write(final String msg, Color color) {
+    private boolean println(final String msg, Color color) {
         boolean success = true;
 
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-
-                textArea.append(msg);
-                textArea.setCaretPosition(textArea.getDocument().getLength());
-                // textArea.append("\n");
-            }
+        SwingUtilities.invokeLater(() -> {
+            textArea.append(msg);
+            textArea.setCaretPosition(textArea.getDocument().getLength());
         });
 
         if (logActive) {
             try {
-                log.Write(msg);
+                log.write(msg);
             } catch (IOException e) {
                 logActive = false;
                 System.err.println(
@@ -430,20 +421,20 @@ public class Heart_Core {
     }
 
     /**
-     * Get the Heart_Core object
+     * get the Heart_Core object
      *
      * @return Heart_Core object
      */
-    public static Heart_Core GetCore() {
+    public static Heart_Core getCore() {
         return heart_core;
     }
 
     /**
-     * Get the Heart's UUID value
+     * get the Heart's UUID value
      *
      * @return UUID object that is equal to the Heart's UUID
      */
-    public UUID GetUUID() {
+    public UUID getUUID() {
         return uuid;
     }
 
@@ -456,48 +447,57 @@ public class Heart_Core {
      *
      * @return true if the configuration is set up, else false.
      */
-    public static boolean IsConfigSet() {
+    public static boolean isConfigSet() {
         return cfg_set;
     }
 
     /**
      * @return true if the server is still active, else false.
      */
-    public boolean IsServerActive() {
-        return server.IsConnectionActive();
+    public boolean isServerActive() {
+        return server.isServerActive();
     }
 
     public void notifyShardsOfUpdate() {
-        for (ClientConnection cc : server.clients) {
+        for (ClientConnection cc : server.getClients()) {
             Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
             p.packetString = "new patch";
             try {
-                cc.SendPacket(p, true);
+                cc.sendPacket(p, true);
             } catch (SendPacketException e) {
                 System.err.println("Error sending update notification to shard. Details: " + e.getMessage());
             }
         }
     }
 
+    /**
+     * Stop the Heart server.
+     * <p>
+     * Unregisters the DNS_SD service on the network
+     * Closes server connections
+     * Stops the server thread
+     * Closes the Media Manager
+     * Stops the Update Checker
+     * Sets all variables to null
+     */
     @SuppressWarnings("deprecation")
-    public void StopHeartServer() {
+    public void stopHeartServer() {
         try {
             dnssd.closeRegisteredService();
         } catch (NullPointerException e) {
         }
-        server.CloseConnections();
+        server.closeConnections();
         dnssd = null;
         server = null;
         serverThread.stop();
         serverThread = null;
         mediaManager.close();
-        new Thread() {
-            public void run() {
-                try {
-                    updateCheckerThread.join();
-                } catch (InterruptedException e) {
-                }
+        new Thread(() -> {
+            try {
+                updateCheckerThread.join();
+                updateCheckerThread = null;
+            } catch (InterruptedException e) {
             }
-        }.start();
+        }).start();
     }
 }
