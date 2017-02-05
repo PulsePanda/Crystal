@@ -9,6 +9,11 @@ import java.net.URL;
 
 public class Movie extends Media {
 
+    /**
+     * Movie default constructor
+     *
+     * @param url String url of the movie
+     */
     public Movie(String url) {
         super(url);
     }

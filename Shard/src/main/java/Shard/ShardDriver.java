@@ -19,7 +19,7 @@ public class ShardDriver {
 
         try {
             shardCore = new Shard_Core(headlessArg);
-            shardCore.Init();
+            shardCore.init();
         } catch (ClientInitializationException ex) {
             System.err.println("Error starting Shard Core. Error: " + ex.getMessage());
         }

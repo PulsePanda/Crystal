@@ -1,6 +1,5 @@
 package Utilities.Media;
 
-import javax.print.attribute.standard.Media;
 import java.io.File;
 
 public class MediaManager {
@@ -11,8 +10,15 @@ public class MediaManager {
     protected MediaList songList, movieList;
     private Thread indexThread;
 
-    boolean isIndexed = false, keepIndexing;
+    protected boolean isIndexed = false, keepIndexing;
 
+    /**
+     * Media Manager default constructor
+     *
+     * @param mediaDir String root media directory. Must contain both musicDir and movieDir within the directory
+     * @param musicDir String root music directory. Must contain all music, can be organized into other folders
+     * @param movieDir String root movie directory. Must contain all movies, can be organized into other folders
+     */
     public MediaManager(String mediaDir, String musicDir, String movieDir) {
         System.out.println("MEDIA_MANAGER: Initializing media manager...");
 
@@ -25,27 +31,52 @@ public class MediaManager {
         songList = new MediaList();
     }
 
-    public void index(boolean keepIndexing) {
+    /**
+     * Index media
+     *
+     * @param keepIndexing boolean false indexing once, true if indexing every 30 minutes
+     * @param delayMinutes int delay between indexing attempts in minutes
+     */
+    public void index(boolean keepIndexing, int delayMinutes) {
         this.keepIndexing = keepIndexing;
 
-        mediaIndexer = new MediaIndexer(this, 30 * 60 * 1000); // 30 minutes
+        mediaIndexer = new MediaIndexer(this, delayMinutes * 60 * 1000); // 30 minutes
         indexThread = new Thread(mediaIndexer);
         indexThread.start();
     }
 
+    /**
+     * Check if indexing is complete
+     *
+     * @return boolean indexing complete
+     */
     public boolean isIndexed() {
         return isIndexed;
     }
 
+    /**
+     * Stop indexing media. Uses thread.stop() (which is depreciated)
+     */
     @SuppressWarnings("deprecation")
     public void close() {
         indexThread.stop();
     }
 
+    /**
+     * Retrieve the Song List
+     *
+     * @return MediaList song list
+     */
     public MediaList getSongList() {
         return songList;
     }
 
+    /**
+     * Retrieve all songs matching a given name
+     *
+     * @param songName String song name
+     * @return String[] all song paths (without drive letter) matching songName
+     */
     public String[] getSong(String songName) {
         ListItem[] items = songList.get(songName);
         String[] files = new String[items.length];
@@ -55,11 +86,22 @@ public class MediaManager {
         return files;
     }
 
-    public MediaList getMovieList(){
+    /**
+     * Retrieve the Movie List
+     *
+     * @return MediaList movie list
+     */
+    public MediaList getMovieList() {
         return movieList;
     }
 
-    public String[] getMovie(String movieName){
+    /**
+     * Retrieve all movies matching a given name
+     *
+     * @param movieName String movie name
+     * @return String[] all movie paths (without drive letter) matching movieName
+     */
+    public String[] getMovie(String movieName) {
         ListItem[] items = movieList.get(movieName);
         String[] files = new String[items.length];
         for (int i = 0; i < files.length; i++) {
@@ -74,11 +116,23 @@ class MediaIndexer implements Runnable {
     private MediaManager mm;
     private int delay;
 
+    /**
+     * Media Indexer. Implements Runnable, threaded.
+     *
+     * @param mm    MediaManager object
+     * @param delay int thread sleep delay. How long between indexing attempts
+     */
     public MediaIndexer(MediaManager mm, int delay) {
         this.mm = mm;
         this.delay = delay;
     }
 
+    /**
+     * Thread run() method.
+     * <p>
+     * Indexes movie directory into MediaManager.movieList and music directory into MediaManager.songList
+     * Then delays for given delay in minutes before looping again.
+     */
     public void run() {
         while (true) {
             System.out.println("MEDIA_MANAGER: Indexing movies...");
@@ -100,6 +154,11 @@ class MediaIndexer implements Runnable {
         }
     }
 
+    /**
+     * Recursive method for indexing movies
+     *
+     * @param file File to index. Start with the root movie directory, and it iterates through the directory until it has each file
+     */
     private void movieIndexHelper(File file) {
         if (file.isDirectory()) {
             File[] listOfFiles = file.listFiles();
@@ -111,11 +170,16 @@ class MediaIndexer implements Runnable {
                 String filePath = file.getPath();
                 // removes the drive letter from the file's path, as the folder is shared and the drive isn't needed
                 filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
-                mm.movieList.addItem(file.getName(), filePath);
+                mm.movieList.addItem(file.getName(), filePath, ListItem.MEDIA_TYPE.Movie);
             }
         }
     }
 
+    /**
+     * Recursive method for indexing songs
+     *
+     * @param file File to index. Start with the root music directory, and it iterates through the directory until it has each file
+     */
     private void songIndexHelper(File file) {
         if (file.isDirectory()) {
             File[] listOfFiles = file.listFiles();
@@ -128,16 +192,22 @@ class MediaIndexer implements Runnable {
                 String filePath = file.getPath();
                 filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
 
-                // Remove the file extension from the name
+                // TODO Remove the file extension from the name
                 String fileName = file.getName();
 //                String[] fileNameSplit = fileName.split(".");
 //                fileName = fileNameSplit[0];
 
-                mm.songList.addItem(fileName, filePath);
+                mm.songList.addItem(fileName, filePath, ListItem.MEDIA_TYPE.Music);
             }
         }
     }
 
+    /**
+     * Check if the given file name is a valid media file
+     *
+     * @param fileName String file name. Includes file extension
+     * @return boolean True if valid, false if else
+     */
     private boolean isMovieOrMusic(String fileName) {
         if (fileName.endsWith(".pcm") || fileName.endsWith(".wav") || fileName.endsWith(".aiff") ||
                 fileName.endsWith(".mp3") || fileName.endsWith(".aac") || fileName.endsWith(".ogg") ||
