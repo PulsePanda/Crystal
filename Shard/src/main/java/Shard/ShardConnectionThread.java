@@ -26,7 +26,7 @@ public class ShardConnectionThread implements Runnable {
      * @param patchOnly   Boolean is the connection only for patching
      */
     public ShardConnectionThread(boolean keepRunning, boolean patchOnly) {
-        sc = Shard_Core.GetShardCore();
+        sc = Shard_Core.getShardCore();
         this.keepRunning = keepRunning;
         this.patchOnly = patchOnly;
     }
@@ -40,9 +40,10 @@ public class ShardConnectionThread implements Runnable {
         while (true) {
             try {
                 if (!patchOnly)
-                    sc.StartShardClient();
-                sc.InitPatcher();
+                    sc.startShardClient();
+                sc.initPatcher();
             } catch (ClientInitializationException e) {
+                // If the shard is already connected, this is executed. Don't need to do anything, just keep looping
             }
             if (!keepRunning)
                 return;

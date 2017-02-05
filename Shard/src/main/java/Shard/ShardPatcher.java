@@ -68,7 +68,7 @@ public class ShardPatcher extends Thread {
             System.err.println("Error getting Hearts version of the Shard. Error: " + ex.getMessage());
             System.err.println("Cancelling execution, unsafe to run unpatched Shard.");
             try {
-                Shard_Core.GetShardCore().StopShardClient();
+                Shard_Core.getShardCore().stopShardClient();
             } catch (ConnectionException ex1) {
             }
         }
@@ -88,7 +88,7 @@ public class ShardPatcher extends Thread {
             Thread.sleep(2000);
         } catch (InterruptedException ex) {
         }
-        client.SendPacket(p, true);
+        client.sendPacket(p, true);
     }
 
     /**
@@ -121,7 +121,7 @@ public class ShardPatcher extends Thread {
         Packet p = new Packet(Packet.PACKET_TYPE.Command, null);
         p.packetString = "Patch";
         client.setPacketEncrypted(false);
-        client.SendPacket(p, true);
+        client.sendPacket(p, true);
         System.out.println("Requested patch from Heart.");
 
         while (updateFile == null) {

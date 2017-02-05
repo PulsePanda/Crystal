@@ -29,11 +29,12 @@ import java.util.UUID;
 
 public class Shard_Core {
 
-    // TODO I STOPPED HERE ----------------------------
+    // Shard version
     public static final String SHARD_VERSION = "0.1.5";
     public static String SHARD_VERSION_SERVER = "";
     private ShardPatcher patcher;
 
+    // Global variables
     public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", shardDir = "Shard/",
             logBaseDir = "Logs/", configDir = "shard_config.cfg";
     private static boolean logActive = false, initialized = false;
@@ -77,38 +78,40 @@ public class Shard_Core {
      * Begin initialization of the Shard. When this method is done executing,
      * the Shard will be ready to connect to a Heart.
      */
-    public void Init() {
+    public void init() {
         if (initialized) {
             return;
         }
 
         if (!headless) {
-            InitGUI();
-            RedirectSystemStreams();
+            initGUI();
+            redirectSystemStreams();
         }
 
         System.out.println("VERSION: " + SHARD_VERSION);
 
-        InitVariables();
+        initVariables();
 
-        InitLog();
+        initLog();
 
-        InitCfg();
+        System.out.println("###############" + systemName + "###############");
+
+        initCfg();
     }
 
     /**
      * Function to redirect standard output streams to the write function
      */
-    private void RedirectSystemStreams() {
+    private void redirectSystemStreams() {
         OutputStream out = new OutputStream() {
             @Override
             public void write(int b) throws IOException {
-                Write(String.valueOf((char) b));
+                println(String.valueOf((char) b));
             }
 
             @Override
             public void write(byte[] b, int off, int len) throws IOException {
-                Write(new String(b, off, len));
+                println(new String(b, off, len));
             }
 
             @Override
@@ -125,7 +128,7 @@ public class Shard_Core {
      * Initialize variables being used for configuration files and log systems.
      * Other variables can be initialized here too.
      */
-    private void InitVariables() {
+    private void initVariables() {
         baseDir = System.getProperty("user.home") + baseDir;
         shardDir = baseDir + shardDir;
         logBaseDir = shardDir + logBaseDir;
@@ -143,13 +146,13 @@ public class Shard_Core {
      * <p>
      * Called after clientThread is started
      */
-    public synchronized void InitPatcher() {
-        if (!client.IsConnectionActive()) {
+    public synchronized void initPatcher() {
+        if (!client.isConnectionActive()) {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
             }
-            InitPatcher();
+            initPatcher();
             return;
         }
 
@@ -186,7 +189,7 @@ public class Shard_Core {
      * console output, being the System.out and System.err output, displaying
      * information from the Heart, and handling input from the user.
      */
-    private void InitGUI() {
+    private void initGUI() {
         // Frame setup
         frame = new JFrame(systemName);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -217,7 +220,7 @@ public class Shard_Core {
             Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
             p.packetString = "Good Morning";
             try {
-                client.SendPacket(p, true);
+                client.sendPacket(p, true);
             } catch (SendPacketException ex) {
                 System.err.println("Error sending Good Morning packet to Heart. Error: " + ex.getMessage());
             }
@@ -231,7 +234,7 @@ public class Shard_Core {
             Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
             p.packetString = "BTC Price";
             try {
-                client.SendPacket(p, true);
+                client.sendPacket(p, true);
             } catch (SendPacketException ex) {
                 System.err.println("Error sending BTC Price packet to Heart. Error: " + ex.getMessage());
             }
@@ -245,7 +248,7 @@ public class Shard_Core {
             Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
             p.packetString = "Weather";
             try {
-                client.SendPacket(p, true);
+                client.sendPacket(p, true);
             } catch (SendPacketException ex) {
                 System.err.println("Error sending Weather packet to Heart. Error: " + ex.getMessage());
             }
@@ -261,7 +264,7 @@ public class Shard_Core {
             String song = JOptionPane.showInputDialog(null, "Song name");
             p.packetStringArray = new String[]{song};
             try {
-                client.SendPacket(p, true);
+                client.sendPacket(p, true);
             } catch (SendPacketException e1) {
                 System.err.println("Error sending Play Music packet to Heart. Error: " + e1.getMessage());
             }
@@ -277,7 +280,7 @@ public class Shard_Core {
             String movie = JOptionPane.showInputDialog(null, "Movie name");
             p.packetStringArray = new String[]{movie};
             try {
-                client.SendPacket(p, true);
+                client.sendPacket(p, true);
             } catch (SendPacketException e1) {
                 System.err.println("Error sending Play Movie packet to Heart. Error: " + e1.getMessage());
             }
@@ -315,7 +318,7 @@ public class Shard_Core {
 
                 allowShutdown = false;
                 try {
-                    StopShardClient();
+                    stopShardClient();
                 } catch (Exception ex) {
                     System.err.println("Error when closing the connection to the Heart. Error: " + ex.getMessage());
                 }
@@ -333,18 +336,6 @@ public class Shard_Core {
         scrollPane.setBounds(0, 60, frame.getWidth() - 5, frame.getHeight() - 115);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
-        // JTextField commandField = new JTextField();
-        // commandField.setBounds(0, frame.getHeight() - 50, frame.getWidth() -
-        // 5, 25);
-        // commandField.addActionListener(new AbstractAction() {
-        // @Override
-        // public void actionPerformed(ActionEvent arg0) {
-        // String commandText = commandField.getText();
-        // System.out.println("Input Command: " + commandText);
-        // command.AnalyzeCommand(commandText);
-        // commandField.setText("");
-        // }
-        // });
         consolePanel.add(exitButton, BorderLayout.NORTH);
         consolePanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -360,14 +351,13 @@ public class Shard_Core {
     /**
      * Sets up the log system
      */
-    private void InitLog() {
+    private void initLog() {
         log = new Log();
         try {
             log.createLog(logBaseDir);
             logActive = true;
 
             // Start the log and initialize the text
-            System.out.println("###############" + systemName + "###############");
             System.out.println("System logging enabled");
         } catch (SecurityException e) {
             System.out.println(
@@ -384,7 +374,7 @@ public class Shard_Core {
      * @throws ConfigurationException if there is an issue creating the configuration file. Details
      *                                will be in the exceptions message.
      */
-    private void InitCfg() {
+    private void initCfg() {
         // TODO: This method is for loading local configuration files. However,
         // the Shard will have both local and "cloud" based
         // configuration files, making this method out of date. Update to solve
@@ -411,16 +401,15 @@ public class Shard_Core {
      * @throws ClientInitializationException thrown if there is an error creating the Client. Error
      *                                       details will be in the getMessage()
      */
-    public void StartShardClient() throws ClientInitializationException {
+    public void startShardClient() throws ClientInitializationException {
         try {
-            if (client.IsConnectionActive()) {
+            if (client.isConnectionActive()) {
                 throw new ClientInitializationException(
                         "Client is already initialized! Aborting attempt to create connection.");
             }
         } catch (NullPointerException e) {
             // If client is not initialized, initialize it
             try {
-                // TODO implement the DNSSD into netta, and have a simpler implementation
                 // Start the search for dnssd service
                 try {
                     dnssd.discoverService("_http._tcp.local.", InetAddress.getLocalHost());
@@ -454,7 +443,7 @@ public class Shard_Core {
 
         try {
             if (clientThread != null || clientThread.isAlive()) {
-                StopShardClient();
+                stopShardClient();
                 throw new ClientInitializationException(
                         "Client Thread is already initialized! Aborting attempt to create connection.");
             }
@@ -469,9 +458,9 @@ public class Shard_Core {
         clientThread.start();
     }
 
-    public void StartShardClientSuppressed() {
+    public void startShardClientSuppressed() {
         try {
-            StartShardClient();
+            startShardClient();
         } catch (ClientInitializationException ex) {
         }
     }
@@ -483,12 +472,12 @@ public class Shard_Core {
      * @throws ConnectionException thrown when there is an issue closing the IO streams to the
      *                             Heart. Error will be in the getMessage()
      */
-    public void StopShardClient() throws ConnectionException {
+    public void stopShardClient() throws ConnectionException {
         try {
             Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
             p.packetString = "Manual disconnect";
-            client.SendPacket(p, true);
-            client.CloseIOStreams();
+            client.sendPacket(p, true);
+            client.closeIOStreams();
             clientThread.join();
             clientThread = null;
             IP = "";
@@ -511,7 +500,7 @@ public class Shard_Core {
      *
      * @return Shard_Core object being used by the Shard
      */
-    public static Shard_Core GetShardCore() {
+    public static Shard_Core getShardCore() {
         return shard_core;
     }
 
@@ -521,7 +510,7 @@ public class Shard_Core {
      * @return UUID of the Shard
      */
     @Deprecated
-    public UUID GetUUID() {
+    public UUID getUUID() {
         return uuid;
     }
 
@@ -530,8 +519,8 @@ public class Shard_Core {
      *
      * @return boolean whether the connection is active
      */
-    public boolean IsActive() {
-        return client.IsConnectionActive();
+    public boolean isActive() {
+        return client.isConnectionActive();
     }
 
     /**
@@ -560,25 +549,16 @@ public class Shard_Core {
         return client;
     }
 
-    // public void setInitializedToFalse() {
-    // initialized = false;
-    // client = null;
-    // try {
-    // clientThread.join();
-    // } catch (InterruptedException ex) {
-    // }
-    // clientThread = null;
-    // }
-
     /**
      * Send a packet to the Heart
      *
-     * @param p Packet to send
+     * @param p         Packet to send
+     * @param encrypted boolean True to encrypt packet, else false
      * @throws SendPacketException thrown if there is an error sending the Packet to the Heart.
      *                             Error will be in the getMessage()
      */
-    public void SendPacket(Packet p) throws SendPacketException {
-        client.SendPacket(p, true);
+    public void sendPacket(Packet p, boolean encrypted) throws SendPacketException {
+        client.sendPacket(p, encrypted);
     }
 
     /**
@@ -588,7 +568,7 @@ public class Shard_Core {
      * @param msg Message to be displayed and written
      * @return Returns TRUE if successful at writing to the log, FALSE if not
      */
-    private boolean Write(String msg) {
+    private boolean println(String msg) {
         boolean success = true;
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -605,7 +585,7 @@ public class Shard_Core {
                     // Log packet to Heart
                     Packet p = new Packet(Packet.PACKET_TYPE.Message, "");
                     p.packetString = msg;
-                    client.SendPacket(p, true);
+                    client.sendPacket(p, true);
                 }
 
                 log.write(msg);

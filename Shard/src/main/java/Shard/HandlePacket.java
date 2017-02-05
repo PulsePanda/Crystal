@@ -53,9 +53,9 @@ public class HandlePacket {
                     String version = split[1];
                     Shard_Core.SHARD_VERSION_SERVER = version;
                 } else if (message.equals("update")) {
-                    Shard_Core.GetShardCore().getPatcher().updateFile = packet.packetByteArray;
+                    Shard_Core.getShardCore().getPatcher().updateFile = packet.packetByteArray;
                 } else if (message.equals("new patch")) {
-                    ShardPatcher patcher = new ShardPatcher(Shard_Core.GetShardCore().getClient(),
+                    ShardPatcher patcher = new ShardPatcher(Shard_Core.getShardCore().getClient(),
                             ShardPatcher.PATCHER_TYPE.downloadUpdate);
                     patcher.start();
                 } else if (message.equals("music")) {
@@ -92,8 +92,8 @@ public class HandlePacket {
                 System.out.println(
                         "Server requested connection termination. Reason: " + packet.packetString + ". Closing connection.");
                 try {
-                    client.CloseIOStreams();
-                    Shard_Core.GetShardCore().resetConnectionData();
+                    client.closeIOStreams();
+                    Shard_Core.getShardCore().resetConnectionData();
                 } catch (ConnectionException e) {
                     System.err.println("Error closing connection with Heart. Error: " + e.getMessage());
                 }

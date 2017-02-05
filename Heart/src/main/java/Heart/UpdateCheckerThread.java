@@ -231,7 +231,7 @@ public class UpdateCheckerThread extends Thread {
      * @throws IOException thrown if there is an error accessing or reading patch data
      */
     private void installHeartPatch() throws IOException {
-        Heart_Core.GetCore().StopHeartServer();
+        Heart_Core.getCore().stopHeartServer();
 
         UnZip.unZip(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir);
 
@@ -257,11 +257,11 @@ public class UpdateCheckerThread extends Thread {
             out.print(shardVersion);
             out.close();
 
-            Heart_Core.GetCore().updateShardVersion();
+            Heart_Core.getCore().updateShardVersion();
         } catch (FileNotFoundException e) {
             System.err.println("UPDATE: Error writing new Shard version to ShardVersion file!");
         }
-        Heart_Core.GetCore().notifyShardsOfUpdate();
+        Heart_Core.getCore().notifyShardsOfUpdate();
     }
 
     /**

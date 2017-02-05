@@ -56,14 +56,14 @@ public class ClientConnection extends ConnectedClient {
                     System.out.println(
                             "Shard requested connection closure. Reason: " + p.packetString + ". Closing connection.");
                     try {
-                        CloseIOStreams();
+                        closeIOStreams();
                     } catch (ConnectionException e) {
                         System.err.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
                     }
                     break;
                 case "Command":
                     try {
-                        command.AnalyzeCommand(p);
+                        command.analyzeCommand(p);
                     } catch (SendPacketException ex) {
                         System.err.println("Error sending response packet to Shard. Error: " + ex.getMessage());
                     }

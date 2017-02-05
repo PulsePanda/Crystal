@@ -49,19 +49,19 @@ public class Server extends MultiClientServer {
     /**
      * close all server connections
      */
-    public void CloseConnections() {
+    public void closeConnections() {
         Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
         p.packetString = "Manual disconnect";
 
         for (int i = 0; i < clients.size(); i++) {
             ClientConnection temp = clients.get(i);
             try {
-                temp.SendPacket(p, true);
+                temp.sendPacket(p, true);
             } catch (SendPacketException e) {
                 System.err.println("Unable to send close Connection Packet to Shard. Error: " + e.getMessage());
             }
             try {
-                temp.CloseIOStreams();
+                temp.closeIOStreams();
             } catch (ConnectionException e) {
                 System.out.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
             }

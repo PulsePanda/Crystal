@@ -33,7 +33,7 @@ public class Command {
      *
      * @param packet Packet to analyze
      */
-    public void AnalyzeCommand(Packet packet) throws SendPacketException {
+    public void analyzeCommand(Packet packet) throws SendPacketException {
         String c = packet.packetString;
         System.out.println("Received command from Shard. Command: " + c);
 
@@ -94,7 +94,7 @@ public class Command {
                 Packet music = new Packet(Packet.PACKET_TYPE.Message, null);
                 music.packetString = "music";
                 String requestedSong = packet.packetStringArray[0];
-                String[] musicPaths = Heart_Core.GetCore().getMediaManager().getSong(requestedSong);
+                String[] musicPaths = Heart_Core.getCore().getMediaManager().getSong(requestedSong);
                 for (int i = 0; i < musicPaths.length; i++) { // edit each path to be a reachable address
                     try {
                         musicPaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + musicPaths[i];
@@ -110,7 +110,7 @@ public class Command {
                 Packet movie = new Packet(Packet.PACKET_TYPE.Message, null);
                 movie.packetString = "movie";
                 String requestedMovie = packet.packetStringArray[0];
-                String[] moviePaths = Heart_Core.GetCore().getMediaManager().getMovie(requestedMovie);
+                String[] moviePaths = Heart_Core.getCore().getMediaManager().getMovie(requestedMovie);
                 for (int i = 0; i < moviePaths.length; i++) {
                     try {
                         moviePaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + moviePaths[i];
@@ -222,7 +222,7 @@ public class Command {
     private void sendToClient(String s, boolean encrypted) throws SendPacketException {
         Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
         p.packetString = s;
-        connection.SendPacket(p, encrypted);
+        connection.sendPacket(p, encrypted);
     }
 
     /**
@@ -234,7 +234,7 @@ public class Command {
      *                             Details will be in the getMessage()
      */
     private void sendToClient(Packet p, boolean encrypted) throws SendPacketException {
-        connection.SendPacket(p, encrypted);
+        connection.sendPacket(p, encrypted);
     }
 
     /**
