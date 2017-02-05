@@ -28,7 +28,7 @@ public class Heart_Core {
 
     public final static boolean DEBUG = false;
 
-    public final static String HEART_VERSION = "0.1.3";
+    public final static String HEART_VERSION = "0.1.4";
     public static String SHARD_VERSION = "";
 
     public static String systemName = "CHS Heart", mediaDir = "", musicDir = "", movieDir = "", commandKey = "",

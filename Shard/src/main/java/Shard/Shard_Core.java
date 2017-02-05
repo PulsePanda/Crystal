@@ -30,7 +30,7 @@ import java.util.UUID;
 public class Shard_Core {
 
     // Shard version
-    public static final String SHARD_VERSION = "0.1.5";
+    public static final String SHARD_VERSION = "0.1.6";
     public static String SHARD_VERSION_SERVER = "";
     private ShardPatcher patcher;
 
