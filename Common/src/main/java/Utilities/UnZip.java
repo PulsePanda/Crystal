@@ -2,39 +2,27 @@ package Utilities;
 
 import java.io.IOException;
 
+/**
+ * UnZip
+ *
+ * Utility to unzip zip files into output folders
+ */
 public class UnZip {
 
-	private String source, destination;
+    /**
+     * UnZip the given zip file into the given output folder
+     *
+     * @param source      input Zip file
+     * @param destination output folder
+     * @throws IOException thrown if there is an error spawning the script
+     */
+    public static void unZip(String source, String destination) throws IOException {
+        String[] params = null;
+        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows)
+            params = new String[]{"py", "../lib/unzip.py", source, destination};
+        else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux)
+            params = new String[]{"python3", "../lib/unzip.py", source, destination};
 
-	/**
-	 * UnZip
-	 *
-	 * @param source
-	 *            input zip file
-	 * @param destination
-	 *            output folder
-	 */
-	public UnZip(String source, String destination) {
-		this.source = source;
-		this.destination = destination;
-	}
-
-	/**
-	 * Execute the UnZip function
-	 * 
-	 * @throws IOException
-	 *             thrown if there is an error spawning the script
-	 */
-	public void run() throws IOException {
-		String os = System.getProperty("os.name");
-		os = os.toLowerCase();
-
-		String[] params = null;
-		if (os.contains("windows"))
-			params = new String[] { "py", "../lib/unzip.py", source, destination };
-		else if (os.contains("linux"))
-			params = new String[] { "python3", "../lib/unzip.py", source, destination };
-
-		Runtime.getRuntime().exec(params);
-	}
+        Runtime.getRuntime().exec(params);
+    }
 }
