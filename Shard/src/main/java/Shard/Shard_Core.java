@@ -13,10 +13,14 @@ package Shard;
 import Exceptions.ClientInitializationException;
 import Exceptions.ConfigurationException;
 import Netta.Connection.Packet;
+import Netta.DNSSD;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
-import Utilities.*;
+import Utilities.Config;
+import Utilities.Log;
 import Utilities.Media.MediaPlayback;
+import Utilities.ShardPatcher;
+import Utilities.SystemInfo;
 
 import javax.swing.*;
 import java.awt.*;

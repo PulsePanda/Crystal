@@ -17,6 +17,7 @@ package Heart;
 import Exceptions.ConfigurationException;
 import Exceptions.ServerInitializationException;
 import Netta.Connection.Packet;
+import Netta.DNSSD;
 import Netta.Exceptions.SendPacketException;
 import Utilities.*;
 import Utilities.Media.MediaManager;
