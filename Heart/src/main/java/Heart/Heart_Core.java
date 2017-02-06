@@ -284,8 +284,7 @@ public class Heart_Core {
         exitButton.setBounds(new Rectangle(10, 10, 100, 40));
 
         JButton checkUpdate = new JButton("Check for Updates");
-//        checkUpdate.addActionListener(e -> new Thread(new UpdateCheckerThread(false, false)).start());
-        checkUpdate.addActionListener(e -> notifyShardsOfUpdate());
+        checkUpdate.addActionListener(e -> new Thread(new UpdateCheckerThread(false, false)).start());
         checkUpdate.setBounds(new Rectangle(120, 10, 140, 40));
 
         JButton forceUpdate = new JButton("Force Update");
