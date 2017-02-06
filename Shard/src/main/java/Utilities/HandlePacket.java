@@ -25,7 +25,6 @@ import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Shard.Client;
-import Shard.ShardPatcher;
 import Shard.Shard_Core;
 import Utilities.Media.MediaPlayback;
 import Utilities.Media.Movie;

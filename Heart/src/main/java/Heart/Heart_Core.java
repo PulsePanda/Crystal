@@ -18,11 +18,8 @@ import Exceptions.ConfigurationException;
 import Exceptions.ServerInitializationException;
 import Netta.Connection.Packet;
 import Netta.Exceptions.SendPacketException;
-import Utilities.Config;
-import Utilities.DNSSD;
-import Utilities.Log;
+import Utilities.*;
 import Utilities.Media.MediaManager;
-import Utilities.SystemInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -287,7 +284,8 @@ public class Heart_Core {
         exitButton.setBounds(new Rectangle(10, 10, 100, 40));
 
         JButton checkUpdate = new JButton("Check for Updates");
-        checkUpdate.addActionListener(e -> new Thread(new UpdateCheckerThread(false, false)).start());
+//        checkUpdate.addActionListener(e -> new Thread(new UpdateCheckerThread(false, false)).start());
+        checkUpdate.addActionListener(e -> notifyShardsOfUpdate());
         checkUpdate.setBounds(new Rectangle(120, 10, 140, 40));
 
         JButton forceUpdate = new JButton("Force Update");
@@ -472,6 +470,7 @@ public class Heart_Core {
     }
 
     public void notifyShardsOfUpdate() {
+        System.out.println("Notifying Shards of update.");
         for (ClientConnection cc : server.getClients()) {
             Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
             p.packetString = "new patch";
