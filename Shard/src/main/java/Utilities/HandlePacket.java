@@ -23,7 +23,6 @@ package Utilities;
 
 import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
-import Netta.Exceptions.ConnectionException;
 import Shard.Client;
 import Shard.Shard_Core;
 import Utilities.Media.MediaPlayback;
@@ -126,15 +125,11 @@ public class HandlePacket {
                     JOptionPane.showMessageDialog(null, message);
                 }
                 break;
-            case "close connection":
+            case "closeconnection":
                 System.out.println(
                         "Server requested connection termination. Reason: " + packet.packetString + ". Closing connection.");
-                try {
-                    client.closeIOStreams();
-                    Shard_Core.getShardCore().resetConnectionData();
-                } catch (ConnectionException e) {
-                    System.err.println("Error closing connection with Heart. Error: " + e.getMessage());
-                }
+                Shard_Core.getShardCore().resetConnectionData();
+
                 break;
         }
     }

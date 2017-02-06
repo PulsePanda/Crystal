@@ -508,18 +508,25 @@ public class Shard_Core {
             p.packetString = "Manual disconnect";
             client.sendPacket(p, true);
             client.closeIOStreams();
-            clientThread.join();
+            clientThread.stop();
             clientThread = null;
             IP = "";
             port = 0;
         } catch (SendPacketException e) {
             System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
-        } catch (InterruptedException ex) {
         }
     }
 
     // TODO javadoc
     public void resetConnectionData() {
+        try {
+            client.closeIOStreams();
+        } catch (ConnectionException e) {
+            System.err.println("Error closing client IO streams. Error: " + e.getMessage());
+        }
+        client = null;
+        clientThread.stop();
+        clientThread = null;
         IP = "";
         port = 0;
     }
