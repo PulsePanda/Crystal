@@ -20,6 +20,7 @@
 
 package Utilities;
 
+import Exceptions.APIException;
 import Heart.ClientConnection;
 import Heart.Heart_Core;
 import Netta.Connection.Packet;
@@ -65,24 +66,24 @@ public class Command {
             case "Good Morning":
                 try {
                     goodMorning();
-                } catch (IOException e) {
-                    System.err.println("Error retrieving API information for goodMorning command!");
+                } catch (APIException e) {
+                    System.err.println("Error retrieving API information for goodMorning command! Details: " + e.getMessage());
                     // TODO have error packet sent to shard
                 }
                 break;
             case "BTC Price":
                 try {
                     btcPrice();
-                } catch (IOException e) {
-                    System.err.println("Error retrieving API information for btcPrice command!");
+                } catch (APIException e) {
+                    System.err.println("Error retrieving API information for btcPrice command! Details: " + e.getMessage());
                     // TODO have error packet sent to shard
                 }
                 break;
             case "Weather":
                 try {
                     weather();
-                } catch (IOException e) {
-                    System.err.println("Error retrieving API information for weather command!");
+                } catch (APIException e) {
+                    System.err.println("Error retrieving API information for weather command! Details: " + e.getMessage());
                     // TODO have error packet sent to shard
                 }
                 break;
@@ -158,9 +159,9 @@ public class Command {
      *
      * @throws SendPacketException thrown if there is an issue sending the packet to the Shard.
      *                             Details will be in the getMessage()
-     * @throws IOException         thrown if there is an error with APIHandler
+     * @throws APIException        thrown if there is an error with APIHandler
      */
-    private void goodMorning() throws SendPacketException, IOException {
+    private void goodMorning() throws SendPacketException, APIException {
         System.out.println("Shard requested Good Morning info.");
 
         // Bitcoin price
@@ -182,9 +183,9 @@ public class Command {
      *
      * @throws SendPacketException thrown if there is an error sending the packet to the Shard.
      *                             Details will be in the getMessage()
-     * @throws IOException         thrown if there is an error with APIHandler
+     * @throws APIException        thrown if there is an error with APIHandler
      */
-    private void btcPrice() throws SendPacketException, IOException {
+    private void btcPrice() throws SendPacketException, APIException {
         System.out.println("Shard requested BTC Price info.");
 
         api = new APIHandler("https://blockchain.info/ticker");
@@ -200,9 +201,9 @@ public class Command {
      *
      * @throws SendPacketException thrown if there is an issue sending the packet to the Shard.
      *                             Details will be in the getMessage()
-     * @throws IOException         thrown if there is an error with API handler
+     * @throws APIException        thrown if there is an error with API handler
      */
-    private void weather() throws SendPacketException, IOException {
+    private void weather() throws SendPacketException, APIException {
         System.out.println("Shard requested Weather info.");
         api = new APIHandler(
                 "http://api.openweathermap.org/data/2.5/forecast?id=5275191&appid=70546178bd3fbec19e717d754e53b129");

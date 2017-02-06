@@ -9,11 +9,24 @@
  * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
  */
 
-package Shard;
+/*
+ * This file is part of Crystal Home Systems.
+ *
+ * Crystal Home Systems is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * Crystal Home Systems is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
+ */
+
+package Utilities;
 
 import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
+import Shard.Client;
+import Shard.ShardPatcher;
+import Shard.Shard_Core;
 import Utilities.Media.MediaPlayback;
 import Utilities.Media.Movie;
 import Utilities.Media.Music;
@@ -64,7 +77,18 @@ public class HandlePacket {
                     patcher.start();
                 } else if (message.equals("music")) {
                     try {
-                        String songPath = packet.packetStringArray[0];
+                        String songPath = "";
+                        if (packet.packetStringArray.length > 1) {
+                            StringBuilder sb = new StringBuilder();
+                            for (int i = 0; i < packet.packetStringArray.length; i++) {
+                                sb.append("" + i + ": " + packet.packetStringArray[i] + "\n");
+                            }
+                            String options = sb.toString();
+                            int index = Integer.parseInt(JOptionPane.showInputDialog(null, "Which file did you mean? Please enter an integer\n" + options));
+                            songPath = packet.packetStringArray[index];
+                        } else {
+                            songPath = packet.packetStringArray[0];
+                        }
                         System.out.println(songPath);
                         try {
                             new MediaPlayback().start(new Music(songPath));
@@ -77,7 +101,18 @@ public class HandlePacket {
                     }
                 } else if (message.equals("movie")) {
                     try {
-                        String moviePath = packet.packetStringArray[0];
+                        String moviePath = "";
+                        if (packet.packetStringArray.length > 1) {
+                            StringBuilder sb = new StringBuilder();
+                            for (int i = 0; i < packet.packetStringArray.length; i++) {
+                                sb.append("" + i + ": " + packet.packetStringArray[i] + "\n");
+                            }
+                            String options = sb.toString();
+                            int index = Integer.parseInt(JOptionPane.showInputDialog(null, "Which file did you mean? Please enter an integer\n" + options));
+                            moviePath = packet.packetStringArray[index];
+                        } else {
+                            moviePath = packet.packetStringArray[0];
+                        }
                         System.out.println(moviePath);
                         try {
                             new MediaPlayback().start(new Movie(moviePath));

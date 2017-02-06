@@ -12,6 +12,7 @@ package Shard;
 
 import Netta.Connection.Client.ClientTemplate;
 import Netta.Connection.Packet;
+import Utilities.HandlePacket;
 
 import java.security.NoSuchAlgorithmException;
 

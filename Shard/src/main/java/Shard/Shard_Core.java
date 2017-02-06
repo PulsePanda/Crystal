@@ -106,10 +106,6 @@ public class Shard_Core {
         System.out.println("###############" + systemName + "###############");
 
         initCfg();
-
-        for(int i = 0; i < 100; i++){
-            System.out.println("asdflk;jasdf;lkjqwopeiur " + i);
-        }
     }
 
     /**
