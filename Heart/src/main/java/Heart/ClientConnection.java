@@ -1,3 +1,13 @@
+/*
+ * This file is part of Crystal Home Systems.
+ *
+ * Crystal Home Systems is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * Crystal Home Systems is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
+ */
+
 package Heart;
 
 import Kript.Kript;
@@ -6,11 +16,15 @@ import Netta.Connection.Server.ConnectedClient;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
 import Netta.Exceptions.SendPacketException;
+import Utilities.Command;
 import Utilities.Log;
 
 import java.io.IOException;
 import java.net.Socket;
 
+/**
+ * Client Connection. Wrapper for accepted client connected to the Heart server
+ */
 public class ClientConnection extends ConnectedClient {
 
     private Command command;
