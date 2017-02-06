@@ -492,12 +492,7 @@ public class Heart_Core {
         serverThread.stop();
         serverThread = null;
         mediaManager.close();
-        new Thread(() -> {
-            try {
-                updateCheckerThread.join();
-                updateCheckerThread = null;
-            } catch (InterruptedException e) {
-            }
-        }).start();
+        updateCheckerThread.stop();
+        updateCheckerThread = null;
     }
 }
