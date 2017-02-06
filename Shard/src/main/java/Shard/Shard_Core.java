@@ -70,6 +70,7 @@ public class Shard_Core {
     private static JTextArea textArea;
     private JPanel consolePanel, commandPanel;
     private JTabbedPane tabbedPane;
+    private JLabel connectionStatus;
 
     // Media Elements
     public MediaPlayback mediaPlayback;
@@ -190,6 +191,9 @@ public class Shard_Core {
             }
         }
 
+        connectionStatus.setText("CONNECTED");
+        connectionStatus.setForeground(Color.GREEN);
+
         // Run shard update
         patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.runUpdate);
         patcher.start();
@@ -215,6 +219,9 @@ public class Shard_Core {
         // Command panel setup
         commandPanel = new JPanel();
         commandPanel.setLayout(new FlowLayout());
+
+        connectionStatus = new JLabel("DISCONNECTED");
+        connectionStatus.setForeground(Color.RED);
 
         JButton checkUpdate = new JButton("Check for Updates");
         checkUpdate.addActionListener(e -> {
@@ -305,6 +312,7 @@ public class Shard_Core {
             mediaPlayback.stop();
         });
 
+        commandPanel.add(connectionStatus);
         commandPanel.add(checkUpdate);
         commandPanel.add(goodMorning);
         commandPanel.add(btcPrice);
@@ -500,13 +508,15 @@ public class Shard_Core {
     }
 
     /**
-     * Used to stop the Shard. Sends a close connection packet to the Heart to
+     * Used to stop the Shard nicely. Sends a close connection packet to the Heart to
      * terminate connection, which will then terminate IO streams
      *
      * @throws ConnectionException thrown when there is an issue closing the IO streams to the
      *                             Heart. Error will be in the getMessage()
      */
     public void stopShardClient() throws ConnectionException {
+        connectionStatus.setText("DISCONNECTED");
+        connectionStatus.setForeground(Color.RED);
         try {
             Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
             p.packetString = "Manual disconnect";
@@ -521,8 +531,13 @@ public class Shard_Core {
         }
     }
 
-    // TODO javadoc
+    /**
+     * Used to stop the Shard without warning. Does the same thing as stopShardClient() without sending a packet to the
+     * Heart
+     */
     public void resetConnectionData() {
+        connectionStatus.setText("DISCONNECTED");
+        connectionStatus.setForeground(Color.RED);
         try {
             client.closeIOStreams();
         } catch (ConnectionException e) {
