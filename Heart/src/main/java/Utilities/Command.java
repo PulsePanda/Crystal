@@ -36,7 +36,7 @@ import java.nio.file.Paths;
 import java.util.Calendar;
 
 /**
- * Command manager. Handles incoming client packets
+ * HandlePacket manager. Handles incoming client packets
  */
 public class Command {
 
@@ -60,7 +60,7 @@ public class Command {
      */
     public void analyzeCommand(Packet packet) throws SendPacketException {
         String c = packet.packetString;
-        System.out.println("Received command from Shard. Command: " + c);
+        System.out.println("Received command from Shard. HandlePacket: " + c);
 
         switch (c) {
             case "Good Morning":

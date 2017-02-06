@@ -193,6 +193,7 @@ public class Shard_Core {
 
         connectionStatus.setText("CONNECTED");
         connectionStatus.setForeground(Color.GREEN);
+        initialized = true;
 
         // Run shard update
         patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.runUpdate);
@@ -637,14 +638,14 @@ public class Shard_Core {
 
         if (logActive) {
             try {
+                log.write(msg);
+
                 if (initialized) {
                     // Log packet to Heart
                     Packet p = new Packet(Packet.PACKET_TYPE.Message, "");
                     p.packetString = msg;
                     client.sendPacket(p, true);
                 }
-
-                log.write(msg);
             } catch (IOException e) {
                 logActive = false;
                 System.err.println(
