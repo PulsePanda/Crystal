@@ -106,6 +106,10 @@ public class Shard_Core {
         System.out.println("###############" + systemName + "###############");
 
         initCfg();
+
+        for(int i = 0; i < 100; i++){
+            System.out.println("asdflk;jasdf;lkjqwopeiur " + i);
+        }
     }
 
     /**
@@ -208,7 +212,7 @@ public class Shard_Core {
         frame.setLocationRelativeTo(null);
         frame.setLayout(null);
         tabbedPane = new JTabbedPane();
-        tabbedPane.setBounds(0, 0, frame.getWidth(), frame.getHeight());
+        tabbedPane.setBounds(0, 0, frame.getWidth(), frame.getHeight() - 10);
 
         // Command panel setup
         commandPanel = new JPanel();
