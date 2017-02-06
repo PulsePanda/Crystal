@@ -22,6 +22,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -46,7 +47,7 @@ public class Shard_Core {
     private static boolean logActive = false, initialized = false;
     public static boolean patchReady = false;
 
-    private boolean headless = false;
+    private boolean headless = false, cfg_set = false;
 
     // private Client client;
     private static Shard_Core shard_core = null;
@@ -389,15 +390,38 @@ public class Shard_Core {
         try {
             cfg = new Config(configDir);
         } catch (ConfigurationException e) {
-            // TODO if the configuration isn't found, create and init it
+            try {
+                new File(configDir).createNewFile();
+                cfg = new Config(configDir);
+                cfg.set("cfg_set", "false");
+                System.out.println("Configuration file created.");
+            } catch (IOException e1) {
+                System.err.println("Unable to create configuration file!");
+            } catch (ConfigurationException e1) {
+                System.err.println("Unable to access configuration file. Error: " + e1.getMessage());
+            }
         }
 
-        // uuid = UUID.fromString(cfg.get("uuid"));
-        if (uuid != null) {
-            System.out.println("Configuration file loaded.");
+        cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
+        if (cfg_set) {
+            loadCfg();
         } else {
-            System.err.println("Please initialize the Config with Nerv before proceeding!");
+            createCfg();
         }
+    }
+
+    /**
+     * Load the configuration file into appropriate variables
+     */
+    private void loadCfg() {
+        System.out.println("Configuration file loaded.");
+    }
+
+    /**
+     * Walk the user through the creation of the configuration values
+     */
+    private void createCfg() {
+
     }
 
     /**

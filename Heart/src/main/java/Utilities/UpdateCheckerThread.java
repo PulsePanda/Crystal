@@ -32,7 +32,7 @@ public class UpdateCheckerThread extends Thread {
 
     private static final String gitAddressMaster = "https://github.com/PulsePanda/Crystal/archive/master.zip";
     private static final String gitAddressDev = "https://github.com/PulsePanda/Crystal/archive/dev.zip";
-    private static final int waitDelay = 1080000; // Checks every 3 hours
+    private static final int waitDelay = Integer.parseInt(Heart_Core.getCore().getCfg().get("updateCheckDelay")) * 60 * 1000;
     private boolean running = false, shardUpdate = false, heartUpdate = false, keepRunning, forceUpdate;
     private String shardVersion;
 

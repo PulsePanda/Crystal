@@ -209,11 +209,6 @@ public class Heart_Core {
 
         shardFileDir = heartDir + shardFileDir;
 
-        // TODO init music/movie dir's based on config
-        mediaDir = "F:/Media";
-        musicDir = "F:/Media/music";
-        movieDir = "F:/Media/movies";
-
         // Share media folder with the network
         if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
             String shareMediaFolder = "net share Media=" + mediaDir.replace("/", "\\") + " /GRANT:Everyone,FULL";
@@ -337,9 +332,11 @@ public class Heart_Core {
             System.out.println("###############" + systemName + "###############");
             System.out.println("System logging enabled");
         } catch (SecurityException e) {
+            System.out.println("###############" + systemName + "###############");
             System.err.println(
                     "Unable to access log file or directory because of permission settings. Will continue running without logs, however please reboot to set logs.\n");
         } catch (IOException e) {
+            System.out.println("###############" + systemName + "###############");
             System.err.println(
                     "Unable to access find or create log on object creation. Will continue running without logs, however please reboot to set logs.\n");
         }
@@ -356,19 +353,108 @@ public class Heart_Core {
         try {
             cfg = new Config(configDir);
         } catch (ConfigurationException e) {
-            // TODO if the configuration isn't found, create and init it
+            try {
+                new File(configDir).createNewFile();
+                cfg = new Config(configDir);
+                cfg.set("cfg_set", "False");
+                System.out.println("Configuration file created.");
+            } catch (IOException e1) {
+                System.err.println("Unable to create configuration file!");
+            } catch (ConfigurationException e1) {
+                System.err.println("Unable to access configuration file. Error: " + e1.getMessage());
+            }
+
         }
 
-        // cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
+        cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
         if (cfg_set) {
-            systemName = cfg.get("systemName");
-            musicDir = cfg.get("musicDir");
-            movieDir = cfg.get("moveDir");
-            commandKey = cfg.get("commandKey");
-            uuid = UUID.fromString(cfg.get("uuid"));
-            System.out.println("Configuration file loaded.");
+            loadCfg();
         } else {
-            System.err.println("Please initialize the Heart Config with Nerv before proceeding!");
+            createCfg();
+            loadCfg();
+        }
+    }
+
+    /**
+     * Load the configuration file into appropriate variables
+     */
+    private void loadCfg() {
+        systemName = cfg.get("systemName");
+        mediaDir = cfg.get("mediaDir");
+        musicDir = cfg.get("musicDir");
+        movieDir = cfg.get("movieDir");
+        commandKey = cfg.get("commandKey");
+        uuid = UUID.fromString(cfg.get("uuid"));
+
+        // Load check
+        if (systemName == null || systemName == "")
+            System.err.println("Unable to load System Name from config file!");
+        if (mediaDir == null || mediaDir == "")
+            System.err.println("Unable to load root Media directory from config file!");
+        if (musicDir == null || musicDir == "")
+            System.err.println("Unable to load root Music directory from config file!");
+        if (movieDir == null || movieDir == "")
+            System.err.println("Unable to load root Movie directory from config file!");
+        if (commandKey == null || commandKey == "")
+            System.err.println("Unable to load Command Key from config file!");
+        if (uuid == null || uuid.toString() == "")
+            System.err.println("Unable to load UUID from config file!");
+
+
+        System.out.println("Configuration file loaded.");
+    }
+
+    /**
+     * Walk the user through the creation of the configuration values
+     */
+    private void createCfg() {
+        JOptionPane.showMessageDialog(frame, "The configuration file hasn't been set up.\nThis will walk through the setup.");
+        String systemName = JOptionPane.showInputDialog(frame, "What do you want to call this device?");
+        JOptionPane.showMessageDialog(frame, "Enter the root media folder.");
+        String mediaDir = FileChooser.chooseFile();
+
+        String musicDir;
+        if (new File(mediaDir + "/music").exists()) {
+            musicDir = mediaDir + "/music";
+        } else if (new File(mediaDir + "/songs").exists()) {
+            musicDir = mediaDir + "/songs";
+        } else {
+            JOptionPane.showMessageDialog(frame, "Enter the root music folder.");
+            musicDir = FileChooser.chooseFile();
+        }
+
+        String movieDir;
+        if (new File(mediaDir + "/movie").exists()) {
+            movieDir = mediaDir + "/movie";
+        } else if (new File(mediaDir + "/movies").exists()) {
+            movieDir = mediaDir + "/movies";
+        } else {
+            JOptionPane.showMessageDialog(frame, "Enter the root movie folder.");
+            movieDir = FileChooser.chooseFile();
+        }
+
+        String commandKey = JOptionPane.showInputDialog(frame, "What voice command will you use to wake up Crystal?");
+
+        String uuid = UUID.randomUUID().toString();
+
+        String mediaIndexDelay = JOptionPane.showInputDialog(frame, "How often do you want to index your media library? (In Minutes)");
+
+        String updateCheckDelay = JOptionPane.showInputDialog(frame, "How often do you want to check for software updates? (In Minutes)");
+
+        cfg.set("cfg_set", "True");
+        cfg.set("systemName", systemName);
+        cfg.set("mediaDir", mediaDir);
+        cfg.set("musicDir", musicDir);
+        cfg.set("movieDir", movieDir);
+        cfg.set("commandKey", commandKey);
+        cfg.set("uuid", uuid);
+        cfg.set("mediaIndexDelay", mediaIndexDelay);
+        cfg.set("updateCheckDelay", updateCheckDelay);
+        try {
+            cfg.save();
+        } catch (ConfigurationException e) {
+            System.err.println("Error saving settings to the config file. Error: " + e.getMessage());
+            JOptionPane.showMessageDialog(frame, "Error saving settings to the config file. Error: " + e.getMessage());
         }
     }
 
@@ -377,7 +463,7 @@ public class Heart_Core {
      */
     private void initMediaManager() {
         mediaManager = new MediaManager(mediaDir, musicDir, movieDir);
-        mediaManager.index(true, 30);
+        mediaManager.index(true, Integer.parseInt(cfg.get("mediaIndexDelay")));
     }
 
     /**
@@ -459,6 +545,15 @@ public class Heart_Core {
      */
     public static boolean isConfigSet() {
         return cfg_set;
+    }
+
+    /**
+     * Get the configuration object
+     *
+     * @return Config configuration object
+     */
+    public Config getCfg() {
+        return cfg;
     }
 
     /**
