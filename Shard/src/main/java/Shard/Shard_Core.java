@@ -596,21 +596,21 @@ public class Shard_Core {
     }
 
     /**
-     * Set the UUID of the Heart server
-     *
-     * @param uuid UUID of the Heart
-     */
-    public void setHeartUUID(UUID uuid) {
-        heartUUID = uuid;
-    }
-
-    /**
      * Get the UUID of the Heart for network verification
      *
      * @return UUID of the Heart
      */
     public UUID getHeartUUID() {
         return heartUUID;
+    }
+
+    /**
+     * Set the UUID of the Heart server
+     *
+     * @param uuid UUID of the Heart
+     */
+    public void setHeartUUID(UUID uuid) {
+        heartUUID = uuid;
     }
 
     /**

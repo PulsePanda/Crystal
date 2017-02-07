@@ -28,11 +28,11 @@ import java.util.UUID;
  */
 public class ClientConnection extends ConnectedClient {
 
+    public UUID clientUUID;
+    public String clientName, clientLocation;
     private Command command;
     private Log clientLog;
     private boolean clientLogCreated = false, conversation = false;
-    public UUID clientUUID;
-    public String clientName, clientLocation;
 
     /**
      * Client Connection default constructor
