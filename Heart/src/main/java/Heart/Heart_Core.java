@@ -40,37 +40,31 @@ public class Heart_Core {
     public final static boolean DEBUG = false;
 
     public final static String HEART_VERSION = "0.1.4";
+    // System elements
+    public final static SystemInfo systemInfo = new SystemInfo();
     public static String SHARD_VERSION = "";
-
     public static String systemName = "CHS Heart", mediaDir = "", musicDir = "", movieDir = "", commandKey = "",
             baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardLogsDir = "Logs/", configDir = "heart_config.cfg",
             logBaseDir = "Logs/", shardFileDir = "Shard_Files/";
     public static boolean DEV_BUILD;
     private static boolean cfg_set = false, logActive = false, initialized = false;
-
-    private boolean headless = false;
-
     // Server elements
     private static Heart_Core heart_core;
     private static Log log;
+    private static JTextArea textArea;
+    public Server server = null;
+    private boolean headless = false;
     private UUID uuid;
     private Config cfg = null;
-    public Server server = null;
     private Thread serverThread = null;
     private Thread updateCheckerThread = null;
     private DNSSD dnssd;
     private int port;
-
     // GUI elements
     private JFrame frame;
-    private static JTextArea textArea;
     private JLabel shardVersionLabel;
-
     // Media elements
     private MediaManager mediaManager;
-
-    // System elements
-    public final static SystemInfo systemInfo = new SystemInfo();
 
     /**
      * Heart Core Default Constructor
@@ -82,6 +76,24 @@ public class Heart_Core {
         heart_core = this;
         this.headless = headless;
         this.DEV_BUILD = DEV_BUILD;
+    }
+
+    /**
+     * get the Heart_Core object
+     *
+     * @return Heart_Core object
+     */
+    public static Heart_Core getCore() {
+        return heart_core;
+    }
+
+    /**
+     * Checks whether the Heart configuration file is set up or not
+     *
+     * @return true if the configuration is set up, else false.
+     */
+    public static boolean isConfigSet() {
+        return cfg_set;
     }
 
     /**
@@ -137,7 +149,7 @@ public class Heart_Core {
                 System.err.println(
                         "This instance of Heart Core already has an active Server Thread. Attempting to close the thread...");
                 // Try to close the server thread
-                // TODO using a depreciated method to stop the server, not necissarily the best option
+                // TODO using a depreciated method to stop the server, not necessarily the best option
                 serverThread.stop();
             }
         } catch (NullPointerException e) {
@@ -518,15 +530,6 @@ public class Heart_Core {
     }
 
     /**
-     * get the Heart_Core object
-     *
-     * @return Heart_Core object
-     */
-    public static Heart_Core getCore() {
-        return heart_core;
-    }
-
-    /**
      * get the Heart's UUID value
      *
      * @return UUID object that is equal to the Heart's UUID
@@ -537,15 +540,6 @@ public class Heart_Core {
 
     public MediaManager getMediaManager() {
         return mediaManager;
-    }
-
-    /**
-     * Checks whether the Heart configuration file is set up or not
-     *
-     * @return true if the configuration is set up, else false.
-     */
-    public static boolean isConfigSet() {
-        return cfg_set;
     }
 
     /**
@@ -567,7 +561,7 @@ public class Heart_Core {
     public void notifyShardsOfUpdate() {
         System.out.println("Notifying Shards of update.");
         for (ClientConnection cc : server.getClients()) {
-            Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
+            Packet p = new Packet(Packet.PACKET_TYPE.Message, uuid.toString());
             p.packetString = "new patch";
             try {
                 cc.sendPacket(p, true);

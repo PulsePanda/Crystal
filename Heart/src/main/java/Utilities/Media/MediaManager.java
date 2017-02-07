@@ -18,12 +18,10 @@ import java.io.File;
 public class MediaManager {
 
     protected String mediaDriveLetter, musicDir, movieDir;
-
-    private MediaIndexer mediaIndexer;
     protected MediaList songList, movieList;
-    private Thread indexThread;
-
     protected boolean isIndexed = false, keepIndexing;
+    private MediaIndexer mediaIndexer;
+    private Thread indexThread;
 
     /**
      * Media Manager default constructor

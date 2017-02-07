@@ -19,7 +19,7 @@ subprojects {
         }
     }
 
-    repositories{
+    repositories {
         mavenCentral()
     }
 

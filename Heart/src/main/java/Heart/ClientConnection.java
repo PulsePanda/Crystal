@@ -21,6 +21,7 @@ import Utilities.Log;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.UUID;
 
 /**
  * Client Connection. Wrapper for accepted client connected to the Heart server
@@ -30,6 +31,8 @@ public class ClientConnection extends ConnectedClient {
     private Command command;
     private Log clientLog;
     private boolean clientLogCreated = false, conversation = false;
+    public UUID clientUUID;
+    public String clientName, clientLocation;
 
     /**
      * Client Connection default constructor
@@ -50,8 +53,6 @@ public class ClientConnection extends ConnectedClient {
         } catch (IOException ex) {
             System.err.println("Unable to create log for connected Shard. Ignoring logging.");
         }
-
-        // Start connection procedures
     }
 
     /**
@@ -98,12 +99,12 @@ public class ClientConnection extends ConnectedClient {
     }
 
     @Deprecated
-    public void setConversation(boolean b) {
-        conversation = b;
+    public boolean getConversation() {
+        return conversation;
     }
 
     @Deprecated
-    public boolean getConversation() {
-        return conversation;
+    public void setConversation(boolean b) {
+        conversation = b;
     }
 }

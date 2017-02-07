@@ -38,9 +38,9 @@ import java.io.IOException;
  */
 public class ShardPatcher extends Thread {
 
+    public byte[] updateFile = null;
     private Client client;
     private PATCHER_TYPE type;
-    public byte[] updateFile = null;
     private String os;
 
     /**
@@ -52,9 +52,22 @@ public class ShardPatcher extends Thread {
     public ShardPatcher(Client client, PATCHER_TYPE type) {
         this.client = client;
         this.type = type;
-        os = System.getProperty("os.name");
-        os = os.split(" ")[0];
-        os = os.toLowerCase();
+        os = SystemInfo.getSystem_os().toString().toLowerCase();
+    }
+
+    /**
+     * Deletes the update directories and file recursively
+     *
+     * @param file File to delete. Should be the root of the patch directory
+     */
+    public static void deleteDir(File file) {
+        File[] contents = file.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                deleteDir(f);
+            }
+        }
+        file.delete();
     }
 
     /**
@@ -96,7 +109,7 @@ public class ShardPatcher extends Thread {
      */
     public void getVersion() throws SendPacketException {
         System.out.println("Getting version from Heart.");
-        Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+        Packet p = new Packet(Packet.PACKET_TYPE.Command, Shard_Core.getShardCore().getUUID().toString());
         p.packetString = "get Shard Version";
         try {
             Thread.sleep(2000);
@@ -132,7 +145,7 @@ public class ShardPatcher extends Thread {
      *                             Details will be in the getMessage()
      */
     private void updateHelper() throws SendPacketException {
-        Packet p = new Packet(Packet.PACKET_TYPE.Command, null);
+        Packet p = new Packet(Packet.PACKET_TYPE.Command, Shard_Core.getShardCore().getUUID().toString());
         p.packetString = "Patch";
         client.setPacketEncrypted(false);
         client.sendPacket(p, true);
@@ -199,21 +212,6 @@ public class ShardPatcher extends Thread {
             }
             System.exit(0);
         }
-    }
-
-    /**
-     * Deletes the update directories and file recursively
-     *
-     * @param file File to delete. Should be the root of the patch directory
-     */
-    public static void deleteDir(File file) {
-        File[] contents = file.listFiles();
-        if (contents != null) {
-            for (File f : contents) {
-                deleteDir(f);
-            }
-        }
-        file.delete();
     }
 
     public enum PATCHER_TYPE {

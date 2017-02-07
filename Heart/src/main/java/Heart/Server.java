@@ -64,7 +64,7 @@ public class Server extends MultiClientServer {
      * close all server connections
      */
     public void closeConnections() {
-        Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
+        Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, Heart_Core.getCore().getUUID().toString());
         p.packetString = "Manual disconnect";
 
         for (int i = 0; i < clients.size(); i++) {

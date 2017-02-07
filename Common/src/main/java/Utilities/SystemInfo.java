@@ -12,7 +12,7 @@ package Utilities;
 
 /**
  * SystemInfo
- *
+ * <p>
  * Utility to get relevant system information
  */
 public class SystemInfo {
@@ -37,7 +37,7 @@ public class SystemInfo {
 
     /**
      * Valid system values
-     *
+     * <p>
      * ERROR is given when a valid system value wasn't found
      */
     public enum SYSTEM_OS {

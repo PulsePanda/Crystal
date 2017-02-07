@@ -1,4 +1,3 @@
-
 /*
  * This file is part of Crystal Home Systems.
  *
@@ -30,6 +29,7 @@ import Utilities.Media.Movie;
 import Utilities.Media.Music;
 
 import javax.swing.*;
+import java.util.UUID;
 
 /**
  * Packet Handler. Figures out what to do with incoming packets and continues from there
@@ -121,6 +121,8 @@ public class HandlePacket {
                         JOptionPane.showMessageDialog(null, "Heart was unable to find a movie matching that name!");
                         System.err.println("Heart was unable to find a movie matching that name!");
                     }
+                } else if (message.equals("uuid")) {
+                    Shard_Core.getShardCore().setHeartUUID(UUID.fromString(packet.senderID));
                 } else {
                     JOptionPane.showMessageDialog(null, message);
                 }

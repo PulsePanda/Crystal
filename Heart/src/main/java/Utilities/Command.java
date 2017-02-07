@@ -34,6 +34,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
+import java.util.UUID;
 
 /**
  * HandlePacket manager. Handles incoming client packets
@@ -63,6 +64,12 @@ public class Command {
         System.out.println("Received command from Shard. HandlePacket: " + c);
 
         switch (c) {
+            case "uuid":
+                connection.clientUUID = UUID.fromString(packet.senderID);
+                connection.clientName = packet.packetStringArray[0];
+                connection.clientLocation = packet.packetStringArray[1];
+                sendToClient("uuid", true);
+                break;
             case "Good Morning":
                 try {
                     goodMorning();
@@ -96,10 +103,10 @@ public class Command {
                     return;
                 }
                 // dummy packet to allow client's readpacket to reset
-                Packet blank = new Packet(Packet.PACKET_TYPE.NULL, null);
+                Packet blank = new Packet(Packet.PACKET_TYPE.NULL, Heart_Core.getCore().getUUID().toString());
                 sendToClient(blank, true);
 
-                Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
+                Packet p = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
                 p.packetString = "update";
                 p.packetByteArray = file;
                 System.out.println("Sending patch to Shard...");
@@ -107,7 +114,7 @@ public class Command {
                 System.out.println("Sent patch to Shard.");
 
                 // second dummy packet
-                Packet blank2 = new Packet(Packet.PACKET_TYPE.NULL, null);
+                Packet blank2 = new Packet(Packet.PACKET_TYPE.NULL, Heart_Core.getCore().getUUID().toString());
                 sendToClient(blank2, false);
                 break;
             case "get Shard Version":
@@ -116,7 +123,7 @@ public class Command {
                 break;
             case "Play Music":
                 System.out.println("Shard requested to play music. Song Name: " + packet.packetStringArray[0]);
-                Packet music = new Packet(Packet.PACKET_TYPE.Message, null);
+                Packet music = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
                 music.packetString = "music";
                 String requestedSong = packet.packetStringArray[0];
                 String[] musicPaths = Heart_Core.getCore().getMediaManager().getSong(requestedSong);
@@ -132,7 +139,7 @@ public class Command {
                 break;
             case "Play Movie":
                 System.out.println("Shard requested to play a movie. Movie Name: " + packet.packetStringArray[0]);
-                Packet movie = new Packet(Packet.PACKET_TYPE.Message, null);
+                Packet movie = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
                 movie.packetString = "movie";
                 String requestedMovie = packet.packetStringArray[0];
                 String[] moviePaths = Heart_Core.getCore().getMediaManager().getMovie(requestedMovie);
@@ -245,7 +252,7 @@ public class Command {
      *                             Details will be in the getMessage()
      */
     private void sendToClient(String s, boolean encrypted) throws SendPacketException {
-        Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
+        Packet p = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
         p.packetString = s;
         connection.sendPacket(p, encrypted);
     }

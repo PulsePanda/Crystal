@@ -42,41 +42,35 @@ public class Shard_Core {
 
     // Shard version
     public static final String SHARD_VERSION = "0.1.6";
+    // System elements
+    public final static SystemInfo systemInfo = new SystemInfo();
     public static String SHARD_VERSION_SERVER = "";
-    private ShardPatcher patcher;
-
     // Global variables
-    public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", shardDir = "Shard/",
+    public static String systemName = "CHS Shard", systemLocation = "", commandKey, baseDir = "/CrystalHomeSys/", shardDir = "Shard/",
             logBaseDir = "Logs/", configDir = "shard_config.cfg";
-    private static boolean logActive = false, initialized = false;
     public static boolean patchReady = false;
-
-    private boolean headless = false, cfg_set = false;
-
+    private static boolean logActive = false, initialized = false;
     // private Client client;
     private static Shard_Core shard_core = null;
+    private static JTextArea textArea;
+    private final int dnssdPort = 6980;
+    // Media Elements
+    public MediaPlayback mediaPlayback;
+    private ShardPatcher patcher;
+    private boolean headless = false, cfg_set = false;
     private Log log;
     private Config cfg = null;
-    private UUID uuid;
+    private UUID uuid, heartUUID;
     private Client client = null;
     private Thread clientThread = null;
     private String IP = null;
     private int port;
-    private final int dnssdPort = 6980;
     private DNSSD dnssd;
-
     // GUI elements
     private JFrame frame;
-    private static JTextArea textArea;
     private JPanel consolePanel, commandPanel;
     private JTabbedPane tabbedPane;
     private JLabel connectionStatus;
-
-    // Media Elements
-    public MediaPlayback mediaPlayback;
-
-    // System elements
-    public final static SystemInfo systemInfo = new SystemInfo();
 
     public Shard_Core(boolean headless) throws ClientInitializationException {
         if (shard_core != null) {
@@ -84,6 +78,16 @@ public class Shard_Core {
         }
         shard_core = this;
         this.headless = headless;
+    }
+
+    /**
+     * Retrieve the object of ShardCore being used by the Shard. There can only
+     * be one, it is static.
+     *
+     * @return Shard_Core object being used by the Shard
+     */
+    public static Shard_Core getShardCore() {
+        return shard_core;
     }
 
     /**
@@ -194,6 +198,11 @@ public class Shard_Core {
         connectionStatus.setText("CONNECTED");
         connectionStatus.setForeground(Color.GREEN);
         initialized = true;
+        try {
+            swapID();
+        } catch (SendPacketException e) {
+            System.err.println("Error sending Heart ID information. Details: " + e.getMessage());
+        }
 
         // Run shard update
         patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.runUpdate);
@@ -236,7 +245,7 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
             p.packetString = "Good Morning";
             try {
                 client.sendPacket(p, true);
@@ -250,7 +259,7 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
             p.packetString = "BTC Price";
             try {
                 client.sendPacket(p, true);
@@ -264,7 +273,7 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
             p.packetString = "Weather";
             try {
                 client.sendPacket(p, true);
@@ -278,7 +287,7 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
             p.packetString = "Play Music";
             String song = JOptionPane.showInputDialog(null, "Song name");
             p.packetStringArray = new String[]{song};
@@ -294,7 +303,7 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
             p.packetString = "Play Movie";
             String movie = JOptionPane.showInputDialog(null, "Movie name");
             p.packetStringArray = new String[]{movie};
@@ -420,6 +429,7 @@ public class Shard_Core {
             loadCfg();
         } else {
             createCfg();
+            loadCfg();
         }
     }
 
@@ -427,6 +437,10 @@ public class Shard_Core {
      * Load the configuration file into appropriate variables
      */
     private void loadCfg() {
+        uuid = UUID.fromString(cfg.get("uuid"));
+        systemName = cfg.get("systemName");
+        systemLocation = cfg.get("systemLocation");
+
         System.out.println("Configuration file loaded.");
     }
 
@@ -434,7 +448,15 @@ public class Shard_Core {
      * Walk the user through the creation of the configuration values
      */
     private void createCfg() {
-
+        cfg.set("uuid", UUID.randomUUID().toString());
+        cfg.set("systemName", JOptionPane.showInputDialog(frame, "What do you want to call this device?"));
+        cfg.set("systemLocation", JOptionPane.showInputDialog(frame, "Where is this device located in your home?"));
+        cfg.set("cfg_set", "true");
+        try {
+            cfg.save();
+        } catch (ConfigurationException e) {
+            System.err.println("Error saving configuration file! Error: " + e.getMessage());
+        }
     }
 
     /**
@@ -509,6 +531,19 @@ public class Shard_Core {
     }
 
     /**
+     * Exchange ID information with the Heart
+     *
+     * @throws SendPacketException thrown if there is an issue sending packets to Heart.
+     *                             Details will be in getMessage()
+     */
+    public void swapID() throws SendPacketException {
+        Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
+        p.packetString = "uuid";
+        p.packetStringArray = new String[]{systemName, systemLocation};
+        client.sendPacket(p, true);
+    }
+
+    /**
      * Used to stop the Shard nicely. Sends a close connection packet to the Heart to
      * terminate connection, which will then terminate IO streams
      *
@@ -519,7 +554,7 @@ public class Shard_Core {
         connectionStatus.setText("DISCONNECTED");
         connectionStatus.setForeground(Color.RED);
         try {
-            Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
+            Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, uuid.toString());
             p.packetString = "Manual disconnect";
             client.sendPacket(p, true);
             client.closeIOStreams();
@@ -552,23 +587,30 @@ public class Shard_Core {
     }
 
     /**
-     * Retrieve the object of ShardCore being used by the Shard. There can only
-     * be one, it is static.
-     *
-     * @return Shard_Core object being used by the Shard
-     */
-    public static Shard_Core getShardCore() {
-        return shard_core;
-    }
-
-    /**
      * Return the UUID of the Shard for use with networking with the Heart
      *
      * @return UUID of the Shard
      */
-    @Deprecated
     public UUID getUUID() {
         return uuid;
+    }
+
+    /**
+     * Set the UUID of the Heart server
+     *
+     * @param uuid UUID of the Heart
+     */
+    public void setHeartUUID(UUID uuid) {
+        heartUUID = uuid;
+    }
+
+    /**
+     * Get the UUID of the Heart for network verification
+     *
+     * @return UUID of the Heart
+     */
+    public UUID getHeartUUID() {
+        return heartUUID;
     }
 
     /**
@@ -642,7 +684,7 @@ public class Shard_Core {
 
                 if (initialized) {
                     // Log packet to Heart
-                    Packet p = new Packet(Packet.PACKET_TYPE.Message, "");
+                    Packet p = new Packet(Packet.PACKET_TYPE.Message, uuid.toString());
                     p.packetString = msg;
                     client.sendPacket(p, true);
                 }
