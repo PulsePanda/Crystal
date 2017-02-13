@@ -129,7 +129,7 @@ public class Command {
                 String[] musicPaths = Heart_Core.getCore().getMediaManager().getSong(requestedSong);
                 for (int i = 0; i < musicPaths.length; i++) { // edit each path to be a reachable address
                     try {
-                        musicPaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + musicPaths[i];
+                        musicPaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + "\\" + musicPaths[i];
                     } catch (UnknownHostException e) {
                         System.err.println("Error getting local hostname! Unable to provide correct path for Shard music playback!");
                     }
@@ -145,7 +145,7 @@ public class Command {
                 String[] moviePaths = Heart_Core.getCore().getMediaManager().getMovie(requestedMovie);
                 for (int i = 0; i < moviePaths.length; i++) {
                     try {
-                        moviePaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + moviePaths[i];
+                        moviePaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + "\\" + moviePaths[i];
                     } catch (UnknownHostException e) {
                         System.err.println("Error getting local hostname! Unable to provide correct path for Shard movie playback!");
                     }

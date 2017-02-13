@@ -87,7 +87,6 @@ public class HandlePacket {
                         } else {
                             songPath = packet.packetStringArray[0];
                         }
-                        System.out.println(songPath);
                         try {
                             new MediaPlayback().start(new Music(songPath));
                         } catch (MediaStartException e) {

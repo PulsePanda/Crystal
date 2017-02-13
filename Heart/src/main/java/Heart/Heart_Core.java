@@ -52,7 +52,7 @@ public class Heart_Core {
     private static Heart_Core heart_core;
     private static Log log;
     private static JTextArea textArea;
-    public Server server = null;
+    private Server server = null;
     private boolean headless = false;
     private UUID uuid;
     private Config cfg = null;
@@ -111,9 +111,11 @@ public class Heart_Core {
 
         initVariables();
 
+        initCfg();
+
         initLog();
 
-        initCfg();
+        shareMediaDir();
 
         initMediaManager();
 
@@ -218,23 +220,9 @@ public class Heart_Core {
 
         logBaseDir = heartDir + logBaseDir;
 
-        configDir = heartDir + configDir;
-
         shardFileDir = heartDir + shardFileDir;
 
-        // Share media folder with the network
-        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
-            String shareMediaFolder = "net share Media=" + mediaDir.replace("/", "\\") + " /GRANT:Everyone,FULL";
-            try {
-                Runtime.getRuntime().exec(shareMediaFolder);
-            } catch (IOException e) {
-                System.err.println("Error sharing the media folder with the network! Media access may not be available for Shards!");
-            }
-        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
-            // TODO add linux folder sharing
-        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
-            // TODO if not on a valid system
-        }
+        configDir = heartDir + configDir;
 
         updateShardVersion();
     }
@@ -468,6 +456,28 @@ public class Heart_Core {
         } catch (ConfigurationException e) {
             System.err.println("Error saving settings to the config file. Error: " + e.getMessage());
             JOptionPane.showMessageDialog(frame, "Error saving settings to the config file. Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Share the root media directory with the network
+     */
+    private void shareMediaDir() {
+        // Share media folder with the network
+        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
+            String shareMediaFolder = "net share Media=" + mediaDir + " /GRANT:Everyone,FULL";
+            try {
+                System.out.println("SHARE INFO: " + shareMediaFolder);
+                Runtime.getRuntime().exec(shareMediaFolder);
+            } catch (IOException e) {
+                System.err.println("Error sharing the media folder with the network! Media access may not be available for Shards!");
+            }
+        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
+            // TODO add linux folder sharing
+            System.out.println("FILE SYSTEM IS LINUX");
+        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
+            // TODO if not on a valid system
+            System.out.println("FILE SYSTEM IS ERROR");
         }
     }
 

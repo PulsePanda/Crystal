@@ -51,7 +51,7 @@ public class FileChooser {
         if (jfc.showDialog(null, "Select") == JFileChooser.APPROVE_OPTION) {
             File file = jfc.getSelectedFile();
             String filePath = file.getPath();
-            filePath = filePath.replace("\\", "");
+//            filePath = filePath.replace("\\", "");
 //            filePath = filePath.replaceFirst("\\", "");
 //            filePath = filePath.replace("\\", "/");
             return filePath;

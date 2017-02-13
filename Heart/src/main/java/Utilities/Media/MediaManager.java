@@ -33,8 +33,9 @@ public class MediaManager {
     public MediaManager(String mediaDir, String musicDir, String movieDir) {
         System.out.println("MEDIA_MANAGER: Initializing media manager...");
 
-        String[] driveLetter = mediaDir.split("/"); // separates out the drive letter
+        String[] driveLetter = mediaDir.split(":"); // separates out the drive letter
         this.mediaDriveLetter = driveLetter[0];
+        this.mediaDriveLetter = mediaDriveLetter + ":\\";
         this.musicDir = musicDir;
         this.movieDir = movieDir;
 
@@ -180,8 +181,12 @@ class MediaIndexer implements Runnable {
             if (isMovieOrMusic(file.getName())) {
                 String filePath = file.getPath();
                 // removes the drive letter from the file's path, as the folder is shared and the drive isn't needed
-                filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
-                mm.movieList.addItem(file.getName(), filePath, ListItem.MEDIA_TYPE.Movie);
+                filePath = filePath.replace(mm.mediaDriveLetter, "");
+
+                // TODO remove the file extension from the name as well as the (year)
+                String fileName = file.getName();
+
+                mm.movieList.addItem(fileName, filePath, ListItem.MEDIA_TYPE.Movie);
             }
         }
     }
@@ -201,7 +206,7 @@ class MediaIndexer implements Runnable {
             if (isMovieOrMusic(file.getName())) {
                 // Remove the drive letter from the path
                 String filePath = file.getPath();
-                filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
+                filePath = filePath.replace(mm.mediaDriveLetter, "");
 
                 // TODO Remove the file extension from the name
                 String fileName = file.getName();

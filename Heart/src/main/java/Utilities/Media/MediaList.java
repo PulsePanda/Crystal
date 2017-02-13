@@ -70,9 +70,9 @@ public class MediaList {
     public boolean contains(String nameOrPath) {
         nameOrPath = nameOrPath.toLowerCase();
         for (ListItem li : list) {
-            if (li.getName().toLowerCase().equals(nameOrPath))
+            if (li.getName().toLowerCase().contains(nameOrPath))
                 return true;
-            if (li.getPath().toLowerCase().equals(nameOrPath))
+            if (li.getPath().toLowerCase().contains(nameOrPath))
                 return true;
         }
 
@@ -89,9 +89,9 @@ public class MediaList {
         nameOrPath = nameOrPath.toLowerCase();
         ArrayList<ListItem> items = new ArrayList<>();
         for (ListItem li : list) {
-            if (li.getName().toLowerCase().equals(nameOrPath))
+            if (li.getName().toLowerCase().contains(nameOrPath))
                 items.add(li);
-            if (li.getPath().toLowerCase().equals(nameOrPath))
+            else if (li.getPath().toLowerCase().contains(nameOrPath))
                 items.add(li);
         }
 

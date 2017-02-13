@@ -49,7 +49,7 @@ public class Shard_Core {
     public static String systemName = "CHS Shard", systemLocation = "", commandKey, baseDir = "/CrystalHomeSys/", shardDir = "Shard/",
             logBaseDir = "Logs/", configDir = "shard_config.cfg";
     public static boolean patchReady = false;
-    private static boolean logActive = false, initialized = false;
+    private static boolean logActive = false, remoteLoggingInitialized = false;
     // private Client client;
     private static Shard_Core shard_core = null;
     private static JTextArea textArea;
@@ -95,7 +95,7 @@ public class Shard_Core {
      * the Shard will be ready to connect to a Heart.
      */
     public void init() {
-        if (initialized) {
+        if (remoteLoggingInitialized) {
             return;
         }
 
@@ -142,7 +142,7 @@ public class Shard_Core {
 
     /**
      * Initialize variables being used for configuration files and log systems.
-     * Other variables can be initialized here too.
+     * Other variables can be remoteLoggingInitialized here too.
      */
     private void initVariables() {
         baseDir = System.getProperty("user.home") + baseDir;
@@ -197,7 +197,7 @@ public class Shard_Core {
 
         connectionStatus.setText("CONNECTED");
         connectionStatus.setForeground(Color.GREEN);
-        initialized = true;
+        remoteLoggingInitialized = true;
         try {
             swapID();
         } catch (SendPacketException e) {
@@ -470,10 +470,10 @@ public class Shard_Core {
         try {
             if (client.isConnectionActive()) {
                 throw new ClientInitializationException(
-                        "Client is already initialized! Aborting attempt to create connection.");
+                        "Client is already remoteLoggingInitialized! Aborting attempt to create connection.");
             }
         } catch (NullPointerException e) {
-            // If client is not initialized, initialize it
+            // If client is not remoteLoggingInitialized, initialize it
             try {
                 // Start the search for dnssd service
                 try {
@@ -510,10 +510,10 @@ public class Shard_Core {
             if (clientThread != null || clientThread.isAlive()) {
                 stopShardClient();
                 throw new ClientInitializationException(
-                        "Client Thread is already initialized! Aborting attempt to create connection.");
+                        "Client Thread is already remoteLoggingInitialized! Aborting attempt to create connection.");
             }
         } catch (NullPointerException e) {
-            // If the clientThread isn't initialized, do nothing
+            // If the clientThread isn't remoteLoggingInitialized, do nothing
             // ((re)-initialize below)
         } catch (ConnectionException ex) {
         }
@@ -584,6 +584,7 @@ public class Shard_Core {
         clientThread = null;
         IP = "";
         port = 0;
+        remoteLoggingInitialized = false;
     }
 
     /**
@@ -682,7 +683,7 @@ public class Shard_Core {
             try {
                 log.write(msg);
 
-                if (initialized) {
+                if (remoteLoggingInitialized) {
                     // Log packet to Heart
                     Packet p = new Packet(Packet.PACKET_TYPE.Message, uuid.toString());
                     p.packetString = msg;
@@ -694,6 +695,7 @@ public class Shard_Core {
                         "Unable to write to log. IOException thrown. Deactivating log file, please reboot to regain access.");
                 success = false;
             } catch (SendPacketException ex) {
+                remoteLoggingInitialized = false;
                 System.err.println("Unable to send log packet to Heart. Error: " + ex.getMessage());
             }
         }
