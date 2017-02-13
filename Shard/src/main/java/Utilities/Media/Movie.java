@@ -10,6 +10,7 @@
 
 package Utilities.Media;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -45,5 +46,20 @@ public class Movie extends Media {
         } catch (IOException e) {
             System.err.println("Error playing back video. Unable to access file!");
         }
+
+//        JFrame f = new JFrame(url);
+//        f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+//        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+//        f.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
+//        f.setResizable(false);
+//        f.setLocationRelativeTo(null);
+//        f.setLayout(new FlowLayout());
+//
+//        JTextPane p = new JTextPane();
+//        p.setText("<html><video id=\"sampleMovie\" src=\"C:\\users\\austin\\desktop\\test.mp4\" controls></video></html>");
+//
+//        f.getContentPane().add(p);
+//        f.setVisible(true);
+
     }
 }

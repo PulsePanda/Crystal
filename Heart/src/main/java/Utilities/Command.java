@@ -142,16 +142,18 @@ public class Command {
                 Packet movie = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
                 movie.packetString = "movie";
                 String requestedMovie = packet.packetStringArray[0];
-                String[] moviePaths = Heart_Core.getCore().getMediaManager().getMovie(requestedMovie);
-                for (int i = 0; i < moviePaths.length; i++) {
-                    try {
-                        moviePaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + "\\" + moviePaths[i];
-                    } catch (UnknownHostException e) {
-                        System.err.println("Error getting local hostname! Unable to provide correct path for Shard movie playback!");
+                if (requestedMovie != null) {
+                    String[] moviePaths = Heart_Core.getCore().getMediaManager().getMovie(requestedMovie);
+                    for (int i = 0; i < moviePaths.length; i++) {
+                        try {
+                            moviePaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + "\\" + moviePaths[i];
+                        } catch (UnknownHostException e) {
+                            System.err.println("Error getting local hostname! Unable to provide correct path for Shard movie playback!");
+                        }
                     }
+                    movie.packetStringArray = moviePaths;
+                    sendToClient(movie, true);
                 }
-                movie.packetStringArray = moviePaths;
-                sendToClient(movie, true);
                 break;
             default:
                 break;

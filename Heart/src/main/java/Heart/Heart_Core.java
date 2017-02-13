@@ -471,7 +471,6 @@ public class Heart_Core {
         if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
             String shareMediaFolder = "net share Media=" + mediaDir + " /GRANT:Everyone,FULL";
             try {
-                System.out.println("SHARE INFO: " + shareMediaFolder);
                 Runtime.getRuntime().exec(shareMediaFolder);
             } catch (IOException e) {
                 System.err.println("Error sharing the media folder with the network! Media access may not be available for Shards!");
