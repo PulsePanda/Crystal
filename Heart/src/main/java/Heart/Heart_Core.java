@@ -474,10 +474,9 @@ public class Heart_Core {
             }
         } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
             // TODO add linux folder sharing
-            System.out.println("FILE SYSTEM IS LINUX");
+            System.err.println("Crystal doesn't know how to share your media folder on this system! Please share folder manually!");
         } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
-            // TODO if not on a valid system
-            System.out.println("FILE SYSTEM IS ERROR");
+            System.err.println("Crystal doesn't know how to share your media folder on this system! Please share folder manually!");
         }
     }
 

@@ -40,9 +40,9 @@ public class MediaManager {
             this.mediaDriveLetter = driveLetter[0];
             this.mediaDriveLetter = mediaDriveLetter + ":\\";
         } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
-
+            System.err.println("Crystal doesn't know how to handle the media paths on your system! Media playback will not work!");
         } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
-
+            System.err.println("Crystal doesn't know how to handle the media paths on your system! Media playback will not work!");
         }
         this.musicDir = musicDir;
         this.movieDir = movieDir;
