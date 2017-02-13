@@ -23,6 +23,10 @@ import Utilities.ShardPatcher;
 import Utilities.SystemInfo;
 
 import javax.swing.*;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -52,7 +56,7 @@ public class Shard_Core {
     private static boolean logActive = false, remoteLoggingInitialized = false;
     // private Client client;
     private static Shard_Core shard_core = null;
-    private static JTextArea textArea;
+    private static JTextPane textArea;
     private final int dnssdPort = 6980;
     // Media Elements
     public MediaPlayback mediaPlayback;
@@ -122,12 +126,30 @@ public class Shard_Core {
         OutputStream out = new OutputStream() {
             @Override
             public void write(int b) throws IOException {
-                println(String.valueOf((char) b));
+                println(String.valueOf((char) b), Color.BLACK);
             }
 
             @Override
             public void write(byte[] b, int off, int len) throws IOException {
-                println(new String(b, off, len));
+                println(new String(b, off, len), Color.BLACK);
+            }
+
+            @Override
+            public void write(byte[] b) throws IOException {
+                write(b, 0, b.length);
+            }
+        };
+
+        // TODO have the error stream print red text
+        OutputStream err = new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                println(String.valueOf((char) b), Color.RED);
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+                println(new String(b, off, len), Color.RED);
             }
 
             @Override
@@ -137,7 +159,7 @@ public class Shard_Core {
         };
 
         System.setOut(new PrintStream(out, true));
-        System.setErr(new PrintStream(out, true));
+        System.setErr(new PrintStream(err, true));
     }
 
     /**
@@ -357,9 +379,9 @@ public class Shard_Core {
         });
         exitButton.setBounds(new Rectangle(10, 10, 100, 40));
 
-        textArea = new JTextArea();
+        textArea = new JTextPane();
         textArea.setEditable(false);
-        textArea.setLineWrap(true);
+//        textArea.setLineWrap(true);
 
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setBounds(0, 60, frame.getWidth() - 5, frame.getHeight() - 115);
@@ -668,12 +690,12 @@ public class Shard_Core {
      * @param msg Message to be displayed and written
      * @return Returns TRUE if successful at writing to the log, FALSE if not
      */
-    private boolean println(String msg) {
+    private boolean println(String msg, Color color) {
         boolean success = true;
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                textArea.append(msg);
+                appendToPane(textArea, msg, color);
                 textArea.setCaretPosition(textArea.getDocument().getLength());
                 // textArea.append("\n");
             }
@@ -701,5 +723,21 @@ public class Shard_Core {
         }
 
         return success;
+    }
+
+    private void appendToPane(JTextPane tp, String msg, Color c)
+    {
+        tp.setEditable(true);
+        StyleContext sc = StyleContext.getDefaultStyleContext();
+        AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
+
+        aset = sc.addAttribute(aset, StyleConstants.FontFamily, "Lucida Console");
+        aset = sc.addAttribute(aset, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
+
+        int len = tp.getDocument().getLength();
+        tp.setCaretPosition(len);
+        tp.setCharacterAttributes(aset, false);
+        tp.replaceSelection(msg);
+        tp.setEditable(false);
     }
 }

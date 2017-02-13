@@ -23,6 +23,10 @@ import Utilities.*;
 import Utilities.Media.MediaManager;
 
 import javax.swing.*;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -51,7 +55,7 @@ public class Heart_Core {
     // Server elements
     private static Heart_Core heart_core;
     private static Log log;
-    private static JTextArea textArea;
+    private static JTextPane textArea;
     private Server server = null;
     private boolean headless = false;
     private UUID uuid;
@@ -291,9 +295,9 @@ public class Heart_Core {
         forceIndex.addActionListener(e -> mediaManager.index(false, 0));
         forceIndex.setBounds(new Rectangle(390, 10, 100, 40));
 
-        textArea = new JTextArea();
+        textArea = new JTextPane();
         textArea.setEditable(false);
-        textArea.setLineWrap(true);
+//        textArea.setLineWrap(true);
 
         JButton clearLog = new JButton("Clear Log");
         clearLog.addActionListener(e -> textArea.setText(""));
@@ -520,7 +524,7 @@ public class Heart_Core {
         boolean success = true;
 
         SwingUtilities.invokeLater(() -> {
-            textArea.append(msg);
+            appendToPane(textArea, msg, color);
             textArea.setCaretPosition(textArea.getDocument().getLength());
         });
 
@@ -536,6 +540,22 @@ public class Heart_Core {
         }
 
         return success;
+    }
+
+    private void appendToPane(JTextPane tp, String msg, Color c)
+    {
+        tp.setEditable(true);
+        StyleContext sc = StyleContext.getDefaultStyleContext();
+        AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
+
+        aset = sc.addAttribute(aset, StyleConstants.FontFamily, "Lucida Console");
+        aset = sc.addAttribute(aset, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
+
+        int len = tp.getDocument().getLength();
+        tp.setCaretPosition(len);
+        tp.setCharacterAttributes(aset, false);
+        tp.replaceSelection(msg);
+        tp.setEditable(false);
     }
 
     /**

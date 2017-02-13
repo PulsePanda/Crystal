@@ -77,7 +77,7 @@ public class Server extends MultiClientServer {
             try {
                 temp.closeIOStreams();
             } catch (ConnectionException e) {
-                System.out.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
+                System.err.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
             }
         }
 
