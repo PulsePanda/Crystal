@@ -10,6 +10,8 @@
 
 package Utilities.Media;
 
+import Utilities.SystemInfo;
+
 import java.io.File;
 
 /**
@@ -33,9 +35,15 @@ public class MediaManager {
     public MediaManager(String mediaDir, String musicDir, String movieDir) {
         System.out.println("MEDIA_MANAGER: Initializing media manager...");
 
-        String[] driveLetter = mediaDir.split(":"); // separates out the drive letter
-        this.mediaDriveLetter = driveLetter[0];
-        this.mediaDriveLetter = mediaDriveLetter + ":\\";
+        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
+            String[] driveLetter = mediaDir.split(":"); // separates out the drive letter
+            this.mediaDriveLetter = driveLetter[0];
+            this.mediaDriveLetter = mediaDriveLetter + ":\\";
+        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
+
+        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
+
+        }
         this.musicDir = musicDir;
         this.movieDir = movieDir;
 
