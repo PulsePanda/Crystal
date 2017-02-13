@@ -541,8 +541,7 @@ public class Heart_Core {
         return success;
     }
 
-    private void appendToPane(JTextPane tp, String msg, Color c)
-    {
+    private void appendToPane(JTextPane tp, String msg, Color c) {
         tp.setEditable(true);
         StyleContext sc = StyleContext.getDefaultStyleContext();
         AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);

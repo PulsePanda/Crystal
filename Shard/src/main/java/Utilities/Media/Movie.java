@@ -10,7 +10,6 @@
 
 package Utilities.Media;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
