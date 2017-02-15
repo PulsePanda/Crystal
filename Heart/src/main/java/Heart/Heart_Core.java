@@ -358,24 +358,25 @@ public class Heart_Core {
             cfg = new Config(configDir);
         } catch (ConfigurationException e) {
             try {
-                new File(configDir).createNewFile();
+                File configPath = new File(heartDir);
+                configPath.mkdirs();
+                configPath = new File(configDir);
+                configPath.createNewFile();
                 cfg = new Config(configDir);
                 cfg.set("cfg_set", "False");
                 cfg.save();
                 System.out.println("Configuration file created.");
             } catch (IOException e1) {
                 System.err.println("Unable to create configuration file!");
+                return;
             } catch (ConfigurationException e1) {
                 System.err.println("Unable to access configuration file. Error: " + e1.getMessage());
+                return;
             }
 
         }
 
-        try {
-            cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
-        } catch (NullPointerException e) {
-            cfg_set = false;
-        }
+        cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
         if (cfg_set) {
             loadCfg();
         } else {
@@ -491,8 +492,12 @@ public class Heart_Core {
      * Initializes the media index thread to provide a usable list for shards
      */
     private void initMediaManager() {
-        mediaManager = new MediaManager(mediaDir, musicDir, movieDir);
-        mediaManager.index(true, Integer.parseInt(cfg.get("mediaIndexDelay")));
+        if (cfg_set) {
+            mediaManager = new MediaManager(mediaDir, musicDir, movieDir);
+            mediaManager.index(true, Integer.parseInt(cfg.get("mediaIndexDelay")));
+        } else {
+            System.err.println("Configuration file was not found. Media management is unavailable until the configuration is set up.");
+        }
     }
 
     /**

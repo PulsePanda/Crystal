@@ -436,14 +436,20 @@ public class Shard_Core {
             cfg = new Config(configDir);
         } catch (ConfigurationException e) {
             try {
-                new File(configDir).createNewFile();
+                File configPath = new File(shardDir);
+                configPath.mkdirs();
+                configPath = new File(configDir);
+                configPath.createNewFile();
                 cfg = new Config(configDir);
                 cfg.set("cfg_set", "false");
+                cfg.save();
                 System.out.println("Configuration file created.");
             } catch (IOException e1) {
                 System.err.println("Unable to create configuration file!");
+                return;
             } catch (ConfigurationException e1) {
                 System.err.println("Unable to access configuration file. Error: " + e1.getMessage());
+                return;
             }
         }
 
