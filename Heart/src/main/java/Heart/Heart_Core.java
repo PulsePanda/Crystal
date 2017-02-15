@@ -189,7 +189,6 @@ public class Heart_Core {
             }
         };
 
-        // TODO have the error stream print red text
         OutputStream err = new OutputStream() {
             @Override
             public void write(int b) throws IOException {
@@ -362,6 +361,7 @@ public class Heart_Core {
                 new File(configDir).createNewFile();
                 cfg = new Config(configDir);
                 cfg.set("cfg_set", "False");
+                cfg.save();
                 System.out.println("Configuration file created.");
             } catch (IOException e1) {
                 System.err.println("Unable to create configuration file!");
@@ -371,7 +371,11 @@ public class Heart_Core {
 
         }
 
-        cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
+        try {
+            cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
+        } catch (NullPointerException e) {
+            cfg_set = false;
+        }
         if (cfg_set) {
             loadCfg();
         } else {
@@ -446,7 +450,7 @@ public class Heart_Core {
 
         String updateCheckDelay = JOptionPane.showInputDialog(frame, "How often do you want to check for software updates? (In Minutes)");
 
-        cfg.set("cfg_set", "True");
+        cfg.set("cfg_set", "True"); // TODO nullpointerexception thrown on kayleighs computer on config creation, before and after input helper
         cfg.set("systemName", systemName);
         cfg.set("mediaDir", mediaDir);
         cfg.set("musicDir", musicDir);
@@ -614,13 +618,25 @@ public class Heart_Core {
             dnssd.closeRegisteredService();
         } catch (NullPointerException e) {
         }
-        server.closeConnections();
+        try {
+            server.closeConnections();
+        } catch (NullPointerException e) {
+        }
         dnssd = null;
         server = null;
-        serverThread.stop();
+        try {
+            serverThread.stop();
+        } catch (NullPointerException e) {
+        }
         serverThread = null;
-        mediaManager.close();
-        updateCheckerThread.stop();
+        try {
+            mediaManager.close();
+        } catch (NullPointerException e) {
+        }
+        try {
+            updateCheckerThread.stop();
+        } catch (NullPointerException e) {
+        }
         updateCheckerThread = null;
     }
 }

@@ -16,6 +16,7 @@ import Netta.Connection.Packet;
 import Netta.DNSSD;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
+import Netta.ServiceEntry;
 import Utilities.Config;
 import Utilities.Log;
 import Utilities.Media.MediaPlayback;
@@ -37,6 +38,7 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -140,7 +142,6 @@ public class Shard_Core {
             }
         };
 
-        // TODO have the error stream print red text
         OutputStream err = new OutputStream() {
             @Override
             public void write(int b) throws IOException {
@@ -492,17 +493,26 @@ public class Shard_Core {
         try {
             if (client.isConnectionActive()) {
                 throw new ClientInitializationException(
-                        "Client is already remoteLoggingInitialized! Aborting attempt to create connection.");
+                        "Client is already initialized! Aborting attempt to create connection.");
             }
         } catch (NullPointerException e) {
             // If client is not remoteLoggingInitialized, initialize it
             try {
                 // Start the search for dnssd service
                 try {
+                    System.out.println("Searching for DNS_SD service on local network.");
                     dnssd.discoverService("_http._tcp.local.", InetAddress.getLocalHost());
                 } catch (UnknownHostException e1) {
                 }
-                while (!dnssd.getServiceName().equals("Crystal Heart Server")) {
+
+                ServiceEntry heartService = null;
+                while (heartService == null) {
+                    ArrayList<ServiceEntry> entries = dnssd.getServiceList();
+                    for (ServiceEntry temp : entries) {
+                        if (temp.getServiceName().equals("Crystal Heart Server"))
+                            heartService = temp;
+                    }
+
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e1) {
@@ -514,7 +524,7 @@ public class Shard_Core {
 
                 // load the service info
                 // service will be loaded as http://192.168.0.2:6666
-                String serviceInfo = dnssd.getServiceInfo();
+                String serviceInfo = heartService.getServiceInfo();
                 String[] serviceSplit = serviceInfo.split("http://");
                 String ipPort = serviceSplit[1]; // removes http://
                 String[] ipPortSplit = ipPort.split(":"); // splits IP and port

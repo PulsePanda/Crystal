@@ -85,6 +85,7 @@ public class Server extends MultiClientServer {
             this.closeServer();
         } catch (IOException e) {
             System.err.println("Error closing server socket.");
+        } catch (NullPointerException e) {
         }
     }
 
