@@ -381,6 +381,10 @@ public class Heart_Core {
             loadCfg();
         } else {
             createCfg();
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+            }
             loadCfg();
         }
     }

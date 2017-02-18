@@ -32,17 +32,16 @@ clean.doFirst {
     delete ".distributions"
 }
 
-task bundleDistros {
-copy {
-    from(file('Heart/build/distributions'))
-    into('.distributions')
+task bundle(dependsOn: build) {
+    sleep(5 * 1000)
+    copy {
+        from(file('Heart/build/distributions'))
+        into('.distributions')
 
-    from(file('Shard/build/distributions'))
-    into('.distributions')
+        from(file('Shard/build/distributions'))
+        into('.distributions')
+    }
 }
-}
-
-bundleDistros.dependsOn build
 
 //Common specific stuff
 project(':Common') {

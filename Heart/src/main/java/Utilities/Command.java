@@ -100,6 +100,7 @@ public class Command {
                     file = Files.readAllBytes(Paths.get(Heart_Core.baseDir + "patch/Shard.zip"));
                 } catch (IOException e1) {
                     System.err.println("Error reading Shard.zip to send to shards. Aborting.");
+                    sendToClient("patch file send error", true);
                     return;
                 }
                 // dummy packet to allow client's readpacket to reset

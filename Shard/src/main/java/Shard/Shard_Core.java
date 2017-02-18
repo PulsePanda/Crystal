@@ -60,6 +60,7 @@ public class Shard_Core {
     private static Shard_Core shard_core = null;
     private static JTextPane textArea;
     private final int dnssdPort = 6980;
+    private Thread shardConnectionThread;
     // Media Elements
     public MediaPlayback mediaPlayback;
     private ShardPatcher patcher;
@@ -119,6 +120,17 @@ public class Shard_Core {
         System.out.println("###############" + systemName + "###############");
 
         initCfg();
+    }
+
+    /**
+     * Start the Shards connection thread to connect to the Heart server. Tries to connect every 10 seconds.
+     * If the connection is already active, nothing happens. Used to automatically reconnect to the Heart on
+     * disconnect.
+     */
+    public void startConnectionThread() {
+        ShardConnectionThread sct = new ShardConnectionThread(true, false);
+        shardConnectionThread = new Thread(sct);
+        shardConnectionThread.start();
     }
 
     /**
@@ -623,6 +635,13 @@ public class Shard_Core {
         IP = "";
         port = 0;
         remoteLoggingInitialized = false;
+    }
+
+    /**
+     * Stop the Shard from continuously trying to connect to the Heart
+     */
+    public void stopShardConnectionThread() {
+        shardConnectionThread.stop();
     }
 
     /**

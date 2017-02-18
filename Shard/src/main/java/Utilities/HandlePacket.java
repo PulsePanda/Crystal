@@ -22,6 +22,7 @@ package Utilities;
 
 import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
+import Netta.Exceptions.ConnectionException;
 import Shard.Client;
 import Shard.Shard_Core;
 import Utilities.Media.MediaPlayback;
@@ -73,6 +74,18 @@ public class HandlePacket {
                     ShardPatcher patcher = new ShardPatcher(Shard_Core.getShardCore().getClient(),
                             ShardPatcher.PATCHER_TYPE.downloadUpdate);
                     patcher.start();
+                } else if (message.equals("patch file send error")) {
+                    System.err.println("Heart was unable to send the patch. This Shard will be unusable until issue is resolved.\n" +
+                            "Common causes: Heart does not have Python installed, or Python is not set as a System Path\n" +
+                            "The filepath is inaccessible to the Heart, likely because of permissions issues. File path is /%userhome%/CrystalHomeSys/\n" +
+                            "For further information, refer to the README provided with Crystal, or at http://github.com/PulsePanda/Crystal\n" +
+                            "\nShard is now closing connections.");
+                    Shard_Core.getShardCore().stopShardConnectionThread();
+                    try {
+                        Shard_Core.getShardCore().stopShardClient();
+                    } catch (ConnectionException e) {
+                        System.err.println("Error closing Shard. Details: " + e.getMessage());
+                    }
                 } else if (message.equals("music")) {
                     try {
                         String songPath = "";
