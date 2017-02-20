@@ -14,12 +14,12 @@ import Heart.ClientConnection;
 import Heart.Heart_Core;
 import Netta.Connection.Packet;
 import Netta.Connection.Server.MediaServer;
-import Netta.Connection.Server.SingleClientServer;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Media.Exceptions.ServerHelperException;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 /**
@@ -42,7 +42,8 @@ public class MediaServerHelper {
         packet.packetString = "media server";
 
         // Verify the media file is a valid file
-        mediaFile = new File(media.getPath());
+//        mediaFile = new File(media.getPath());
+        mediaFile = new File("C:/Users/Austin/Desktop/piano2.wav");
         if (!mediaFile.exists() || !mediaFile.isFile()) {
             throw new ServerHelperException("MediaServer: Invalid music file. File does not exist!\nMediaServer: Aborting Media Server.");
         }
@@ -55,25 +56,25 @@ public class MediaServerHelper {
             serverHelperThread = new Thread(serverHelper);
             serverHelperThread.start();
 
-//            try {
-//                Thread.sleep(3000);
-//            } catch (InterruptedException e) {
-//            }
-//
-//            while (!serverHelper.isServerActive()) {
-//                System.out.println("Attempting to host media server on port " + ++mediaServerPort);
-//                stopMediaServer();
-//
-//                serverHelper = new ServerHelper(mediaServerPort, this, mediaFile);
-//                serverHelperThread = new Thread(serverHelper);
-//                serverHelperThread.start();
-//
-//                if (!serverHelper.isServerActive())
-//                    try {
-//                        Thread.sleep(3000);
-//                    } catch (InterruptedException e) {
-//                    }
-//            }
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+            }
+
+            while (!serverHelper.isServerActive()) {
+                System.out.println("Attempting to host media server on port " + ++mediaServerPort);
+                stopMediaServer();
+
+                serverHelper = new ServerHelper(mediaServerPort, this, mediaFile);
+                serverHelperThread = new Thread(serverHelper);
+                serverHelperThread.start();
+
+                if (!serverHelper.isServerActive())
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                    }
+            }
 
             packet.packetInt = mediaServerPort;
             packet.packetStringArray = new String[]{media.getPath()};
