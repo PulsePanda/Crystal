@@ -20,14 +20,11 @@
 
 package Utilities;
 
-import Exceptions.MediaStartException;
 import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
+import Netta.Exceptions.SendPacketException;
 import Shard.Client;
 import Shard.Shard_Core;
-import Utilities.Media.MediaPlayback;
-import Utilities.Media.Movie;
-import Utilities.Media.Music;
 
 import javax.swing.*;
 import java.util.UUID;
@@ -86,7 +83,7 @@ public class HandlePacket {
                     } catch (ConnectionException e) {
                         System.err.println("Error closing Shard. Details: " + e.getMessage());
                     }
-                } else if (message.equals("music")) {
+                } else if (message.equals("which song")) {
                     try {
                         String songPath = "";
                         if (packet.packetStringArray.length > 1) {
@@ -100,16 +97,17 @@ public class HandlePacket {
                         } else {
                             songPath = packet.packetStringArray[0];
                         }
-                        try {
-                            new MediaPlayback().start(new Music(songPath));
-                        } catch (MediaStartException e) {
-                            System.err.println("Error starting music playback. Details: " + e.getMessage());
-                        }
+                        Packet p = new Packet(Packet.PACKET_TYPE.Command, Shard_Core.getShardCore().getUUID().toString());
+                        p.packetString = "Play Music";
+                        p.packetStringArray = new String[]{songPath};
+                        Shard_Core.getShardCore().getClient().sendPacket(p, true);
                     } catch (ArrayIndexOutOfBoundsException e) {
                         JOptionPane.showMessageDialog(null, "Heart was unable to find a song matching that name!");
                         System.err.println("Heart was unable to find a song matching that name!");
+                    } catch (SendPacketException e) {
+                        System.err.println("Error sending song response packet to Heart. Details: " + e.getMessage());
                     }
-                } else if (message.equals("movie")) {
+                } else if (message.equals("which movie")) {
                     try {
                         String moviePath = "";
                         if (packet.packetStringArray.length > 1) {
@@ -123,16 +121,20 @@ public class HandlePacket {
                         } else {
                             moviePath = packet.packetStringArray[0];
                         }
-                        System.out.println(moviePath);
-                        try {
-                            new MediaPlayback().start(new Movie(moviePath));
-                        } catch (MediaStartException e) {
-                            System.err.println("Error starting music playback. Details: " + e.getMessage());
-                        }
+                        Packet p = new Packet(Packet.PACKET_TYPE.Command, Shard_Core.getShardCore().getUUID().toString());
+                        p.packetString = "Play Movie";
+                        p.packetStringArray = new String[]{moviePath};
+                        Shard_Core.getShardCore().getClient().sendPacket(p, true);
                     } catch (ArrayIndexOutOfBoundsException e) {
                         JOptionPane.showMessageDialog(null, "Heart was unable to find a movie matching that name!");
                         System.err.println("Heart was unable to find a movie matching that name!");
+                    } catch (SendPacketException e) {
+                        System.err.println("Error sending movie response packet to Heart. Details: " + e.getMessage());
                     }
+                } else if (message.equals("media server")) {
+                    int mediaServerPort = packet.packetInt;
+                    System.out.println("Received media server information. Port: " + mediaServerPort + " Address: " + Shard_Core.getShardCore().getIP());
+                    Shard_Core.getShardCore().connectToMediaServer(mediaServerPort, "music"); // TODO the Music param needs to be dynamic
                 } else if (message.equals("uuid")) {
                     Shard_Core.getShardCore().setHeartUUID(UUID.fromString(packet.senderID));
                 } else {

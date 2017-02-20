@@ -25,12 +25,12 @@ import Heart.ClientConnection;
 import Heart.Heart_Core;
 import Netta.Connection.Packet;
 import Netta.Exceptions.SendPacketException;
+import Utilities.Media.Exceptions.ServerHelperException;
+import Utilities.Media.ListItem;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
@@ -125,35 +125,45 @@ public class Command {
             case "Play Music":
                 System.out.println("Shard requested to play music. Song Name: " + packet.packetStringArray[0]);
                 Packet music = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
-                music.packetString = "music";
                 String requestedSong = packet.packetStringArray[0];
-                String[] musicPaths = Heart_Core.getCore().getMediaManager().getSong(requestedSong);
-                for (int i = 0; i < musicPaths.length; i++) { // edit each path to be a reachable address
-                    try {
-                        musicPaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + "\\" + musicPaths[i];
-                    } catch (UnknownHostException e) {
-                        System.err.println("Error getting local hostname! Unable to provide correct path for Shard music playback!");
+                if (requestedSong != null) {
+                    String[] musicPaths = Heart_Core.getCore().getMediaManager().getSong(requestedSong);
+                    if (musicPaths.length > 1) { // If there is more than one matching song, ask the shard which one
+                        music.packetString = "which song";
+                        music.packetStringArray = musicPaths;
+                        sendToClient(music, true);
+                    } else {
+                        try {
+                            ListItem[] temp = Heart_Core.getCore().getMediaManager().getSongList().get(musicPaths[0]);
+                            Heart_Core.getCore().startMediaServer(temp[0], connection);
+                        } catch (NullPointerException e) {
+                        } catch (ServerHelperException e) {
+                            System.err.println("Unable to start Media Server! Details: " + e.getMessage());
+                        }
                     }
                 }
-                music.packetStringArray = musicPaths;
-                sendToClient(music, true);
                 break;
             case "Play Movie":
                 System.out.println("Shard requested to play a movie. Movie Name: " + packet.packetStringArray[0]);
                 Packet movie = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
-                movie.packetString = "movie";
                 String requestedMovie = packet.packetStringArray[0];
                 if (requestedMovie != null) {
                     String[] moviePaths = Heart_Core.getCore().getMediaManager().getMovie(requestedMovie);
-                    for (int i = 0; i < moviePaths.length; i++) {
+                    if (moviePaths.length > 1) { // If there is more than one matching movie, ask the shard which one
+                        movie.packetString = "which movie";
+                        movie.packetStringArray = moviePaths;
+                        sendToClient(movie, true);
+                    } else {
                         try {
-                            moviePaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + "\\" + moviePaths[i];
-                        } catch (UnknownHostException e) {
-                            System.err.println("Error getting local hostname! Unable to provide correct path for Shard movie playback!");
+                            ListItem[] temp = Heart_Core.getCore().getMediaManager().getMovieList().get(moviePaths[0]);
+                            try {
+                                Heart_Core.getCore().startMediaServer(temp[0], connection);
+                            } catch (ServerHelperException e) {
+                                System.err.println("Unable to start Media Server! Details: " + e.getMessage());
+                            }
+                        } catch (NullPointerException e) {
                         }
                     }
-                    movie.packetStringArray = moviePaths;
-                    sendToClient(movie, true);
                 }
                 break;
             default:

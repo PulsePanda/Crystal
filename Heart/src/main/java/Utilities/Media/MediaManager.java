@@ -10,8 +10,6 @@
 
 package Utilities.Media;
 
-import Utilities.SystemInfo;
-
 import java.io.File;
 
 /**
@@ -35,15 +33,16 @@ public class MediaManager {
     public MediaManager(String mediaDir, String musicDir, String movieDir) {
         System.out.println("MEDIA_MANAGER: Initializing media manager...");
 
-        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
-            String[] driveLetter = mediaDir.split(":"); // separates out the drive letter
-            this.mediaDriveLetter = driveLetter[0];
-            this.mediaDriveLetter = mediaDriveLetter + ":\\";
-        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
-            System.err.println("Crystal doesn't know how to handle the media paths on your system! Media playback will not work!");
-        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
-            System.err.println("Crystal doesn't know how to handle the media paths on your system! Media playback will not work!");
-        }
+        // Remove drive letter from paths
+//        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
+//            String[] driveLetter = mediaDir.split(":"); // separates out the drive letter
+//            this.mediaDriveLetter = driveLetter[0];
+//            this.mediaDriveLetter = mediaDriveLetter + ":\\";
+//        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
+//            System.err.println("Crystal doesn't know how to handle the media paths on your system! Media playback will not work!");
+//        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
+//            System.err.println("Crystal doesn't know how to handle the media paths on your system! Media playback will not work!");
+//        }
         this.musicDir = musicDir;
         this.movieDir = movieDir;
 
@@ -188,10 +187,6 @@ class MediaIndexer implements Runnable {
         } else if (file.isFile()) {
             if (isMovieOrMusic(file.getName())) {
                 String filePath = file.getPath();
-                // removes the drive letter from the file's path, as the folder is shared and the drive isn't needed
-                filePath = filePath.replace(mm.mediaDriveLetter, "");
-
-                // TODO remove the file extension from the name as well as the (year)
                 String fileName = file.getName();
 
                 mm.movieList.addItem(fileName, filePath, ListItem.MEDIA_TYPE.Movie);
@@ -212,14 +207,8 @@ class MediaIndexer implements Runnable {
             }
         } else if (file.isFile()) {
             if (isMovieOrMusic(file.getName())) {
-                // Remove the drive letter from the path
                 String filePath = file.getPath();
-                filePath = filePath.replace(mm.mediaDriveLetter, "");
-
-                // TODO Remove the file extension from the name
                 String fileName = file.getName();
-//                String[] fileNameSplit = fileName.split(".");
-//                fileName = fileNameSplit[0];
 
                 mm.songList.addItem(fileName, filePath, ListItem.MEDIA_TYPE.Music);
             }

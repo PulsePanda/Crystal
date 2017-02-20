@@ -8,31 +8,18 @@
  * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
  */
 
-package Shard;
+package Utilities.Media.Client;
 
-import Netta.Connection.Client.ClientTemplate;
-import Netta.Connection.Packet;
-import Utilities.HandlePacket;
+import Netta.Connection.Client.MediaClient;
 
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Client wrapper. Handles connection and packets received from Heart
+ * Created by Austin on 2/19/2017.
  */
-public class Client extends ClientTemplate {
+public class MediaClientHelper extends MediaClient {
 
-    public Client(String serverIP, int port) throws NoSuchAlgorithmException {
-        super(serverIP, port);
-    }
-
-    /**
-     * This method is called every time the shard sends something to the heart.
-     *
-     * @param p packet received from shard.
-     */
-    @Override
-    public void packetReceived(Packet p) {
-        new HandlePacket(p, this);
+    public MediaClientHelper(String serverIP, int port, String mediaType) throws NoSuchAlgorithmException {
+        super(serverIP, port, mediaType);
     }
 }
-

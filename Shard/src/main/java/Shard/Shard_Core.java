@@ -19,7 +19,7 @@ import Netta.Exceptions.SendPacketException;
 import Netta.ServiceEntry;
 import Utilities.Config;
 import Utilities.Log;
-import Utilities.Media.MediaPlayback;
+import Utilities.Media.Client.MediaClientHelper;
 import Utilities.ShardPatcher;
 import Utilities.SystemInfo;
 
@@ -40,6 +40,8 @@ import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.UUID;
+
+//import Utilities.Media.MediaPlayback;
 
 /**
  * Core class for the Shard. Handles everything the Shard does
@@ -62,7 +64,7 @@ public class Shard_Core {
     private final int dnssdPort = 6980;
     private Thread shardConnectionThread;
     // Media Elements
-    public MediaPlayback mediaPlayback;
+//    public MediaPlayback mediaPlayback;
     private ShardPatcher patcher;
     private boolean headless = false, cfg_set = false;
     private Log log;
@@ -73,6 +75,8 @@ public class Shard_Core {
     private String IP = null;
     private int port;
     private DNSSD dnssd;
+    private MediaClientHelper mediaClient;
+    private Thread mediaClientThread;
     // GUI elements
     private JFrame frame;
     private JPanel consolePanel, commandPanel;
@@ -187,7 +191,7 @@ public class Shard_Core {
 
         dnssd = new DNSSD();
 
-        mediaPlayback = new MediaPlayback();
+//        mediaPlayback = new MediaPlayback();
     }
 
     /**
@@ -354,7 +358,7 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            mediaPlayback.stop();
+//            mediaPlayback.stop();
         });
 
         commandPanel.add(connectionStatus);
@@ -573,6 +577,17 @@ public class Shard_Core {
         clientThread.start();
     }
 
+    public void connectToMediaServer(int mediaServerPort, String mediaType) {
+        try {
+            mediaClient = new MediaClientHelper(IP, mediaServerPort, mediaType);
+            mediaClientThread = new Thread(mediaClient);
+            mediaClientThread.start();
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("Error starting MediaClient. Kript was unable to set up encryption keys. Aborting creation.");
+        }
+    }
+
+    @Deprecated
     public void startShardClientSuppressed() {
         try {
             startShardClient();
@@ -603,18 +618,29 @@ public class Shard_Core {
     public void stopShardClient() throws ConnectionException {
         connectionStatus.setText("DISCONNECTED");
         connectionStatus.setForeground(Color.RED);
+        Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, uuid.toString());
         try {
-            Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, uuid.toString());
             p.packetString = "Manual disconnect";
             client.sendPacket(p, true);
-            client.closeIOStreams();
-            clientThread.stop();
-            clientThread = null;
-            IP = "";
-            port = 0;
         } catch (SendPacketException e) {
             System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
         }
+        client.closeIOStreams();
+        clientThread.stop();
+        clientThread = null;
+        IP = "";
+        port = 0;
+
+        try {
+            p.packetString = "Manual disconnect";
+            client.sendPacket(p, true);
+        } catch (SendPacketException e) {
+            System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
+        }
+        mediaClient.closeIOStreams();
+        mediaClientThread.stop();
+        mediaClient = null;
+        mediaClientThread = null;
     }
 
     /**

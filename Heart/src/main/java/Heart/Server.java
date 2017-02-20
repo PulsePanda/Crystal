@@ -47,7 +47,7 @@ public class Server extends MultiClientServer {
      * @param cc Socket connection client socket
      */
     @Override
-    public void ThreadAction(Socket cc) {
+    public void clientConnected(Socket cc) {
         ClientConnection temp;
         try {
             temp = new ClientConnection(cc, kript);

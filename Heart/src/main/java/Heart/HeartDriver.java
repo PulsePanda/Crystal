@@ -44,7 +44,10 @@ public class HeartDriver {
             System.out.println("Starting Heart server on port " + corePort);
             heartCore.startHeartServer(corePort);
 
-            Thread.sleep(1000);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
 
             // If the server is unable to host on the specified port, try another one
             while (!heartCore.isServerActive()) {
@@ -53,14 +56,15 @@ public class HeartDriver {
                 heartCore.startHeartServer(corePort);
 
                 if (!heartCore.isServerActive())
-                    Thread.sleep(3000);
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                    }
             }
 
             heartCore.initDNSSD();
         } catch (ServerInitializationException e) {
             System.err.println("Error starting Heart server! Error message: " + e.getMessage());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 }

@@ -20,7 +20,10 @@ import Netta.Connection.Packet;
 import Netta.DNSSD;
 import Netta.Exceptions.SendPacketException;
 import Utilities.*;
+import Utilities.Media.Exceptions.ServerHelperException;
+import Utilities.Media.ListItem;
 import Utilities.Media.MediaManager;
+import Utilities.Media.MediaServerHelper;
 
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
@@ -34,6 +37,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -64,6 +68,7 @@ public class Heart_Core {
     private Thread updateCheckerThread = null;
     private DNSSD dnssd;
     private int port;
+    private ArrayList<MediaServerHelper> mediaServerArrayList;
     // GUI elements
     private JFrame frame;
     private JLabel shardVersionLabel;
@@ -80,6 +85,7 @@ public class Heart_Core {
         heart_core = this;
         this.headless = headless;
         this.DEV_BUILD = DEV_BUILD;
+        mediaServerArrayList = new ArrayList<>();
     }
 
     /**
@@ -166,6 +172,20 @@ public class Heart_Core {
         // Start the server
         serverThread = new Thread(server);
         serverThread.start();
+    }
+
+    /**
+     * Start the server the Shard will connect to allowing for Media Streaming
+     *
+     * @param media  String chosen media URL
+     * @param client ClientConnection Shard client object requesting media playback
+     * @throws ServerHelperException Thrown when there is an issue creating the MediaServerHelper.
+     *                               Details will be in the getMessage()
+     */
+    public void startMediaServer(ListItem media, ClientConnection client) throws ServerHelperException {
+        MediaServerHelper mediaServer = new MediaServerHelper(media, client);
+        client.setMediaServer(mediaServer);
+        mediaServerArrayList.add(mediaServer);
     }
 
     /**
@@ -623,6 +643,12 @@ public class Heart_Core {
      */
     @SuppressWarnings("deprecation")
     public void stopHeartServer() {
+        for (MediaServerHelper ms : mediaServerArrayList) {
+            ms.stopMediaServer();
+            ms = null;
+        }
+        mediaServerArrayList = null;
+
         try {
             dnssd.closeRegisteredService();
         } catch (NullPointerException e) {
@@ -633,15 +659,18 @@ public class Heart_Core {
         }
         dnssd = null;
         server = null;
+
         try {
             serverThread.stop();
         } catch (NullPointerException e) {
         }
         serverThread = null;
+
         try {
             mediaManager.close();
         } catch (NullPointerException e) {
         }
+
         try {
             updateCheckerThread.stop();
         } catch (NullPointerException e) {

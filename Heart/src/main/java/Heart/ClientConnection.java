@@ -18,6 +18,7 @@ import Netta.Exceptions.ConnectionInitializationException;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Command;
 import Utilities.Log;
+import Utilities.Media.MediaServerHelper;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -33,6 +34,7 @@ public class ClientConnection extends ConnectedClient {
     private Command command;
     private Log clientLog;
     private boolean clientLogCreated = false, conversation = false;
+    private MediaServerHelper mediaServer;
 
     /**
      * Client Connection default constructor
@@ -75,6 +77,10 @@ public class ClientConnection extends ConnectedClient {
                     } catch (ConnectionException e) {
                         System.err.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
                     }
+                    try {
+                        mediaServer.stopMediaServer();
+                    } catch (NullPointerException e) {
+                    }
                     break;
                 case "Command":
                     try {
@@ -106,5 +112,13 @@ public class ClientConnection extends ConnectedClient {
     @Deprecated
     public void setConversation(boolean b) {
         conversation = b;
+    }
+
+    public void setMediaServer(MediaServerHelper mediaServer) {
+        this.mediaServer = mediaServer;
+    }
+
+    public MediaServerHelper getMediaServerHelper() {
+        return mediaServer;
     }
 }
