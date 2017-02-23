@@ -12,3 +12,6 @@ buildShard.bat
 Common/build/
 Heart/build/
 Shard/build/
+Heart/libs/jl1.0.1-javadocs/package-list
+*.gif
+Heart/libs/jl1.0.1-javadocs/stylesheet.css

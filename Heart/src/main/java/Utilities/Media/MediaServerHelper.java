@@ -17,6 +17,8 @@ import Netta.Connection.Server.MediaServer;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Media.Exceptions.ServerHelperException;
+import javazoom.jl.converter.Converter;
+import javazoom.jl.decoder.JavaLayerException;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +35,7 @@ public class MediaServerHelper {
     private Thread serverHelperThread;
     private ClientConnection client;
     private File mediaFile;
+    private boolean converted = false;
 
     public MediaServerHelper(ListItem media, ClientConnection client) throws ServerHelperException {
         this.media = media;
@@ -42,8 +45,8 @@ public class MediaServerHelper {
         packet.packetString = "media server";
 
         // Verify the media file is a valid file
-//        mediaFile = new File(media.getPath());
-        mediaFile = new File("C:/Users/Austin/Desktop/piano2.wav");
+        mediaFile = new File(media.getPath());
+//        mediaFile = new File("C:/Users/Austin/Desktop/piano2.wav");
         if (!mediaFile.exists() || !mediaFile.isFile()) {
             throw new ServerHelperException("MediaServer: Invalid music file. File does not exist!\nMediaServer: Aborting Media Server.");
         }
@@ -52,6 +55,16 @@ public class MediaServerHelper {
         try {
             System.out.println("Starting media server for media file " + media.getName());
             System.out.println("Attempting to host media server on port " + mediaServerPort);
+
+            // Convert mp3 file to wav for streaming
+            if (mediaFile.getPath().contains(".mp3")) {
+                mediaFile = convertMp3ToWave();
+                if (mediaFile == null) {
+                    System.err.println("Error converting mp3 file to wav format. Aborting streaming.");
+                    return;
+                }
+            }
+
             serverHelper = new ServerHelper(mediaServerPort, this, mediaFile);
             serverHelperThread = new Thread(serverHelper);
             serverHelperThread.start();
@@ -92,6 +105,18 @@ public class MediaServerHelper {
         }
     }
 
+    private File convertMp3ToWave() {
+        Converter converter = new Converter();
+        try {
+            System.out.println("Converting mediaFile from .mp3 to .wav for streaming...");
+            converter.convert(mediaFile.getPath(), mediaFile.getPath().replace(".mp3", ".wav"));
+            converted = true;
+            return new File(mediaFile.getPath().replace(".mp3", ".wav"));
+        } catch (JavaLayerException e) {
+            return null;
+        }
+    }
+
     public void stopMediaServer() {
         try {
             serverHelper.closeIOStreams();
@@ -111,6 +136,13 @@ public class MediaServerHelper {
         }
 
         serverHelper = null;
+
+        if (converted) {
+            try {
+                mediaFile.delete();
+            } catch (Exception e) {
+            }
+        }
     }
 
     public ClientConnection getClientConnection() {
