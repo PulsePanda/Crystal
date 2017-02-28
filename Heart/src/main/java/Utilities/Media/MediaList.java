@@ -120,4 +120,11 @@ public class MediaList {
     public int size() {
         return list.size();
     }
+
+    /**
+     * Deletes all entries in the list
+     */
+    public void delete() {
+        list.clear();
+    }
 }

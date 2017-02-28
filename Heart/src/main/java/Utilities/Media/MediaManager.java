@@ -59,6 +59,8 @@ public class MediaManager {
     public void index(boolean keepIndexing, int delayMinutes) {
         this.keepIndexing = keepIndexing;
 
+        clearIndex();
+
         mediaIndexer = new MediaIndexer(this, delayMinutes * 60 * 1000); // 30 minutes
         indexThread = new Thread(mediaIndexer);
         indexThread.start();
@@ -127,6 +129,14 @@ public class MediaManager {
             files[i] = items[i].getPath();
         }
         return files;
+    }
+
+    /**
+     * Clears out the index to re-index
+     */
+    public void clearIndex() {
+        movieList.delete();
+        songList.delete();
     }
 }
 

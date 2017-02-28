@@ -59,8 +59,10 @@ public class MediaServerHelper {
             // Convert mp3 file to wav for streaming
             if (mediaFile.getPath().contains(".mp3")) {
                 mediaFile = convertMp3ToWave();
+                converted = true;
                 if (mediaFile == null) {
                     System.err.println("Error converting mp3 file to wav format. Aborting streaming.");
+                    converted = false;
                     return;
                 }
             }
@@ -92,6 +94,10 @@ public class MediaServerHelper {
             packet.packetInt = mediaServerPort;
             packet.packetStringArray = new String[]{media.getPath()};
             client.sendPacket(packet, true);
+            if (converted) {
+                ConvertedDeleterHelper cdh = new ConvertedDeleterHelper(mediaFile, serverHelper);
+                cdh.start();
+            }
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Error starting Media Server. Error creating Kript object! Attempt has been aborted.");
             stopMediaServer();
@@ -110,7 +116,6 @@ public class MediaServerHelper {
         try {
             System.out.println("Converting mediaFile from .mp3 to .wav for streaming...");
             converter.convert(mediaFile.getPath(), mediaFile.getPath().replace(".mp3", ".wav"));
-            converted = true;
             return new File(mediaFile.getPath().replace(".mp3", ".wav"));
         } catch (JavaLayerException e) {
             return null;
@@ -154,5 +159,30 @@ class ServerHelper extends MediaServer {
 
     public ServerHelper(int port, MediaServerHelper mediaServerHelper, File mediaFile) throws NoSuchAlgorithmException, ServerHelperException {
         super(port, mediaFile);
+    }
+}
+
+class ConvertedDeleterHelper extends Thread {
+
+    private File file;
+    private ServerHelper helper;
+
+    public ConvertedDeleterHelper(File file, ServerHelper helper) {
+        this.file = file;
+        this.helper = helper;
+    }
+
+    public void run() {
+        while (helper.isStreaming()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
+        }
+
+        try {
+            file.delete();
+        } catch (Exception e) {
+        }
     }
 }
