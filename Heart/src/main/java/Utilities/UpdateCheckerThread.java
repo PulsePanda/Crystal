@@ -20,6 +20,7 @@
 
 package Utilities;
 
+import Exceptions.UpdateCheckerThreadException;
 import Heart.Heart_Core;
 
 import java.io.*;
@@ -83,8 +84,8 @@ public class UpdateCheckerThread extends Thread {
                 System.out.println("UPDATER: All software is up to date!");
                 shardUpdate = false;
                 heartUpdate = false;
-            } catch (Exception ex) {
-                System.err.println("UPDATER: Issue downloading patch from GitHub. Aborting patch.");
+            } catch (UpdateCheckerThreadException ex) {
+                System.err.println("UPDATER: Issue patching. Aborting patch. Details: " + ex.getMessage());
                 shardUpdate = false;
                 heartUpdate = false;
                 removeFiles();
@@ -101,47 +102,67 @@ public class UpdateCheckerThread extends Thread {
     /**
      * Check for an available update
      *
-     * @throws IOException thrown if there is an error getting the update information
+     * @throws UpdateCheckerThreadException thrown if there is an error getting the update information
      */
-    private void checkForUpdate() throws IOException {
+    private void checkForUpdate() throws UpdateCheckerThreadException {
         URL url;
-        if (!Heart_Core.DEV_BUILD)
-            url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/HeartVersion");
-        else
-            url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/dev/HeartVersion");
-        BufferedInputStream bis = new BufferedInputStream(url.openStream());
-        FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "HeartVersion.txt");
+        try {
+            if (!Heart_Core.DEV_BUILD)
+                url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/HeartVersion");
+            else
+                url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/dev/HeartVersion");
+        } catch (IOException e) {
+            throw new UpdateCheckerThreadException("Patch URL is unable to be created.");
+        }
+
+        BufferedInputStream bis;
+        FileOutputStream fis;
         byte[] buffer = new byte[1024];
         int count = 0;
-        while ((count = bis.read(buffer, 0, 1024)) != -1) {
-            fis.write(buffer, 0, count);
-        }
-        fis.close();
-        bis.close();
 
-        if (!Heart_Core.DEV_BUILD)
-            url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/ShardVersion");
-        else
-            url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/dev/ShardVersion");
-        bis = new BufferedInputStream(url.openStream());
-        fis = new FileOutputStream(Heart_Core.baseDir + "ShardVersion.txt");
-        buffer = new byte[1024];
-        while ((count = bis.read(buffer, 0, 1024)) != -1) {
-            fis.write(buffer, 0, count);
-        }
-        fis.close();
-        bis.close();
-
-        String heartVersion = readVersionFile(Heart_Core.baseDir + "HeartVersion.txt");
-        String shardVersion = readVersionFile(Heart_Core.baseDir + "ShardVersion.txt");
-        if (heartVersion != null || shardVersion != null) {
-            if (!shardVersion.equals(Heart_Core.SHARD_VERSION)) {
-                shardUpdate = true;
+        try {
+            bis = new BufferedInputStream(url.openStream());
+            fis = new FileOutputStream(Heart_Core.baseDir + "HeartVersion.txt");
+            while ((count = bis.read(buffer, 0, 1024)) != -1) {
+                fis.write(buffer, 0, count);
             }
-            this.shardVersion = shardVersion;
+            fis.close();
+            bis.close();
+        } catch (IOException e) {
+            throw new UpdateCheckerThreadException("Unable to update HeartVersion file.");
+        }
 
-            if (!heartVersion.equals(Heart_Core.HEART_VERSION))
-                heartUpdate = true;
+        try {
+            if (!Heart_Core.DEV_BUILD)
+                url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/ShardVersion");
+            else
+                url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/dev/ShardVersion");
+            bis = new BufferedInputStream(url.openStream());
+            fis = new FileOutputStream(Heart_Core.baseDir + "ShardVersion.txt");
+            buffer = new byte[1024];
+            while ((count = bis.read(buffer, 0, 1024)) != -1) {
+                fis.write(buffer, 0, count);
+            }
+            fis.close();
+            bis.close();
+        } catch (IOException e) {
+            throw new UpdateCheckerThreadException("Unable to update ShardVersion file.");
+        }
+
+        try {
+            String heartVersion = readVersionFile(Heart_Core.baseDir + "HeartVersion.txt");
+            String shardVersion = readVersionFile(Heart_Core.baseDir + "ShardVersion.txt");
+            if (heartVersion != null || shardVersion != null) {
+                if (!shardVersion.equals(Heart_Core.SHARD_VERSION)) {
+                    shardUpdate = true;
+                }
+                this.shardVersion = shardVersion;
+
+                if (!heartVersion.equals(Heart_Core.HEART_VERSION))
+                    heartUpdate = true;
+            }
+        } catch (UpdateCheckerThreadException e) {
+            throw new UpdateCheckerThreadException("Unable to read version files.");
         }
     }
 
@@ -150,51 +171,67 @@ public class UpdateCheckerThread extends Thread {
      *
      * @param path String version file path
      * @return String version information
-     * @throws IOException thrown if there is an error reading or accessing the version file
+     * @throws UpdateCheckerThreadException thrown if there is an error reading or accessing the version file
      */
-    private String readVersionFile(String path) throws IOException {
+    private String readVersionFile(String path) throws UpdateCheckerThreadException {
         String line = null;
-        FileReader fileReader = new FileReader(path);
+        try {
+            FileReader fileReader = new FileReader(path);
 
-        BufferedReader bufferedReader = new BufferedReader(fileReader);
-        line = bufferedReader.readLine();
-        bufferedReader.close();
-
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            line = bufferedReader.readLine();
+            bufferedReader.close();
+        } catch (IOException e) {
+            throw new UpdateCheckerThreadException("");
+        }
         return line;
     }
 
     /**
      * Download the repository for the update
      *
-     * @throws IOException thrown if there is an error accessing or downloading the repository
+     * @throws UpdateCheckerThreadException thrown if there is an error accessing or downloading the repository
      */
-    private void downloadUpdate() throws IOException {
+    private void downloadUpdate() throws UpdateCheckerThreadException {
         URL url;
-        if (!Heart_Core.DEV_BUILD)
-            url = new URL(gitAddressMaster);
-        else
-            url = new URL(gitAddressDev);
-        BufferedInputStream bis = new BufferedInputStream(url.openStream());
-        FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "patch.zip");
-        byte[] buffer = new byte[1024];
-        int count = 0;
-        while ((count = bis.read(buffer, 0, 1024)) != -1) {
-            fis.write(buffer, 0, count);
+        try {
+            if (!Heart_Core.DEV_BUILD)
+                url = new URL(gitAddressMaster);
+            else
+                url = new URL(gitAddressDev);
+        } catch (IOException e) {
+            throw new UpdateCheckerThreadException("Unable to create URL for patch.");
         }
-        fis.close();
-        bis.close();
+
+        try {
+            BufferedInputStream bis = new BufferedInputStream(url.openStream());
+            FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "patch.zip");
+            byte[] buffer = new byte[1024];
+            int count = 0;
+            while ((count = bis.read(buffer, 0, 1024)) != -1) {
+                fis.write(buffer, 0, count);
+            }
+            fis.close();
+            bis.close();
+        } catch (IOException e) {
+            throw new UpdateCheckerThreadException("Unable to download update from URL.");
+        }
     }
 
     /**
      * Prepare the patch
      *
-     * @throws IOException thrown if there is an error accessing or reading the patch data
+     * @throws UpdateCheckerThreadException thrown if there is an error accessing or reading the patch data
      */
-    private synchronized void preparePatch() throws IOException {
-        UnZip.unZip(Heart_Core.baseDir + "patch.zip", Heart_Core.baseDir + "patch");
+    private synchronized void preparePatch() throws UpdateCheckerThreadException {
+        try {
+            UnZip.unZip(Heart_Core.baseDir + "patch.zip", Heart_Core.baseDir + "patch");
+        } catch (IOException e) {
+            throw new UpdateCheckerThreadException("Unable to unzip patch data.");
+        }
 
         try {
-            Thread.sleep(2000);
+            Thread.sleep(3000);
         } catch (InterruptedException e) {
         }
 
@@ -208,7 +245,11 @@ public class UpdateCheckerThread extends Thread {
             String[] params = new String[]{"cmd.exe", "/c", "gradlew Shard:build"};
             ProcessBuilder builder = new ProcessBuilder(params);
             builder.directory(patchDir);
-            builder.start();
+            try {
+                builder.start();
+            } catch (IOException e) {
+                throw new UpdateCheckerThreadException("Unable to build Shard patch with Gradle.");
+            }
 
             try {
                 Thread.sleep(5000);
@@ -227,7 +268,11 @@ public class UpdateCheckerThread extends Thread {
             String[] params = new String[]{"cmd.exe", "/c", "gradlew Heart:build"};
             ProcessBuilder builder = new ProcessBuilder(params);
             builder.directory(patchDir);
-            builder.start();
+            try {
+                builder.start();
+            } catch (IOException e) {
+                throw new UpdateCheckerThreadException("Unable to build Heart with Gradle.");
+            }
 
             try {
                 Thread.sleep(5000);
@@ -246,12 +291,16 @@ public class UpdateCheckerThread extends Thread {
     /**
      * Install the Heart patch
      *
-     * @throws IOException thrown if there is an error accessing or reading patch data
+     * @throws UpdateCheckerThreadException thrown if there is an error accessing or reading patch data
      */
-    private void installHeartPatch() throws IOException {
+    private void installHeartPatch() throws UpdateCheckerThreadException {
         Heart_Core.getCore().stopHeartServer();
 
-        UnZip.unZip(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir);
+        try {
+            UnZip.unZip(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir);
+        } catch (IOException e) {
+            throw new UpdateCheckerThreadException("Unable to unzip Heart patch.");
+        }
 
         try {
             Thread.sleep(5000);
@@ -259,8 +308,12 @@ public class UpdateCheckerThread extends Thread {
         }
 
         System.out.println("UPDATER: Starting Heart Patcher...");
-        Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", Heart_Core.heartDir + "bin/Heart.bat"});
-        System.exit(0);
+        try {
+            Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", Heart_Core.heartDir + "bin/Heart.bat"});
+            System.exit(0);
+        } catch (IOException e) {
+            throw new UpdateCheckerThreadException("Unable to start Heart patch file.");
+        }
     }
 
     /**
