@@ -1,7 +1,20 @@
+/*
+ * This file is part of Crystal Home Systems.
+ *
+ * Crystal Home Systems is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * Crystal Home Systems is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
+ */
+
 package Utilities.Media;
 
 import java.util.ArrayList;
 
+/**
+ * ListItem List wrapper. Contains all the media files found from MediaManager in ListItem format
+ */
 public class MediaList {
 
     public ArrayList<ListItem> list;
@@ -57,9 +70,9 @@ public class MediaList {
     public boolean contains(String nameOrPath) {
         nameOrPath = nameOrPath.toLowerCase();
         for (ListItem li : list) {
-            if (li.getName().toLowerCase().equals(nameOrPath))
+            if (li.getName().toLowerCase().contains(nameOrPath))
                 return true;
-            if (li.getPath().toLowerCase().equals(nameOrPath))
+            if (li.getPath().toLowerCase().contains(nameOrPath))
                 return true;
         }
 
@@ -76,9 +89,9 @@ public class MediaList {
         nameOrPath = nameOrPath.toLowerCase();
         ArrayList<ListItem> items = new ArrayList<>();
         for (ListItem li : list) {
-            if (li.getName().toLowerCase().equals(nameOrPath))
+            if (li.getName().toLowerCase().contains(nameOrPath))
                 items.add(li);
-            if (li.getPath().toLowerCase().equals(nameOrPath))
+            else if (li.getPath().toLowerCase().contains(nameOrPath))
                 items.add(li);
         }
 
@@ -106,5 +119,12 @@ public class MediaList {
      */
     public int size() {
         return list.size();
+    }
+
+    /**
+     * Deletes all entries in the list
+     */
+    public void delete() {
+        list.clear();
     }
 }

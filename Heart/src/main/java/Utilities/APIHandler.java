@@ -1,17 +1,27 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * This file is part of Crystal Home Systems.
+ *
+ * Crystal Home Systems is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * Crystal Home Systems is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
  */
+
 package Utilities;
 
+import Exceptions.APIException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
+/**
+ * API manager. Wrapper to handle all JSON api's
+ */
 public class APIHandler {
 
     private JSONObject jobj;
@@ -23,9 +33,10 @@ public class APIHandler {
      * Utility for handling remote API's
      *
      * @param URL API url
-     * @throws IOException if the URL is invalid
+     * @throws APIException thrown if there is an issue accessing API.
+     *                      Details will be in the getMessage()
      */
-    public APIHandler(String URL) throws IOException {
+    public APIHandler(String URL) throws APIException {
         url = URL;
         loadFromURL(url);
     }
@@ -34,9 +45,10 @@ public class APIHandler {
      * Load API data from URL. Called by default by the constructor
      *
      * @param URL API url
-     * @throws IOException if URL is invalid
+     * @throws APIException thrown if there is an issue accessing the API.
+     *                      Details will be in the getMessage()
      */
-    public void loadFromURL(String URL) throws IOException {
+    public void loadFromURL(String URL) throws APIException {
         url = URL;
         jobj = getJSONfromURL(URL);
     }
@@ -46,14 +58,25 @@ public class APIHandler {
      *
      * @param URL API url
      * @return JSONObject JSON information object
-     * @throws IOException thrown when unable to load from given URL
+     * @throws APIException thrown when unable to load from given URL
+     *                      Details will be in the getMessage()
      */
-    private JSONObject getJSONfromURL(String URL) throws IOException {
+    private JSONObject getJSONfromURL(String URL) throws APIException {
 
-        URL url = new URL(URL);
+        URL url = null;
+        try {
+            url = new URL(URL);
+        } catch (MalformedURLException e) {
+            throw new APIException("Unable to retrieve JSON from URL. URL is invalid.");
+        }
 
         // read from the URL
-        Scanner scan = new Scanner(url.openStream());
+        Scanner scan = null;
+        try {
+            scan = new Scanner(url.openStream());
+        } catch (IOException e) {
+            throw new APIException("Unable to access provided URL.");
+        }
         String str = new String();
         while (scan.hasNext()) {
             str += scan.nextLine();

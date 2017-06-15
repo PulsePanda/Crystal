@@ -1,3 +1,13 @@
+/*
+ * This file is part of Crystal Home Systems.
+ *
+ * Crystal Home Systems is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * Crystal Home Systems is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
+ */
+
 /**
  * @file Heart_Core.java
  * @author Austin VanAlstyne
@@ -7,14 +17,19 @@ package Heart;
 import Exceptions.ConfigurationException;
 import Exceptions.ServerInitializationException;
 import Netta.Connection.Packet;
+import Netta.DNSSD;
 import Netta.Exceptions.SendPacketException;
-import Utilities.Config;
-import Utilities.DNSSD;
-import Utilities.Log;
+import Utilities.*;
+import Utilities.Media.Exceptions.ServerHelperException;
+import Utilities.Media.ListItem;
 import Utilities.Media.MediaManager;
-import Utilities.SystemInfo;
+import Utilities.Media.MediaServerHelper;
 
 import javax.swing.*;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,44 +37,43 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.UUID;
 
+/**
+ * Core Heart class. Handles every operation of the Server
+ */
 public class Heart_Core {
 
     public final static boolean DEBUG = false;
 
     public final static String HEART_VERSION = "0.1.4";
+    // System elements
+    public final static SystemInfo systemInfo = new SystemInfo();
     public static String SHARD_VERSION = "";
-
     public static String systemName = "CHS Heart", mediaDir = "", musicDir = "", movieDir = "", commandKey = "",
             baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardLogsDir = "Logs/", configDir = "heart_config.cfg",
             logBaseDir = "Logs/", shardFileDir = "Shard_Files/";
     public static boolean DEV_BUILD;
     private static boolean cfg_set = false, logActive = false, initialized = false;
-
-    private boolean headless = false;
-
     // Server elements
     private static Heart_Core heart_core;
     private static Log log;
+    private static JTextPane textArea;
+    private Server server = null;
+    private boolean headless = false;
     private UUID uuid;
     private Config cfg = null;
-    public Server server = null;
     private Thread serverThread = null;
     private Thread updateCheckerThread = null;
     private DNSSD dnssd;
     private int port;
-
+    private ArrayList<MediaServerHelper> mediaServerArrayList;
     // GUI elements
     private JFrame frame;
-    private static JTextArea textArea;
     private JLabel shardVersionLabel;
-
     // Media elements
     private MediaManager mediaManager;
-
-    // System elements
-    public final static SystemInfo systemInfo = new SystemInfo();
 
     /**
      * Heart Core Default Constructor
@@ -71,6 +85,25 @@ public class Heart_Core {
         heart_core = this;
         this.headless = headless;
         this.DEV_BUILD = DEV_BUILD;
+        mediaServerArrayList = new ArrayList<>();
+    }
+
+    /**
+     * get the Heart_Core object
+     *
+     * @return Heart_Core object
+     */
+    public static Heart_Core getCore() {
+        return heart_core;
+    }
+
+    /**
+     * Checks whether the Heart configuration file is set up or not
+     *
+     * @return true if the configuration is set up, else false.
+     */
+    public static boolean isConfigSet() {
+        return cfg_set;
     }
 
     /**
@@ -88,9 +121,11 @@ public class Heart_Core {
 
         initVariables();
 
+        initCfg();
+
         initLog();
 
-        initCfg();
+        shareMediaDir();
 
         initMediaManager();
 
@@ -126,7 +161,7 @@ public class Heart_Core {
                 System.err.println(
                         "This instance of Heart Core already has an active Server Thread. Attempting to close the thread...");
                 // Try to close the server thread
-                // TODO using a depreciated method to stop the server, not necissarily the best option
+                // TODO using a depreciated method to stop the server, not necessarily the best option
                 serverThread.stop();
             }
         } catch (NullPointerException e) {
@@ -137,6 +172,20 @@ public class Heart_Core {
         // Start the server
         serverThread = new Thread(server);
         serverThread.start();
+    }
+
+    /**
+     * Start the server the Shard will connect to allowing for Media Streaming
+     *
+     * @param media  String chosen media URL
+     * @param client ClientConnection Shard client object requesting media playback
+     * @throws ServerHelperException Thrown when there is an issue creating the MediaServerHelper.
+     *                               Details will be in the getMessage()
+     */
+    public void startMediaServer(ListItem media, ClientConnection client) throws ServerHelperException {
+        MediaServerHelper mediaServer = new MediaServerHelper(media, client);
+        client.setMediaServer(mediaServer);
+        mediaServerArrayList.add(mediaServer);
     }
 
     /**
@@ -160,7 +209,6 @@ public class Heart_Core {
             }
         };
 
-        // TODO have the error stream print red text
         OutputStream err = new OutputStream() {
             @Override
             public void write(int b) throws IOException {
@@ -195,28 +243,9 @@ public class Heart_Core {
 
         logBaseDir = heartDir + logBaseDir;
 
-        configDir = heartDir + configDir;
-
         shardFileDir = heartDir + shardFileDir;
 
-        // TODO init music/movie dir's based on config
-        mediaDir = "F:/Media";
-        musicDir = "F:/Media/music";
-        movieDir = "F:/Media/movies";
-
-        // Share media folder with the network
-        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
-            String shareMediaFolder = "net share Media=" + mediaDir.replace("/", "\\") + " /GRANT:Everyone,FULL";
-            try {
-                Runtime.getRuntime().exec(shareMediaFolder);
-            } catch (IOException e) {
-                System.err.println("Error sharing the media folder with the network! Media access may not be available for Shards!");
-            }
-        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
-            // TODO add linux folder sharing
-        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
-            // TODO if not on a valid system
-        }
+        configDir = heartDir + configDir;
 
         updateShardVersion();
     }
@@ -285,9 +314,9 @@ public class Heart_Core {
         forceIndex.addActionListener(e -> mediaManager.index(false, 0));
         forceIndex.setBounds(new Rectangle(390, 10, 100, 40));
 
-        textArea = new JTextArea();
+        textArea = new JTextPane();
         textArea.setEditable(false);
-        textArea.setLineWrap(true);
+//        textArea.setLineWrap(true);
 
         JButton clearLog = new JButton("Clear Log");
         clearLog.addActionListener(e -> textArea.setText(""));
@@ -327,9 +356,11 @@ public class Heart_Core {
             System.out.println("###############" + systemName + "###############");
             System.out.println("System logging enabled");
         } catch (SecurityException e) {
+            System.out.println("###############" + systemName + "###############");
             System.err.println(
                     "Unable to access log file or directory because of permission settings. Will continue running without logs, however please reboot to set logs.\n");
         } catch (IOException e) {
+            System.out.println("###############" + systemName + "###############");
             System.err.println(
                     "Unable to access find or create log on object creation. Will continue running without logs, however please reboot to set logs.\n");
         }
@@ -346,19 +377,138 @@ public class Heart_Core {
         try {
             cfg = new Config(configDir);
         } catch (ConfigurationException e) {
-            // TODO if the configuration isn't found, create and init it
+            try {
+                File configPath = new File(heartDir);
+                configPath.mkdirs();
+                configPath = new File(configDir);
+                configPath.createNewFile();
+                cfg = new Config(configDir);
+                cfg.set("cfg_set", "False");
+                cfg.save();
+                System.out.println("Configuration file created.");
+            } catch (IOException e1) {
+                System.err.println("Unable to create configuration file!");
+                return;
+            } catch (ConfigurationException e1) {
+                System.err.println("Unable to access configuration file. Error: " + e1.getMessage());
+                return;
+            }
+
         }
 
-        // cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
+        cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
         if (cfg_set) {
-            systemName = cfg.get("systemName");
-            musicDir = cfg.get("musicDir");
-            movieDir = cfg.get("moveDir");
-            commandKey = cfg.get("commandKey");
-            uuid = UUID.fromString(cfg.get("uuid"));
-            System.out.println("Configuration file loaded.");
+            loadCfg();
         } else {
-            System.err.println("Please initialize the Heart Config with Nerv before proceeding!");
+            createCfg();
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+            }
+            loadCfg();
+        }
+    }
+
+    /**
+     * Load the configuration file into appropriate variables
+     */
+    private void loadCfg() {
+        systemName = cfg.get("systemName");
+        mediaDir = cfg.get("mediaDir");
+        musicDir = cfg.get("musicDir");
+        movieDir = cfg.get("movieDir");
+        commandKey = cfg.get("commandKey");
+        uuid = UUID.fromString(cfg.get("uuid"));
+
+        // Load check
+        if (systemName == null || systemName == "")
+            System.err.println("Unable to load System Name from config file!");
+        if (mediaDir == null || mediaDir == "")
+            System.err.println("Unable to load root Media directory from config file!");
+        if (musicDir == null || musicDir == "")
+            System.err.println("Unable to load root Music directory from config file!");
+        if (movieDir == null || movieDir == "")
+            System.err.println("Unable to load root Movie directory from config file!");
+        if (commandKey == null || commandKey == "")
+            System.err.println("Unable to load Command Key from config file!");
+        if (uuid == null || uuid.toString() == "")
+            System.err.println("Unable to load UUID from config file!");
+
+
+        System.out.println("Configuration file loaded.");
+    }
+
+    /**
+     * Walk the user through the creation of the configuration values
+     */
+    private void createCfg() {
+        JOptionPane.showMessageDialog(frame, "The configuration file hasn't been set up.\nThis will walk through the setup.");
+        String systemName = JOptionPane.showInputDialog(frame, "What do you want to call this device?");
+        JOptionPane.showMessageDialog(frame, "Enter the root media folder.");
+        String mediaDir = FileChooser.chooseFile();
+
+        String musicDir;
+        if (new File(mediaDir + "/music").exists()) {
+            musicDir = mediaDir + "/music";
+        } else if (new File(mediaDir + "/songs").exists()) {
+            musicDir = mediaDir + "/songs";
+        } else {
+            JOptionPane.showMessageDialog(frame, "Enter the root music folder.");
+            musicDir = FileChooser.chooseFile();
+        }
+
+        String movieDir;
+        if (new File(mediaDir + "/movie").exists()) {
+            movieDir = mediaDir + "/movie";
+        } else if (new File(mediaDir + "/movies").exists()) {
+            movieDir = mediaDir + "/movies";
+        } else {
+            JOptionPane.showMessageDialog(frame, "Enter the root movie folder.");
+            movieDir = FileChooser.chooseFile();
+        }
+
+        String commandKey = JOptionPane.showInputDialog(frame, "What voice command will you use to wake up Crystal?");
+
+        String uuid = UUID.randomUUID().toString();
+
+        String mediaIndexDelay = JOptionPane.showInputDialog(frame, "How often do you want to index your media library? (In Minutes)");
+
+        String updateCheckDelay = JOptionPane.showInputDialog(frame, "How often do you want to check for software updates? (In Minutes)");
+
+        cfg.set("cfg_set", "True"); // TODO nullpointerexception thrown on kayleighs computer on config creation, before and after input helper
+        cfg.set("systemName", systemName);
+        cfg.set("mediaDir", mediaDir);
+        cfg.set("musicDir", musicDir);
+        cfg.set("movieDir", movieDir);
+        cfg.set("commandKey", commandKey);
+        cfg.set("uuid", uuid);
+        cfg.set("mediaIndexDelay", mediaIndexDelay);
+        cfg.set("updateCheckDelay", updateCheckDelay);
+        try {
+            cfg.save();
+        } catch (ConfigurationException e) {
+            System.err.println("Error saving settings to the config file. Error: " + e.getMessage());
+            JOptionPane.showMessageDialog(frame, "Error saving settings to the config file. Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Share the root media directory with the network
+     */
+    private void shareMediaDir() {
+        // Share media folder with the network
+        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
+            String shareMediaFolder = "net share Media=" + mediaDir + " /GRANT:Everyone,FULL";
+            try {
+                Runtime.getRuntime().exec(shareMediaFolder);
+            } catch (IOException e) {
+                System.err.println("Error sharing the media folder with the network! Media access may not be available for Shards!");
+            }
+        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
+            // TODO add linux folder sharing
+            System.err.println("Crystal doesn't know how to share your media folder on this system! Please share folder manually!");
+        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
+            System.err.println("Crystal doesn't know how to share your media folder on this system! Please share folder manually!");
         }
     }
 
@@ -366,8 +516,12 @@ public class Heart_Core {
      * Initializes the media index thread to provide a usable list for shards
      */
     private void initMediaManager() {
-        mediaManager = new MediaManager(mediaDir, musicDir, movieDir);
-        mediaManager.index(true, 30);
+        if (cfg_set) {
+            mediaManager = new MediaManager(mediaDir, musicDir, movieDir);
+            mediaManager.index(true, Integer.parseInt(cfg.get("mediaIndexDelay")));
+        } else {
+            System.err.println("Configuration file was not found. Media management is unavailable until the configuration is set up.");
+        }
     }
 
     /**
@@ -402,7 +556,7 @@ public class Heart_Core {
         boolean success = true;
 
         SwingUtilities.invokeLater(() -> {
-            textArea.append(msg);
+            appendToPane(textArea, msg, color);
             textArea.setCaretPosition(textArea.getDocument().getLength());
         });
 
@@ -420,13 +574,19 @@ public class Heart_Core {
         return success;
     }
 
-    /**
-     * get the Heart_Core object
-     *
-     * @return Heart_Core object
-     */
-    public static Heart_Core getCore() {
-        return heart_core;
+    private void appendToPane(JTextPane tp, String msg, Color c) {
+        tp.setEditable(true);
+        StyleContext sc = StyleContext.getDefaultStyleContext();
+        AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
+
+        aset = sc.addAttribute(aset, StyleConstants.FontFamily, "Lucida Console");
+        aset = sc.addAttribute(aset, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
+
+        int len = tp.getDocument().getLength();
+        tp.setCaretPosition(len);
+        tp.setCharacterAttributes(aset, false);
+        tp.replaceSelection(msg);
+        tp.setEditable(false);
     }
 
     /**
@@ -443,12 +603,12 @@ public class Heart_Core {
     }
 
     /**
-     * Checks whether the Heart configuration file is set up or not
+     * Get the configuration object
      *
-     * @return true if the configuration is set up, else false.
+     * @return Config configuration object
      */
-    public static boolean isConfigSet() {
-        return cfg_set;
+    public Config getCfg() {
+        return cfg;
     }
 
     /**
@@ -459,8 +619,9 @@ public class Heart_Core {
     }
 
     public void notifyShardsOfUpdate() {
+        System.out.println("Notifying Shards of update.");
         for (ClientConnection cc : server.getClients()) {
-            Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
+            Packet p = new Packet(Packet.PACKET_TYPE.Message, uuid.toString());
             p.packetString = "new patch";
             try {
                 cc.sendPacket(p, true);
@@ -482,22 +643,38 @@ public class Heart_Core {
      */
     @SuppressWarnings("deprecation")
     public void stopHeartServer() {
+        for (MediaServerHelper ms : mediaServerArrayList) {
+            ms.stopMediaServer();
+            ms = null;
+        }
+        mediaServerArrayList = null;
+
         try {
             dnssd.closeRegisteredService();
         } catch (NullPointerException e) {
         }
-        server.closeConnections();
+        try {
+            server.closeConnections();
+        } catch (NullPointerException e) {
+        }
         dnssd = null;
         server = null;
-        serverThread.stop();
+
+        try {
+            serverThread.stop();
+        } catch (NullPointerException e) {
+        }
         serverThread = null;
-        mediaManager.close();
-        new Thread(() -> {
-            try {
-                updateCheckerThread.join();
-                updateCheckerThread = null;
-            } catch (InterruptedException e) {
-            }
-        }).start();
+
+        try {
+            mediaManager.close();
+        } catch (NullPointerException e) {
+        }
+
+        try {
+            updateCheckerThread.stop();
+        } catch (NullPointerException e) {
+        }
+        updateCheckerThread = null;
     }
 }

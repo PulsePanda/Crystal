@@ -1,16 +1,27 @@
+/*
+ * This file is part of Crystal Home Systems.
+ *
+ * Crystal Home Systems is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * Crystal Home Systems is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
+ */
+
 package Utilities.Media;
 
 import java.io.File;
 
+/**
+ * Media manager. Indexes all media found in given directories and stores them for later use
+ */
 public class MediaManager {
 
     protected String mediaDriveLetter, musicDir, movieDir;
-
-    private MediaIndexer mediaIndexer;
     protected MediaList songList, movieList;
-    private Thread indexThread;
-
     protected boolean isIndexed = false, keepIndexing;
+    private MediaIndexer mediaIndexer;
+    private Thread indexThread;
 
     /**
      * Media Manager default constructor
@@ -22,8 +33,16 @@ public class MediaManager {
     public MediaManager(String mediaDir, String musicDir, String movieDir) {
         System.out.println("MEDIA_MANAGER: Initializing media manager...");
 
-        String[] driveLetter = mediaDir.split("/"); // separates out the drive letter
-        this.mediaDriveLetter = driveLetter[0];
+        // Remove drive letter from paths
+//        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
+//            String[] driveLetter = mediaDir.split(":"); // separates out the drive letter
+//            this.mediaDriveLetter = driveLetter[0];
+//            this.mediaDriveLetter = mediaDriveLetter + ":\\";
+//        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
+//            System.err.println("Crystal doesn't know how to handle the media paths on your system! Media playback will not work!");
+//        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
+//            System.err.println("Crystal doesn't know how to handle the media paths on your system! Media playback will not work!");
+//        }
         this.musicDir = musicDir;
         this.movieDir = movieDir;
 
@@ -39,6 +58,8 @@ public class MediaManager {
      */
     public void index(boolean keepIndexing, int delayMinutes) {
         this.keepIndexing = keepIndexing;
+
+        clearIndex();
 
         mediaIndexer = new MediaIndexer(this, delayMinutes * 60 * 1000); // 30 minutes
         indexThread = new Thread(mediaIndexer);
@@ -109,6 +130,14 @@ public class MediaManager {
         }
         return files;
     }
+
+    /**
+     * Clears out the index to re-index
+     */
+    public void clearIndex() {
+        movieList.delete();
+        songList.delete();
+    }
 }
 
 class MediaIndexer implements Runnable {
@@ -168,9 +197,9 @@ class MediaIndexer implements Runnable {
         } else if (file.isFile()) {
             if (isMovieOrMusic(file.getName())) {
                 String filePath = file.getPath();
-                // removes the drive letter from the file's path, as the folder is shared and the drive isn't needed
-                filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
-                mm.movieList.addItem(file.getName(), filePath, ListItem.MEDIA_TYPE.Movie);
+                String fileName = file.getName();
+
+                mm.movieList.addItem(fileName, filePath, ListItem.MEDIA_TYPE.Movie);
             }
         }
     }
@@ -188,14 +217,8 @@ class MediaIndexer implements Runnable {
             }
         } else if (file.isFile()) {
             if (isMovieOrMusic(file.getName())) {
-                // Remove the drive letter from the path
                 String filePath = file.getPath();
-                filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
-
-                // TODO Remove the file extension from the name
                 String fileName = file.getName();
-//                String[] fileNameSplit = fileName.split(".");
-//                fileName = fileNameSplit[0];
 
                 mm.songList.addItem(fileName, filePath, ListItem.MEDIA_TYPE.Music);
             }

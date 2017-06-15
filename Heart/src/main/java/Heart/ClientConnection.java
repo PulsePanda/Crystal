@@ -1,3 +1,13 @@
+/*
+ * This file is part of Crystal Home Systems.
+ *
+ * Crystal Home Systems is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * Crystal Home Systems is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
+ */
+
 package Heart;
 
 import Kript.Kript;
@@ -6,16 +16,25 @@ import Netta.Connection.Server.ConnectedClient;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
 import Netta.Exceptions.SendPacketException;
+import Utilities.Command;
 import Utilities.Log;
+import Utilities.Media.MediaServerHelper;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.UUID;
 
+/**
+ * Client Connection. Wrapper for accepted client connected to the Heart server
+ */
 public class ClientConnection extends ConnectedClient {
 
+    public UUID clientUUID;
+    public String clientName, clientLocation;
     private Command command;
     private Log clientLog;
     private boolean clientLogCreated = false, conversation = false;
+    private MediaServerHelper mediaServer;
 
     /**
      * Client Connection default constructor
@@ -36,8 +55,6 @@ public class ClientConnection extends ConnectedClient {
         } catch (IOException ex) {
             System.err.println("Unable to create log for connected Shard. Ignoring logging.");
         }
-
-        // Start connection procedures
     }
 
     /**
@@ -59,6 +76,10 @@ public class ClientConnection extends ConnectedClient {
                         closeIOStreams();
                     } catch (ConnectionException e) {
                         System.err.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
+                    }
+                    try {
+                        mediaServer.stopMediaServer();
+                    } catch (NullPointerException e) {
                     }
                     break;
                 case "Command":
@@ -84,12 +105,20 @@ public class ClientConnection extends ConnectedClient {
     }
 
     @Deprecated
+    public boolean getConversation() {
+        return conversation;
+    }
+
+    @Deprecated
     public void setConversation(boolean b) {
         conversation = b;
     }
 
-    @Deprecated
-    public boolean getConversation() {
-        return conversation;
+    public void setMediaServer(MediaServerHelper mediaServer) {
+        this.mediaServer = mediaServer;
+    }
+
+    public MediaServerHelper getMediaServerHelper() {
+        return mediaServer;
     }
 }

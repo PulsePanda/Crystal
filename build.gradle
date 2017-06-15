@@ -7,6 +7,7 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'eclipse'
+    apply plugin: 'idea'
 
     task copyLicense {
         outputs.file new File("$buildDir/LICENSE")
@@ -18,7 +19,7 @@ subprojects {
         }
     }
 
-    repositories{
+    repositories {
         mavenCentral()
     }
 
@@ -31,7 +32,22 @@ clean.doFirst {
     delete ".distributions"
 }
 
-build.doLast {
+def exportedProjects = [
+        ":Heart",
+	":Shard",
+	":Common"
+]
+
+task alljavadoc(type: Javadoc) {
+    source exportedProjects.collect { project(it).sourceSets.main.allJava }
+    classpath = files(exportedProjects.collect { project(it).sourceSets.main.compileClasspath })
+    destinationDir = file("docs")
+}
+
+build.dependsOn alljavadoc
+
+task bundle(dependsOn: build) {
+    sleep(5 * 1000)
     copy {
         from(file('Heart/build/distributions'))
         into('.distributions')
