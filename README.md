@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/PulsePanda/Crystal.svg?branch=master)](https://travis-ci.org/PulsePanda/Crystal)
 
-![alt tag](http://pulsepanda.com/austinVanAlstyne_files/chs.png)
+![alt tag](http://austinva.me/austinVanAlstyne_files/chs.png)
 
 # Crystal Home Systems
 Copyright© 2015 Austin VanAlstyne, Bailey Thorson
