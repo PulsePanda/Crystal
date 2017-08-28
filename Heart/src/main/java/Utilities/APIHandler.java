@@ -1,4 +1,3 @@
-
 /*
  * This file is part of Crystal Home Systems.
  *
@@ -11,10 +10,12 @@
 
 package Utilities;
 
+import Exceptions.APIException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
@@ -32,9 +33,10 @@ public class APIHandler {
      * Utility for handling remote API's
      *
      * @param URL API url
-     * @throws IOException if the URL is invalid
+     * @throws APIException thrown if there is an issue accessing API.
+     *                      Details will be in the getMessage()
      */
-    public APIHandler(String URL) throws IOException {
+    public APIHandler(String URL) throws APIException {
         url = URL;
         loadFromURL(url);
     }
@@ -43,9 +45,10 @@ public class APIHandler {
      * Load API data from URL. Called by default by the constructor
      *
      * @param URL API url
-     * @throws IOException if URL is invalid
+     * @throws APIException thrown if there is an issue accessing the API.
+     *                      Details will be in the getMessage()
      */
-    public void loadFromURL(String URL) throws IOException {
+    public void loadFromURL(String URL) throws APIException {
         url = URL;
         jobj = getJSONfromURL(URL);
     }
@@ -55,14 +58,25 @@ public class APIHandler {
      *
      * @param URL API url
      * @return JSONObject JSON information object
-     * @throws IOException thrown when unable to load from given URL
+     * @throws APIException thrown when unable to load from given URL
+     *                      Details will be in the getMessage()
      */
-    private JSONObject getJSONfromURL(String URL) throws IOException {
+    private JSONObject getJSONfromURL(String URL) throws APIException {
 
-        URL url = new URL(URL);
+        URL url = null;
+        try {
+            url = new URL(URL);
+        } catch (MalformedURLException e) {
+            throw new APIException("Unable to retrieve JSON from URL. URL is invalid.");
+        }
 
         // read from the URL
-        Scanner scan = new Scanner(url.openStream());
+        Scanner scan = null;
+        try {
+            scan = new Scanner(url.openStream());
+        } catch (IOException e) {
+            throw new APIException("Unable to access provided URL.");
+        }
         String str = new String();
         while (scan.hasNext()) {
             str += scan.nextLine();

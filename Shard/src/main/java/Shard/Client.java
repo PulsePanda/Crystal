@@ -12,6 +12,7 @@ package Shard;
 
 import Netta.Connection.Client.ClientTemplate;
 import Netta.Connection.Packet;
+import Utilities.HandlePacket;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -30,7 +31,7 @@ public class Client extends ClientTemplate {
      * @param p packet received from shard.
      */
     @Override
-    public void ThreadAction(Packet p) {
+    public void packetReceived(Packet p) {
         new HandlePacket(p, this);
     }
 }

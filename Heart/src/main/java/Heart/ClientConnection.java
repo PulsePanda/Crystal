@@ -18,18 +18,23 @@ import Netta.Exceptions.ConnectionInitializationException;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Command;
 import Utilities.Log;
+import Utilities.Media.MediaServerHelper;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.UUID;
 
 /**
  * Client Connection. Wrapper for accepted client connected to the Heart server
  */
 public class ClientConnection extends ConnectedClient {
 
+    public UUID clientUUID;
+    public String clientName, clientLocation;
     private Command command;
     private Log clientLog;
     private boolean clientLogCreated = false, conversation = false;
+    private MediaServerHelper mediaServer;
 
     /**
      * Client Connection default constructor
@@ -50,8 +55,6 @@ public class ClientConnection extends ConnectedClient {
         } catch (IOException ex) {
             System.err.println("Unable to create log for connected Shard. Ignoring logging.");
         }
-
-        // Start connection procedures
     }
 
     /**
@@ -73,6 +76,10 @@ public class ClientConnection extends ConnectedClient {
                         closeIOStreams();
                     } catch (ConnectionException e) {
                         System.err.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
+                    }
+                    try {
+                        mediaServer.stopMediaServer();
+                    } catch (NullPointerException e) {
                     }
                     break;
                 case "Command":
@@ -98,12 +105,20 @@ public class ClientConnection extends ConnectedClient {
     }
 
     @Deprecated
+    public boolean getConversation() {
+        return conversation;
+    }
+
+    @Deprecated
     public void setConversation(boolean b) {
         conversation = b;
     }
 
-    @Deprecated
-    public boolean getConversation() {
-        return conversation;
+    public void setMediaServer(MediaServerHelper mediaServer) {
+        this.mediaServer = mediaServer;
+    }
+
+    public MediaServerHelper getMediaServerHelper() {
+        return mediaServer;
     }
 }

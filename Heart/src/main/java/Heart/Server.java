@@ -16,6 +16,7 @@ import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
 import Netta.Exceptions.SendPacketException;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class Server extends MultiClientServer {
      * @param cc Socket connection client socket
      */
     @Override
-    public void ThreadAction(Socket cc) {
+    public void clientConnected(Socket cc) {
         ClientConnection temp;
         try {
             temp = new ClientConnection(cc, kript);
@@ -63,7 +64,7 @@ public class Server extends MultiClientServer {
      * close all server connections
      */
     public void closeConnections() {
-        Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
+        Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, Heart_Core.getCore().getUUID().toString());
         p.packetString = "Manual disconnect";
 
         for (int i = 0; i < clients.size(); i++) {
@@ -76,8 +77,15 @@ public class Server extends MultiClientServer {
             try {
                 temp.closeIOStreams();
             } catch (ConnectionException e) {
-                System.out.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
+                System.err.println("Unable to close IO streams with Shard. Error: " + e.getMessage());
             }
+        }
+
+        try {
+            this.closeServer();
+        } catch (IOException e) {
+            System.err.println("Error closing server socket.");
+        } catch (NullPointerException e) {
         }
     }
 

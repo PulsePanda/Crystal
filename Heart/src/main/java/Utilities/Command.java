@@ -20,22 +20,24 @@
 
 package Utilities;
 
+import Exceptions.APIException;
 import Heart.ClientConnection;
 import Heart.Heart_Core;
 import Netta.Connection.Packet;
 import Netta.Exceptions.SendPacketException;
+import Utilities.Media.Exceptions.ServerHelperException;
+import Utilities.Media.ListItem;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
+import java.util.UUID;
 
 /**
- * Command manager. Handles incoming client packets
+ * HandlePacket manager. Handles incoming client packets
  */
 public class Command {
 
@@ -59,30 +61,36 @@ public class Command {
      */
     public void analyzeCommand(Packet packet) throws SendPacketException {
         String c = packet.packetString;
-        System.out.println("Received command from Shard. Command: " + c);
+        System.out.println("Received command from Shard. HandlePacket: " + c);
 
         switch (c) {
+            case "uuid":
+                connection.clientUUID = UUID.fromString(packet.senderID);
+                connection.clientName = packet.packetStringArray[0];
+                connection.clientLocation = packet.packetStringArray[1];
+                sendToClient("uuid", true);
+                break;
             case "Good Morning":
                 try {
                     goodMorning();
-                } catch (IOException e) {
-                    System.err.println("Error retrieving API information for goodMorning command!");
+                } catch (APIException e) {
+                    System.err.println("Error retrieving API information for goodMorning command! Details: " + e.getMessage());
                     // TODO have error packet sent to shard
                 }
                 break;
             case "BTC Price":
                 try {
                     btcPrice();
-                } catch (IOException e) {
-                    System.err.println("Error retrieving API information for btcPrice command!");
+                } catch (APIException e) {
+                    System.err.println("Error retrieving API information for btcPrice command! Details: " + e.getMessage());
                     // TODO have error packet sent to shard
                 }
                 break;
             case "Weather":
                 try {
                     weather();
-                } catch (IOException e) {
-                    System.err.println("Error retrieving API information for weather command!");
+                } catch (APIException e) {
+                    System.err.println("Error retrieving API information for weather command! Details: " + e.getMessage());
                     // TODO have error packet sent to shard
                 }
                 break;
@@ -92,13 +100,14 @@ public class Command {
                     file = Files.readAllBytes(Paths.get(Heart_Core.baseDir + "patch/Shard.zip"));
                 } catch (IOException e1) {
                     System.err.println("Error reading Shard.zip to send to shards. Aborting.");
+                    sendToClient("patch file send error", true);
                     return;
                 }
                 // dummy packet to allow client's readpacket to reset
-                Packet blank = new Packet(Packet.PACKET_TYPE.NULL, null);
+                Packet blank = new Packet(Packet.PACKET_TYPE.NULL, Heart_Core.getCore().getUUID().toString());
                 sendToClient(blank, true);
 
-                Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
+                Packet p = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
                 p.packetString = "update";
                 p.packetByteArray = file;
                 System.out.println("Sending patch to Shard...");
@@ -106,7 +115,7 @@ public class Command {
                 System.out.println("Sent patch to Shard.");
 
                 // second dummy packet
-                Packet blank2 = new Packet(Packet.PACKET_TYPE.NULL, null);
+                Packet blank2 = new Packet(Packet.PACKET_TYPE.NULL, Heart_Core.getCore().getUUID().toString());
                 sendToClient(blank2, false);
                 break;
             case "get Shard Version":
@@ -115,35 +124,47 @@ public class Command {
                 break;
             case "Play Music":
                 System.out.println("Shard requested to play music. Song Name: " + packet.packetStringArray[0]);
-                Packet music = new Packet(Packet.PACKET_TYPE.Message, null);
-                music.packetString = "music";
+                Packet music = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
                 String requestedSong = packet.packetStringArray[0];
-                String[] musicPaths = Heart_Core.getCore().getMediaManager().getSong(requestedSong);
-                for (int i = 0; i < musicPaths.length; i++) { // edit each path to be a reachable address
-                    try {
-                        musicPaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + musicPaths[i];
-                    } catch (UnknownHostException e) {
-                        System.err.println("Error getting local hostname! Unable to provide correct path for Shard music playback!");
+                if (requestedSong != null) {
+                    String[] musicPaths = Heart_Core.getCore().getMediaManager().getSong(requestedSong);
+                    if (musicPaths.length > 1) { // If there is more than one matching song, ask the shard which one
+                        music.packetString = "which song";
+                        music.packetStringArray = musicPaths;
+                        sendToClient(music, true);
+                    } else {
+                        try {
+                            ListItem[] temp = Heart_Core.getCore().getMediaManager().getSongList().get(musicPaths[0]);
+                            Heart_Core.getCore().startMediaServer(temp[0], connection);
+                        } catch (NullPointerException e) {
+                        } catch (ServerHelperException e) {
+                            System.err.println("Unable to start Media Server! Details: " + e.getMessage());
+                        }
                     }
                 }
-                music.packetStringArray = musicPaths;
-                sendToClient(music, true);
                 break;
             case "Play Movie":
                 System.out.println("Shard requested to play a movie. Movie Name: " + packet.packetStringArray[0]);
-                Packet movie = new Packet(Packet.PACKET_TYPE.Message, null);
-                movie.packetString = "movie";
+                Packet movie = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
                 String requestedMovie = packet.packetStringArray[0];
-                String[] moviePaths = Heart_Core.getCore().getMediaManager().getMovie(requestedMovie);
-                for (int i = 0; i < moviePaths.length; i++) {
-                    try {
-                        moviePaths[i] = "file://" + InetAddress.getLocalHost().getHostName() + moviePaths[i];
-                    } catch (UnknownHostException e) {
-                        System.err.println("Error getting local hostname! Unable to provide correct path for Shard movie playback!");
+                if (requestedMovie != null) {
+                    String[] moviePaths = Heart_Core.getCore().getMediaManager().getMovie(requestedMovie);
+                    if (moviePaths.length > 1) { // If there is more than one matching movie, ask the shard which one
+                        movie.packetString = "which movie";
+                        movie.packetStringArray = moviePaths;
+                        sendToClient(movie, true);
+                    } else {
+                        try {
+                            ListItem[] temp = Heart_Core.getCore().getMediaManager().getMovieList().get(moviePaths[0]);
+                            try {
+                                Heart_Core.getCore().startMediaServer(temp[0], connection);
+                            } catch (ServerHelperException e) {
+                                System.err.println("Unable to start Media Server! Details: " + e.getMessage());
+                            }
+                        } catch (NullPointerException e) {
+                        }
                     }
                 }
-                movie.packetStringArray = moviePaths;
-                sendToClient(movie, true);
                 break;
             default:
                 break;
@@ -158,9 +179,9 @@ public class Command {
      *
      * @throws SendPacketException thrown if there is an issue sending the packet to the Shard.
      *                             Details will be in the getMessage()
-     * @throws IOException         thrown if there is an error with APIHandler
+     * @throws APIException        thrown if there is an error with APIHandler
      */
-    private void goodMorning() throws SendPacketException, IOException {
+    private void goodMorning() throws SendPacketException, APIException {
         System.out.println("Shard requested Good Morning info.");
 
         // Bitcoin price
@@ -182,9 +203,9 @@ public class Command {
      *
      * @throws SendPacketException thrown if there is an error sending the packet to the Shard.
      *                             Details will be in the getMessage()
-     * @throws IOException         thrown if there is an error with APIHandler
+     * @throws APIException        thrown if there is an error with APIHandler
      */
-    private void btcPrice() throws SendPacketException, IOException {
+    private void btcPrice() throws SendPacketException, APIException {
         System.out.println("Shard requested BTC Price info.");
 
         api = new APIHandler("https://blockchain.info/ticker");
@@ -200,9 +221,9 @@ public class Command {
      *
      * @throws SendPacketException thrown if there is an issue sending the packet to the Shard.
      *                             Details will be in the getMessage()
-     * @throws IOException         thrown if there is an error with API handler
+     * @throws APIException        thrown if there is an error with API handler
      */
-    private void weather() throws SendPacketException, IOException {
+    private void weather() throws SendPacketException, APIException {
         System.out.println("Shard requested Weather info.");
         api = new APIHandler(
                 "http://api.openweathermap.org/data/2.5/forecast?id=5275191&appid=70546178bd3fbec19e717d754e53b129");
@@ -244,7 +265,7 @@ public class Command {
      *                             Details will be in the getMessage()
      */
     private void sendToClient(String s, boolean encrypted) throws SendPacketException {
-        Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
+        Packet p = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
         p.packetString = s;
         connection.sendPacket(p, encrypted);
     }

@@ -37,8 +37,6 @@ public class ShardDriver {
             System.err.println("Error starting Shard Core. Error: " + ex.getMessage());
         }
 
-        ShardConnectionThread sct = new ShardConnectionThread(true, false);
-        Thread t = new Thread(sct);
-        t.start();
+        shardCore.startConnectionThread();
     }
 }

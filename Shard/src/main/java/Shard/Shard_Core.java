@@ -13,25 +13,35 @@ package Shard;
 import Exceptions.ClientInitializationException;
 import Exceptions.ConfigurationException;
 import Netta.Connection.Packet;
+import Netta.DNSSD;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
+import Netta.ServiceEntry;
 import Utilities.Config;
-import Utilities.DNSSD;
 import Utilities.Log;
-import Utilities.Media.MediaPlayback;
+import Utilities.Media.Client.MediaClientHelper;
+import Utilities.ShardPatcher;
 import Utilities.SystemInfo;
 
 import javax.swing.*;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.UUID;
+
+//import Utilities.Media.MediaPlayback;
 
 /**
  * Core class for the Shard. Handles everything the Shard does
@@ -40,40 +50,38 @@ public class Shard_Core {
 
     // Shard version
     public static final String SHARD_VERSION = "0.1.6";
+    // System elements
+    public final static SystemInfo systemInfo = new SystemInfo();
     public static String SHARD_VERSION_SERVER = "";
-    private ShardPatcher patcher;
-
     // Global variables
-    public static String systemName = "CHS Shard", commandKey, baseDir = "/CrystalHomeSys/", shardDir = "Shard/",
+    public static String systemName = "CHS Shard", systemLocation = "", commandKey, baseDir = "/CrystalHomeSys/", shardDir = "Shard/",
             logBaseDir = "Logs/", configDir = "shard_config.cfg";
-    private static boolean logActive = false, initialized = false;
     public static boolean patchReady = false;
-
-    private boolean headless = false;
-
+    private static boolean logActive = false, remoteLoggingInitialized = false;
     // private Client client;
     private static Shard_Core shard_core = null;
+    private static JTextPane textArea;
+    private final int dnssdPort = 6980;
+    private Thread shardConnectionThread;
+    // Media Elements
+//    public MediaPlayback mediaPlayback;
+    private ShardPatcher patcher;
+    private boolean headless = false, cfg_set = false;
     private Log log;
     private Config cfg = null;
-    private UUID uuid;
+    private UUID uuid, heartUUID;
     private Client client = null;
     private Thread clientThread = null;
     private String IP = null;
     private int port;
-    private final int dnssdPort = 6980;
     private DNSSD dnssd;
-
+    private MediaClientHelper mediaClient;
+    private Thread mediaClientThread;
     // GUI elements
     private JFrame frame;
-    private static JTextArea textArea;
     private JPanel consolePanel, commandPanel;
     private JTabbedPane tabbedPane;
-
-    // Media Elements
-    public MediaPlayback mediaPlayback;
-
-    // System elements
-    public final static SystemInfo systemInfo = new SystemInfo();
+    private JLabel connectionStatus;
 
     public Shard_Core(boolean headless) throws ClientInitializationException {
         if (shard_core != null) {
@@ -84,11 +92,21 @@ public class Shard_Core {
     }
 
     /**
+     * Retrieve the object of ShardCore being used by the Shard. There can only
+     * be one, it is static.
+     *
+     * @return Shard_Core object being used by the Shard
+     */
+    public static Shard_Core getShardCore() {
+        return shard_core;
+    }
+
+    /**
      * Begin initialization of the Shard. When this method is done executing,
      * the Shard will be ready to connect to a Heart.
      */
     public void init() {
-        if (initialized) {
+        if (remoteLoggingInitialized) {
             return;
         }
 
@@ -109,18 +127,46 @@ public class Shard_Core {
     }
 
     /**
+     * Start the Shards connection thread to connect to the Heart server. Tries to connect every 10 seconds.
+     * If the connection is already active, nothing happens. Used to automatically reconnect to the Heart on
+     * disconnect.
+     */
+    public void startConnectionThread() {
+        ShardConnectionThread sct = new ShardConnectionThread(true, false);
+        shardConnectionThread = new Thread(sct);
+        shardConnectionThread.start();
+    }
+
+    /**
      * Function to redirect standard output streams to the write function
      */
     private void redirectSystemStreams() {
         OutputStream out = new OutputStream() {
             @Override
             public void write(int b) throws IOException {
-                println(String.valueOf((char) b));
+                println(String.valueOf((char) b), Color.BLACK);
             }
 
             @Override
             public void write(byte[] b, int off, int len) throws IOException {
-                println(new String(b, off, len));
+                println(new String(b, off, len), Color.BLACK);
+            }
+
+            @Override
+            public void write(byte[] b) throws IOException {
+                write(b, 0, b.length);
+            }
+        };
+
+        OutputStream err = new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                println(String.valueOf((char) b), Color.RED);
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+                println(new String(b, off, len), Color.RED);
             }
 
             @Override
@@ -130,12 +176,12 @@ public class Shard_Core {
         };
 
         System.setOut(new PrintStream(out, true));
-        System.setErr(new PrintStream(out, true));
+        System.setErr(new PrintStream(err, true));
     }
 
     /**
      * Initialize variables being used for configuration files and log systems.
-     * Other variables can be initialized here too.
+     * Other variables can be remoteLoggingInitialized here too.
      */
     private void initVariables() {
         baseDir = System.getProperty("user.home") + baseDir;
@@ -145,7 +191,7 @@ public class Shard_Core {
 
         dnssd = new DNSSD();
 
-        mediaPlayback = new MediaPlayback();
+//        mediaPlayback = new MediaPlayback();
     }
 
     /**
@@ -188,6 +234,15 @@ public class Shard_Core {
             }
         }
 
+        connectionStatus.setText("CONNECTED");
+        connectionStatus.setForeground(Color.GREEN);
+        remoteLoggingInitialized = true;
+        try {
+            swapID();
+        } catch (SendPacketException e) {
+            System.err.println("Error sending Heart ID information. Details: " + e.getMessage());
+        }
+
         // Run shard update
         patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.runUpdate);
         patcher.start();
@@ -208,11 +263,14 @@ public class Shard_Core {
         frame.setLocationRelativeTo(null);
         frame.setLayout(null);
         tabbedPane = new JTabbedPane();
-        tabbedPane.setBounds(0, 0, frame.getWidth(), frame.getHeight());
+        tabbedPane.setBounds(0, 0, frame.getWidth(), frame.getHeight() - 10);
 
         // Command panel setup
         commandPanel = new JPanel();
         commandPanel.setLayout(new FlowLayout());
+
+        connectionStatus = new JLabel("DISCONNECTED");
+        connectionStatus.setForeground(Color.RED);
 
         JButton checkUpdate = new JButton("Check for Updates");
         checkUpdate.addActionListener(e -> {
@@ -226,7 +284,7 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
             p.packetString = "Good Morning";
             try {
                 client.sendPacket(p, true);
@@ -240,7 +298,7 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
             p.packetString = "BTC Price";
             try {
                 client.sendPacket(p, true);
@@ -254,7 +312,7 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
             p.packetString = "Weather";
             try {
                 client.sendPacket(p, true);
@@ -268,7 +326,7 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
             p.packetString = "Play Music";
             String song = JOptionPane.showInputDialog(null, "Song name");
             p.packetStringArray = new String[]{song};
@@ -284,7 +342,7 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            Packet p = new Packet(Packet.PACKET_TYPE.Command, "");
+            Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
             p.packetString = "Play Movie";
             String movie = JOptionPane.showInputDialog(null, "Movie name");
             p.packetStringArray = new String[]{movie};
@@ -300,9 +358,10 @@ public class Shard_Core {
             if (!patchReady)
                 return;
 
-            mediaPlayback.stop();
+//            mediaPlayback.stop();
         });
 
+        commandPanel.add(connectionStatus);
         commandPanel.add(checkUpdate);
         commandPanel.add(goodMorning);
         commandPanel.add(btcPrice);
@@ -337,9 +396,9 @@ public class Shard_Core {
         });
         exitButton.setBounds(new Rectangle(10, 10, 100, 40));
 
-        textArea = new JTextArea();
+        textArea = new JTextPane();
         textArea.setEditable(false);
-        textArea.setLineWrap(true);
+//        textArea.setLineWrap(true);
 
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setBounds(0, 60, frame.getWidth() - 5, frame.getHeight() - 115);
@@ -392,14 +451,56 @@ public class Shard_Core {
         try {
             cfg = new Config(configDir);
         } catch (ConfigurationException e) {
-            // TODO if the configuration isn't found, create and init it
+            try {
+                File configPath = new File(shardDir);
+                configPath.mkdirs();
+                configPath = new File(configDir);
+                configPath.createNewFile();
+                cfg = new Config(configDir);
+                cfg.set("cfg_set", "false");
+                cfg.save();
+                System.out.println("Configuration file created.");
+            } catch (IOException e1) {
+                System.err.println("Unable to create configuration file!");
+                return;
+            } catch (ConfigurationException e1) {
+                System.err.println("Unable to access configuration file. Error: " + e1.getMessage());
+                return;
+            }
         }
 
-        // uuid = UUID.fromString(cfg.get("uuid"));
-        if (uuid != null) {
-            System.out.println("Configuration file loaded.");
+        cfg_set = Boolean.parseBoolean(cfg.get("cfg_set"));
+        if (cfg_set) {
+            loadCfg();
         } else {
-            System.err.println("Please initialize the Config with Nerv before proceeding!");
+            createCfg();
+            loadCfg();
+        }
+    }
+
+    /**
+     * Load the configuration file into appropriate variables
+     */
+    private void loadCfg() {
+        uuid = UUID.fromString(cfg.get("uuid"));
+        systemName = cfg.get("systemName");
+        systemLocation = cfg.get("systemLocation");
+
+        System.out.println("Configuration file loaded.");
+    }
+
+    /**
+     * Walk the user through the creation of the configuration values
+     */
+    private void createCfg() {
+        cfg.set("uuid", UUID.randomUUID().toString());
+        cfg.set("systemName", JOptionPane.showInputDialog(frame, "What do you want to call this device?"));
+        cfg.set("systemLocation", JOptionPane.showInputDialog(frame, "Where is this device located in your home?"));
+        cfg.set("cfg_set", "true");
+        try {
+            cfg.save();
+        } catch (ConfigurationException e) {
+            System.err.println("Error saving configuration file! Error: " + e.getMessage());
         }
     }
 
@@ -417,14 +518,23 @@ public class Shard_Core {
                         "Client is already initialized! Aborting attempt to create connection.");
             }
         } catch (NullPointerException e) {
-            // If client is not initialized, initialize it
+            // If client is not remoteLoggingInitialized, initialize it
             try {
                 // Start the search for dnssd service
                 try {
+                    System.out.println("Searching for DNS_SD service on local network.");
                     dnssd.discoverService("_http._tcp.local.", InetAddress.getLocalHost());
                 } catch (UnknownHostException e1) {
                 }
-                while (!dnssd.getServiceName().equals("Crystal Heart Server")) {
+
+                ServiceEntry heartService = null;
+                while (heartService == null) {
+                    ArrayList<ServiceEntry> entries = dnssd.getServiceList();
+                    for (ServiceEntry temp : entries) {
+                        if (temp.getServiceName().equals("Crystal Heart Server"))
+                            heartService = temp;
+                    }
+
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e1) {
@@ -436,7 +546,7 @@ public class Shard_Core {
 
                 // load the service info
                 // service will be loaded as http://192.168.0.2:6666
-                String serviceInfo = dnssd.getServiceInfo();
+                String serviceInfo = heartService.getServiceInfo();
                 String[] serviceSplit = serviceInfo.split("http://");
                 String ipPort = serviceSplit[1]; // removes http://
                 String[] ipPortSplit = ipPort.split(":"); // splits IP and port
@@ -454,10 +564,10 @@ public class Shard_Core {
             if (clientThread != null || clientThread.isAlive()) {
                 stopShardClient();
                 throw new ClientInitializationException(
-                        "Client Thread is already initialized! Aborting attempt to create connection.");
+                        "Client Thread is already remoteLoggingInitialized! Aborting attempt to create connection.");
             }
         } catch (NullPointerException e) {
-            // If the clientThread isn't initialized, do nothing
+            // If the clientThread isn't remoteLoggingInitialized, do nothing
             // ((re)-initialize below)
         } catch (ConnectionException ex) {
         }
@@ -467,6 +577,17 @@ public class Shard_Core {
         clientThread.start();
     }
 
+    public void connectToMediaServer(int mediaServerPort, String mediaType) {
+        try {
+            mediaClient = new MediaClientHelper(IP, mediaServerPort, mediaType);
+            mediaClientThread = new Thread(mediaClient);
+            mediaClientThread.start();
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("Error starting MediaClient. Kript was unable to set up encryption keys. Aborting creation.");
+        }
+    }
+
+    @Deprecated
     public void startShardClientSuppressed() {
         try {
             startShardClient();
@@ -475,42 +596,78 @@ public class Shard_Core {
     }
 
     /**
-     * Used to stop the Shard. Sends a close connection packet to the Heart to
+     * Exchange ID information with the Heart
+     *
+     * @throws SendPacketException thrown if there is an issue sending packets to Heart.
+     *                             Details will be in getMessage()
+     */
+    public void swapID() throws SendPacketException {
+        Packet p = new Packet(Packet.PACKET_TYPE.Command, uuid.toString());
+        p.packetString = "uuid";
+        p.packetStringArray = new String[]{systemName, systemLocation};
+        client.sendPacket(p, true);
+    }
+
+    /**
+     * Used to stop the Shard nicely. Sends a close connection packet to the Heart to
      * terminate connection, which will then terminate IO streams
      *
      * @throws ConnectionException thrown when there is an issue closing the IO streams to the
      *                             Heart. Error will be in the getMessage()
      */
     public void stopShardClient() throws ConnectionException {
+        connectionStatus.setText("DISCONNECTED");
+        connectionStatus.setForeground(Color.RED);
+        Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, uuid.toString());
         try {
-            Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, null);
             p.packetString = "Manual disconnect";
             client.sendPacket(p, true);
-            client.closeIOStreams();
-            clientThread.join();
-            clientThread = null;
-            IP = "";
-            port = 0;
         } catch (SendPacketException e) {
             System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
-        } catch (InterruptedException ex) {
         }
-    }
-
-    // TODO javadoc
-    public void resetConnectionData() {
+        client.closeIOStreams();
+        clientThread.stop();
+        clientThread = null;
         IP = "";
         port = 0;
+
+        try {
+            p.packetString = "Manual disconnect";
+            client.sendPacket(p, true);
+        } catch (SendPacketException e) {
+            System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
+        }
+        mediaClient.closeIOStreams();
+        mediaClientThread.stop();
+        mediaClient = null;
+        mediaClientThread = null;
     }
 
     /**
-     * Retrieve the object of ShardCore being used by the Shard. There can only
-     * be one, it is static.
-     *
-     * @return Shard_Core object being used by the Shard
+     * Used to stop the Shard without warning. Does the same thing as stopShardClient() without sending a packet to the
+     * Heart
      */
-    public static Shard_Core getShardCore() {
-        return shard_core;
+    public void resetConnectionData() {
+        connectionStatus.setText("DISCONNECTED");
+        connectionStatus.setForeground(Color.RED);
+        try {
+            client.closeIOStreams();
+        } catch (ConnectionException e) {
+            System.err.println("Error closing client IO streams. Error: " + e.getMessage());
+        }
+        client = null;
+        clientThread.stop();
+        clientThread = null;
+        IP = "";
+        port = 0;
+        remoteLoggingInitialized = false;
+    }
+
+    /**
+     * Stop the Shard from continuously trying to connect to the Heart
+     */
+    public void stopShardConnectionThread() {
+        shardConnectionThread.stop();
     }
 
     /**
@@ -518,9 +675,26 @@ public class Shard_Core {
      *
      * @return UUID of the Shard
      */
-    @Deprecated
     public UUID getUUID() {
         return uuid;
+    }
+
+    /**
+     * Get the UUID of the Heart for network verification
+     *
+     * @return UUID of the Heart
+     */
+    public UUID getHeartUUID() {
+        return heartUUID;
+    }
+
+    /**
+     * Set the UUID of the Heart server
+     *
+     * @param uuid UUID of the Heart
+     */
+    public void setHeartUUID(UUID uuid) {
+        heartUUID = uuid;
     }
 
     /**
@@ -577,12 +751,12 @@ public class Shard_Core {
      * @param msg Message to be displayed and written
      * @return Returns TRUE if successful at writing to the log, FALSE if not
      */
-    private boolean println(String msg) {
+    private boolean println(String msg, Color color) {
         boolean success = true;
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                textArea.append(msg);
+                appendToPane(textArea, msg, color);
                 textArea.setCaretPosition(textArea.getDocument().getLength());
                 // textArea.append("\n");
             }
@@ -590,24 +764,40 @@ public class Shard_Core {
 
         if (logActive) {
             try {
-                if (initialized) {
+                log.write(msg);
+
+                if (remoteLoggingInitialized) {
                     // Log packet to Heart
-                    Packet p = new Packet(Packet.PACKET_TYPE.Message, "");
+                    Packet p = new Packet(Packet.PACKET_TYPE.Message, uuid.toString());
                     p.packetString = msg;
                     client.sendPacket(p, true);
                 }
-
-                log.write(msg);
             } catch (IOException e) {
                 logActive = false;
                 System.err.println(
                         "Unable to write to log. IOException thrown. Deactivating log file, please reboot to regain access.");
                 success = false;
             } catch (SendPacketException ex) {
+                remoteLoggingInitialized = false;
                 System.err.println("Unable to send log packet to Heart. Error: " + ex.getMessage());
             }
         }
 
         return success;
+    }
+
+    private void appendToPane(JTextPane tp, String msg, Color c) {
+        tp.setEditable(true);
+        StyleContext sc = StyleContext.getDefaultStyleContext();
+        AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
+
+        aset = sc.addAttribute(aset, StyleConstants.FontFamily, "Lucida Console");
+        aset = sc.addAttribute(aset, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
+
+        int len = tp.getDocument().getLength();
+        tp.setCaretPosition(len);
+        tp.setCharacterAttributes(aset, false);
+        tp.replaceSelection(msg);
+        tp.setEditable(false);
     }
 }

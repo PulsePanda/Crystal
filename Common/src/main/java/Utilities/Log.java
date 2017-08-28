@@ -36,7 +36,6 @@ public class Log {
      *
      * @param directory Path to the directory the log will be located. Must end with
      *                  '/'.
-     * @return boolean True if log was created, else false
      * @throws IOException thrown if the named file exists but is a directory rather than a
      *                     regular file, does not exist but cannot be created, or cannot
      *                     be opened for any other reason

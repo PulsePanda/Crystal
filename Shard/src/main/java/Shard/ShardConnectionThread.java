@@ -20,7 +20,8 @@ import Exceptions.ClientInitializationException;
 public class ShardConnectionThread implements Runnable {
 
     private Shard_Core sc;
-    private boolean keepRunning, patchOnly;
+    private boolean keepRunning;
+    private boolean patchOnly;
 
     /**
      * Default constructor

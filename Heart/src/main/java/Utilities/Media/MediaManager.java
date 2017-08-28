@@ -18,12 +18,10 @@ import java.io.File;
 public class MediaManager {
 
     protected String mediaDriveLetter, musicDir, movieDir;
-
-    private MediaIndexer mediaIndexer;
     protected MediaList songList, movieList;
-    private Thread indexThread;
-
     protected boolean isIndexed = false, keepIndexing;
+    private MediaIndexer mediaIndexer;
+    private Thread indexThread;
 
     /**
      * Media Manager default constructor
@@ -35,8 +33,16 @@ public class MediaManager {
     public MediaManager(String mediaDir, String musicDir, String movieDir) {
         System.out.println("MEDIA_MANAGER: Initializing media manager...");
 
-        String[] driveLetter = mediaDir.split("/"); // separates out the drive letter
-        this.mediaDriveLetter = driveLetter[0];
+        // Remove drive letter from paths
+//        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
+//            String[] driveLetter = mediaDir.split(":"); // separates out the drive letter
+//            this.mediaDriveLetter = driveLetter[0];
+//            this.mediaDriveLetter = mediaDriveLetter + ":\\";
+//        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
+//            System.err.println("Crystal doesn't know how to handle the media paths on your system! Media playback will not work!");
+//        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
+//            System.err.println("Crystal doesn't know how to handle the media paths on your system! Media playback will not work!");
+//        }
         this.musicDir = musicDir;
         this.movieDir = movieDir;
 
@@ -52,6 +58,8 @@ public class MediaManager {
      */
     public void index(boolean keepIndexing, int delayMinutes) {
         this.keepIndexing = keepIndexing;
+
+        clearIndex();
 
         mediaIndexer = new MediaIndexer(this, delayMinutes * 60 * 1000); // 30 minutes
         indexThread = new Thread(mediaIndexer);
@@ -122,6 +130,14 @@ public class MediaManager {
         }
         return files;
     }
+
+    /**
+     * Clears out the index to re-index
+     */
+    public void clearIndex() {
+        movieList.delete();
+        songList.delete();
+    }
 }
 
 class MediaIndexer implements Runnable {
@@ -181,9 +197,9 @@ class MediaIndexer implements Runnable {
         } else if (file.isFile()) {
             if (isMovieOrMusic(file.getName())) {
                 String filePath = file.getPath();
-                // removes the drive letter from the file's path, as the folder is shared and the drive isn't needed
-                filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
-                mm.movieList.addItem(file.getName(), filePath, ListItem.MEDIA_TYPE.Movie);
+                String fileName = file.getName();
+
+                mm.movieList.addItem(fileName, filePath, ListItem.MEDIA_TYPE.Movie);
             }
         }
     }
@@ -201,14 +217,8 @@ class MediaIndexer implements Runnable {
             }
         } else if (file.isFile()) {
             if (isMovieOrMusic(file.getName())) {
-                // Remove the drive letter from the path
                 String filePath = file.getPath();
-                filePath = filePath.replaceFirst(mm.mediaDriveLetter, "");
-
-                // TODO Remove the file extension from the name
                 String fileName = file.getName();
-//                String[] fileNameSplit = fileName.split(".");
-//                fileName = fileNameSplit[0];
 
                 mm.songList.addItem(fileName, filePath, ListItem.MEDIA_TYPE.Music);
             }
