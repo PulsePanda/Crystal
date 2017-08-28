@@ -35,7 +35,8 @@ clean.doFirst {
 def exportedProjects = [
         ":Heart",
 	":Shard",
-	":Common"
+	":Common",
+        ":Nerv"
 ]
 
 task alljavadoc(type: Javadoc) {
@@ -53,6 +54,9 @@ task bundle(dependsOn: build) {
         into('.distributions')
 
         from(file('Shard/build/distributions'))
+        into('.distributions')
+
+        from(file('Nerv/build/distributions'))
         into('.distributions')
     }
 }
@@ -90,6 +94,21 @@ project(':Shard') {
         compile fileTree(dir: 'libs', include: ['*.jar'])
         compile fileTree(dir: 'libs/Sphinx', include: ['*.jar'])
         compile fileTree(dir: 'libs/TTS', include: ['*.jar'])
+        compile project(':Common')
+    }
+
+    applicationDistribution.from(copyLicense) {
+        into ""
+    }
+}
+
+//Nerv specific stuff
+project(':Nerv') {
+    apply plugin: 'application'
+
+    mainClassName = 'Nerv.NervDriver'
+
+    dependencies {
         compile project(':Common')
     }
 
