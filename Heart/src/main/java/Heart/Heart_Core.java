@@ -125,8 +125,6 @@ public class Heart_Core {
 
         initCfg();
 
-        firstTimeSetup();
-
         initLog();
 
         initMediaManager();
