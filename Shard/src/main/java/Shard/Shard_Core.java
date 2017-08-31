@@ -17,8 +17,8 @@ import Netta.DNSSD;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 import Netta.ServiceEntry;
-import Utilities.Config;
-import Utilities.Log;
+import Utilities.SettingsFileManager;
+import Utilities.LogManager;
 import Utilities.Media.Client.MediaClientHelper;
 import Utilities.ShardPatcher;
 import Utilities.SystemInfo;
@@ -67,8 +67,8 @@ public class Shard_Core {
 //    public MediaPlayback mediaPlayback;
     private ShardPatcher patcher;
     private boolean headless = false, cfg_set = false;
-    private Log log;
-    private Config cfg = null;
+    private LogManager logManager;
+    private SettingsFileManager cfg = null;
     private UUID uuid, heartUUID;
     private Client client = null;
     private Thread clientThread = null;
@@ -180,7 +180,7 @@ public class Shard_Core {
     }
 
     /**
-     * Initialize variables being used for configuration files and log systems.
+     * Initialize variables being used for configuration files and logManager systems.
      * Other variables can be remoteLoggingInitialized here too.
      */
     private void initVariables() {
@@ -417,22 +417,22 @@ public class Shard_Core {
     }
 
     /**
-     * Sets up the log system
+     * Sets up the logManager system
      */
     private void initLog() {
-        log = new Log();
+        logManager = new LogManager();
         try {
-            log.createLog(logBaseDir);
+            logManager.createLog(logBaseDir);
             logActive = true;
 
-            // Start the log and initialize the text
+            // Start the logManager and initialize the text
             System.out.println("System logging enabled");
         } catch (SecurityException e) {
             System.out.println(
-                    "Unable to access log file or directory because of permission settings. Will continue running without logs, however please reboot to set logs.\n");
+                    "Unable to access logManager file or directory because of permission settings. Will continue running without logs, however please reboot to set logs.\n");
         } catch (IOException e) {
             System.out.println(
-                    "Unable to access find or create log on object creation. Will continue running without logs, however please reboot to set logs.\n");
+                    "Unable to access find or create logManager on object creation. Will continue running without logs, however please reboot to set logs.\n");
         }
     }
 
@@ -449,14 +449,14 @@ public class Shard_Core {
         // this issue
         System.out.println("Loading configuration file...");
         try {
-            cfg = new Config(configDir);
+            cfg = new SettingsFileManager(configDir);
         } catch (ConfigurationException e) {
             try {
                 File configPath = new File(shardDir);
                 configPath.mkdirs();
                 configPath = new File(configDir);
                 configPath.createNewFile();
-                cfg = new Config(configDir);
+                cfg = new SettingsFileManager(configDir);
                 cfg.set("cfg_set", "false");
                 cfg.save();
                 System.out.println("Configuration file created.");
@@ -746,10 +746,10 @@ public class Shard_Core {
 
     /**
      * Writes to the Standard Output Stream, as well as calls 'write' on the
-     * local log object
+     * local logManager object
      *
      * @param msg Message to be displayed and written
-     * @return Returns TRUE if successful at writing to the log, FALSE if not
+     * @return Returns TRUE if successful at writing to the logManager, FALSE if not
      */
     private boolean println(String msg, Color color) {
         boolean success = true;
@@ -764,10 +764,10 @@ public class Shard_Core {
 
         if (logActive) {
             try {
-                log.write(msg);
+                logManager.write(msg);
 
                 if (remoteLoggingInitialized) {
-                    // Log packet to Heart
+                    // LogManager packet to Heart
                     Packet p = new Packet(Packet.PACKET_TYPE.Message, uuid.toString());
                     p.packetString = msg;
                     client.sendPacket(p, true);
@@ -775,11 +775,11 @@ public class Shard_Core {
             } catch (IOException e) {
                 logActive = false;
                 System.err.println(
-                        "Unable to write to log. IOException thrown. Deactivating log file, please reboot to regain access.");
+                        "Unable to write to logManager. IOException thrown. Deactivating logManager file, please reboot to regain access.");
                 success = false;
             } catch (SendPacketException ex) {
                 remoteLoggingInitialized = false;
-                System.err.println("Unable to send log packet to Heart. Error: " + ex.getMessage());
+                System.err.println("Unable to send logManager packet to Heart. Error: " + ex.getMessage());
             }
         }
 

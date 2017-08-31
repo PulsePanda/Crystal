@@ -58,12 +58,12 @@ public class Heart_Core {
     private static boolean cfg_set = false, logActive = false, initialized = false;
     // Server elements
     private static Heart_Core heart_core;
-    private static Log log;
+    private static LogManager logManager;
     private static JTextPane textArea;
     private Server server = null;
     private boolean headless = false;
     private UUID uuid;
-    private Config cfg = null;
+    private SettingsFileManager cfg = null;
     private Thread serverThread = null;
     private Thread updateCheckerThread = null;
     private DNSSD dnssd;
@@ -318,7 +318,7 @@ public class Heart_Core {
         textArea.setEditable(false);
 //        textArea.setLineWrap(true);
 
-        JButton clearLog = new JButton("Clear Log");
+        JButton clearLog = new JButton("Clear LogManager");
         clearLog.addActionListener(e -> textArea.setText(""));
         clearLog.setBounds(new Rectangle(500, 10, 100, 40));
 
@@ -347,22 +347,22 @@ public class Heart_Core {
      * set up the logging system
      */
     private void initLog() {
-        log = new Log();
+        logManager = new LogManager();
         try {
-            log.createLog(logBaseDir);
+            logManager.createLog(logBaseDir);
             logActive = true;
 
-            // Start the log and initialize the text
+            // Start the logManager and initialize the text
             System.out.println("###############" + systemName + "###############");
             System.out.println("System logging enabled");
         } catch (SecurityException e) {
             System.out.println("###############" + systemName + "###############");
             System.err.println(
-                    "Unable to access log file or directory because of permission settings. Will continue running without logs, however please reboot to set logs.\n");
+                    "Unable to access logManager file or directory because of permission settings. Will continue running without logs, however please reboot to set logs.\n");
         } catch (IOException e) {
             System.out.println("###############" + systemName + "###############");
             System.err.println(
-                    "Unable to access find or create log on object creation. Will continue running without logs, however please reboot to set logs.\n");
+                    "Unable to access find or create logManager on object creation. Will continue running without logs, however please reboot to set logs.\n");
         }
     }
 
@@ -375,14 +375,14 @@ public class Heart_Core {
     private void initCfg() {
         System.out.println("Loading configuration file...");
         try {
-            cfg = new Config(configDir);
+            cfg = new SettingsFileManager(configDir);
         } catch (ConfigurationException e) {
             try {
                 File configPath = new File(heartDir);
                 configPath.mkdirs();
                 configPath = new File(configDir);
                 configPath.createNewFile();
-                cfg = new Config(configDir);
+                cfg = new SettingsFileManager(configDir);
                 cfg.set("cfg_set", "False");
                 cfg.save();
                 System.out.println("Configuration file created.");
@@ -546,11 +546,11 @@ public class Heart_Core {
 
     /**
      * Writes to the Standard Output Stream, as well as calls 'write' on the
-     * local log object
+     * local logManager object
      *
      * @param msg   String message to be displayed and written
      * @param color Color to set the line of text
-     * @return Returns TRUE if successful at writing to the log, FALSE if not
+     * @return Returns TRUE if successful at writing to the logManager, FALSE if not
      */
     private boolean println(final String msg, Color color) {
         boolean success = true;
@@ -562,7 +562,7 @@ public class Heart_Core {
 
         if (logActive) {
             try {
-                log.write(msg);
+                logManager.write(msg);
             } catch (IOException e) {
                 logActive = false;
                 System.err.println(
@@ -605,9 +605,9 @@ public class Heart_Core {
     /**
      * Get the configuration object
      *
-     * @return Config configuration object
+     * @return SettingsFileManager configuration object
      */
-    public Config getCfg() {
+    public SettingsFileManager getCfg() {
         return cfg;
     }
 

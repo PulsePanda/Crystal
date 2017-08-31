@@ -187,7 +187,7 @@ public class ShardPatcher extends Thread {
         if (!Shard_Core.SHARD_VERSION.equals(Shard_Core.SHARD_VERSION_SERVER)) {
             System.out.println("Installing update...");
             try {
-                UnZip.unZip(Shard_Core.shardDir + "Shard.zip", Shard_Core.baseDir);
+                UnZipPython.unZip(Shard_Core.shardDir + "Shard.zip", Shard_Core.baseDir);
             } catch (IOException e) {
                 e.printStackTrace();
             }

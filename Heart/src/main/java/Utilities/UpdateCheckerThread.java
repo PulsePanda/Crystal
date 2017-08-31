@@ -225,7 +225,7 @@ public class UpdateCheckerThread extends Thread {
      */
     private synchronized void preparePatch() throws UpdateCheckerThreadException {
         try {
-            UnZip.unZip(Heart_Core.baseDir + "patch.zip", Heart_Core.baseDir + "patch");
+            UnZipPython.unZip(Heart_Core.baseDir + "patch.zip", Heart_Core.baseDir + "patch");
         } catch (IOException e) {
             throw new UpdateCheckerThreadException("Unable to unzip patch data.");
         }
@@ -297,7 +297,7 @@ public class UpdateCheckerThread extends Thread {
         Heart_Core.getCore().stopHeartServer();
 
         try {
-            UnZip.unZip(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir);
+            UnZipPython.unZip(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir);
         } catch (IOException e) {
             throw new UpdateCheckerThreadException("Unable to unzip Heart patch.");
         }
