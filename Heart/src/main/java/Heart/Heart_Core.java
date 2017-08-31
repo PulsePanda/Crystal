@@ -125,8 +125,6 @@ public class Heart_Core {
 
         initLog();
 
-        shareMediaDir();
-
         initMediaManager();
 
         initPatchThread();
@@ -489,26 +487,6 @@ public class Heart_Core {
         } catch (ConfigurationException e) {
             System.err.println("Error saving settings to the config file. Error: " + e.getMessage());
             JOptionPane.showMessageDialog(frame, "Error saving settings to the config file. Error: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Share the root media directory with the network
-     */
-    private void shareMediaDir() {
-        // Share media folder with the network
-        if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows) {
-            String shareMediaFolder = "net share Media=" + mediaDir + " /GRANT:Everyone,FULL";
-            try {
-                Runtime.getRuntime().exec(shareMediaFolder);
-            } catch (IOException e) {
-                System.err.println("Error sharing the media folder with the network! Media access may not be available for Shards!");
-            }
-        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux) {
-            // TODO add linux folder sharing
-            System.err.println("Crystal doesn't know how to share your media folder on this system! Please share folder manually!");
-        } else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.ERROR) {
-            System.err.println("Crystal doesn't know how to share your media folder on this system! Please share folder manually!");
         }
     }
 
