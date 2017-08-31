@@ -43,7 +43,6 @@ public class GUIManager {
 
     public GUIManager(Heart_Core heart_core) {
         c = heart_core;
-        initGUI();
     }
 
     //TODO Removing this method for service migration
@@ -51,7 +50,7 @@ public class GUIManager {
     /**
      * Sets up and starts the GUI associated with the Heart
      */
-    private void initGUI() {
+    public void initGUI() {
         // Frame and it's settings
         frame = new JFrame(c.getConfigurationManager().systemName);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

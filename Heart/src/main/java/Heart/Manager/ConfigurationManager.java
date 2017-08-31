@@ -119,7 +119,7 @@ public class ConfigurationManager {
     /**
      * Load the configuration file into appropriate variables
      */
-    private void loadCfg() {
+    public void loadCfg() {
         systemName = cfg.get("systemName");
         mediaDir = cfg.get("mediaDir");
         musicDir = cfg.get("musicDir");

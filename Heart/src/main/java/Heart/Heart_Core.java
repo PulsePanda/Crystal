@@ -73,6 +73,8 @@ public class Heart_Core {
 
         if (!headless) {
             guiManager = new GUIManager(this);
+            guiManager.initGUI();
+
             redirectSystemStreams();
         }
 

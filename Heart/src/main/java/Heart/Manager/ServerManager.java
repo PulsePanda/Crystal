@@ -104,7 +104,6 @@ public class ServerManager {
         mediaServerArrayList.add(mediaServer);
     }
 
-
     /**
      * Initialize and register the DNS_SD for the server
      */
