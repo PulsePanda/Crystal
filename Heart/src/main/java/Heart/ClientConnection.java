@@ -50,7 +50,7 @@ public class ClientConnection extends ConnectedClient {
         command = new Command(this);
         clientLogManager = new LogManager();
         try {
-            clientLogManager.createLog(Heart_Core.shardLogsDir);
+            clientLogManager.createLog(Heart_Core.getCore().getConfigurationManager().shardLogsDir);
             clientLogCreated = true;
         } catch (IOException ex) {
             System.err.println("Unable to create log for connected Shard. Ignoring logging.");

@@ -33,7 +33,7 @@ public class UpdateCheckerThread extends Thread {
 
     private static final String gitAddressMaster = "https://github.com/PulsePanda/Crystal/archive/master.zip";
     private static final String gitAddressDev = "https://github.com/PulsePanda/Crystal/archive/dev.zip";
-    private static final int waitDelay = Integer.parseInt(Heart_Core.getCore().getCfg().get("updateCheckDelay")) * 60 * 1000;
+    private static final int waitDelay = Integer.parseInt(Heart_Core.getCore().getConfigurationManager().getCfg().get("updateCheckDelay")) * 60 * 1000;
     private boolean running = false, shardUpdate = false, heartUpdate = false, keepRunning, forceUpdate;
     private String shardVersion;
 
@@ -107,7 +107,7 @@ public class UpdateCheckerThread extends Thread {
     private void checkForUpdate() throws UpdateCheckerThreadException {
         URL url;
         try {
-            if (!Heart_Core.DEV_BUILD)
+            if (!Heart_Core.getCore().getConfigurationManager().DEV_BUILD)
                 url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/HeartVersion");
             else
                 url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/dev/HeartVersion");
@@ -122,7 +122,7 @@ public class UpdateCheckerThread extends Thread {
 
         try {
             bis = new BufferedInputStream(url.openStream());
-            fis = new FileOutputStream(Heart_Core.baseDir + "HeartVersion.txt");
+            fis = new FileOutputStream(Heart_Core.getCore().getConfigurationManager().baseDir + "HeartVersion.txt");
             while ((count = bis.read(buffer, 0, 1024)) != -1) {
                 fis.write(buffer, 0, count);
             }
@@ -133,12 +133,12 @@ public class UpdateCheckerThread extends Thread {
         }
 
         try {
-            if (!Heart_Core.DEV_BUILD)
+            if (!Heart_Core.getCore().getConfigurationManager().DEV_BUILD)
                 url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/master/ShardVersion");
             else
                 url = new URL("https://raw.githubusercontent.com/PulsePanda/Crystal/dev/ShardVersion");
             bis = new BufferedInputStream(url.openStream());
-            fis = new FileOutputStream(Heart_Core.baseDir + "ShardVersion.txt");
+            fis = new FileOutputStream(Heart_Core.getCore().getConfigurationManager().baseDir + "ShardVersion.txt");
             buffer = new byte[1024];
             while ((count = bis.read(buffer, 0, 1024)) != -1) {
                 fis.write(buffer, 0, count);
@@ -150,15 +150,15 @@ public class UpdateCheckerThread extends Thread {
         }
 
         try {
-            String heartVersion = readVersionFile(Heart_Core.baseDir + "HeartVersion.txt");
-            String shardVersion = readVersionFile(Heart_Core.baseDir + "ShardVersion.txt");
+            String heartVersion = readVersionFile(Heart_Core.getCore().getConfigurationManager().baseDir + "HeartVersion.txt");
+            String shardVersion = readVersionFile(Heart_Core.getCore().getConfigurationManager().baseDir + "ShardVersion.txt");
             if (heartVersion != null || shardVersion != null) {
-                if (!shardVersion.equals(Heart_Core.SHARD_VERSION)) {
+                if (!shardVersion.equals(Heart_Core.getCore().getConfigurationManager().SHARD_VERSION)) {
                     shardUpdate = true;
                 }
                 this.shardVersion = shardVersion;
 
-                if (!heartVersion.equals(Heart_Core.HEART_VERSION))
+                if (!heartVersion.equals(Heart_Core.getCore().getConfigurationManager().HEART_VERSION))
                     heartUpdate = true;
             }
         } catch (UpdateCheckerThreadException e) {
@@ -195,7 +195,7 @@ public class UpdateCheckerThread extends Thread {
     private void downloadUpdate() throws UpdateCheckerThreadException {
         URL url;
         try {
-            if (!Heart_Core.DEV_BUILD)
+            if (!Heart_Core.getCore().getConfigurationManager().DEV_BUILD)
                 url = new URL(gitAddressMaster);
             else
                 url = new URL(gitAddressDev);
@@ -205,7 +205,7 @@ public class UpdateCheckerThread extends Thread {
 
         try {
             BufferedInputStream bis = new BufferedInputStream(url.openStream());
-            FileOutputStream fis = new FileOutputStream(Heart_Core.baseDir + "patch.zip");
+            FileOutputStream fis = new FileOutputStream(Heart_Core.getCore().getConfigurationManager().baseDir + "patch.zip");
             byte[] buffer = new byte[1024];
             int count = 0;
             while ((count = bis.read(buffer, 0, 1024)) != -1) {
@@ -225,7 +225,7 @@ public class UpdateCheckerThread extends Thread {
      */
     private synchronized void preparePatch() throws UpdateCheckerThreadException {
         try {
-            UnZipPython.unZip(Heart_Core.baseDir + "patch.zip", Heart_Core.baseDir + "patch");
+            UnZipPython.unZip(Heart_Core.getCore().getConfigurationManager().baseDir + "patch.zip", Heart_Core.getCore().getConfigurationManager().baseDir + "patch");
         } catch (IOException e) {
             throw new UpdateCheckerThreadException("Unable to unzip patch data.");
         }
@@ -236,10 +236,10 @@ public class UpdateCheckerThread extends Thread {
         }
 
         File patchDir;
-        if (!Heart_Core.DEV_BUILD)
-            patchDir = new File(Heart_Core.baseDir + "patch/Crystal-master/");
+        if (!Heart_Core.getCore().getConfigurationManager().DEV_BUILD)
+            patchDir = new File(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Crystal-master/");
         else
-            patchDir = new File(Heart_Core.baseDir + "patch/Crystal-dev/");
+            patchDir = new File(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Crystal-dev/");
 
         if (shardUpdate) {
             String[] params = new String[]{"cmd.exe", "/c", "gradlew Shard:build"};
@@ -257,11 +257,11 @@ public class UpdateCheckerThread extends Thread {
             }
 
             File dir;
-            if (!Heart_Core.DEV_BUILD)
-                dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Shard/build/distributions/Shard.zip");
+            if (!Heart_Core.getCore().getConfigurationManager().DEV_BUILD)
+                dir = new File(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Crystal-master/Shard/build/distributions/Shard.zip");
             else
-                dir = new File(Heart_Core.baseDir + "patch/Crystal-dev/Shard/build/distributions/Shard.zip");
-            dir.renameTo(new File(Heart_Core.baseDir + "patch/Shard.zip"));
+                dir = new File(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Crystal-dev/Shard/build/distributions/Shard.zip");
+            dir.renameTo(new File(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Shard.zip"));
         }
 
         if (heartUpdate) {
@@ -280,11 +280,11 @@ public class UpdateCheckerThread extends Thread {
             }
 
             File dir;
-            if (!Heart_Core.DEV_BUILD)
-                dir = new File(Heart_Core.baseDir + "patch/Crystal-master/Heart/build/distributions/Heart.zip");
+            if (!Heart_Core.getCore().getConfigurationManager().DEV_BUILD)
+                dir = new File(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Crystal-master/Heart/build/distributions/Heart.zip");
             else
-                dir = new File(Heart_Core.baseDir + "patch/Crystal-dev/Heart/build/distributions/Heart.zip");
-            dir.renameTo(new File(Heart_Core.baseDir + "patch/Heart.zip"));
+                dir = new File(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Crystal-dev/Heart/build/distributions/Heart.zip");
+            dir.renameTo(new File(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Heart.zip"));
         }
     }
 
@@ -294,10 +294,10 @@ public class UpdateCheckerThread extends Thread {
      * @throws UpdateCheckerThreadException thrown if there is an error accessing or reading patch data
      */
     private void installHeartPatch() throws UpdateCheckerThreadException {
-        Heart_Core.getCore().stopHeartServer();
+        Heart_Core.getCore().getCore().getServerManager().stopHeartServer();
 
         try {
-            UnZipPython.unZip(Heart_Core.baseDir + "patch/Heart.zip", Heart_Core.baseDir);
+            UnZipPython.unZip(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Heart.zip", Heart_Core.getCore().getConfigurationManager().baseDir);
         } catch (IOException e) {
             throw new UpdateCheckerThreadException("Unable to unzip Heart patch.");
         }
@@ -309,7 +309,7 @@ public class UpdateCheckerThread extends Thread {
 
         System.out.println("UPDATER: Starting Heart Patcher...");
         try {
-            Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", Heart_Core.heartDir + "bin/Heart.bat"});
+            Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", Heart_Core.getCore().getConfigurationManager().heartDir + "bin/Heart.bat"});
             System.exit(0);
         } catch (IOException e) {
             throw new UpdateCheckerThreadException("Unable to start Heart patch file.");
@@ -324,15 +324,15 @@ public class UpdateCheckerThread extends Thread {
     private void installShardPatch() {
         PrintWriter out;
         try {
-            out = new PrintWriter(Heart_Core.heartDir + "ShardVersion");
+            out = new PrintWriter(Heart_Core.getCore().getConfigurationManager().heartDir + "ShardVersion");
             out.print(shardVersion);
             out.close();
 
-            Heart_Core.getCore().updateShardVersion();
+            Heart_Core.getCore().getShardManager().updateShardVersionFromLocal();
         } catch (FileNotFoundException e) {
             System.err.println("UPDATE: Error writing new Shard version to ShardVersion file!");
         }
-        Heart_Core.getCore().notifyShardsOfUpdate();
+        Heart_Core.getCore().getShardManager().notifyShardsOfUpdate();
     }
 
     /**
@@ -354,10 +354,10 @@ public class UpdateCheckerThread extends Thread {
      * Remove patch files
      */
     private void removeFiles() {
-        deleteDir(new File(Heart_Core.baseDir + "HeartVersion.txt"));
-        deleteDir(new File(Heart_Core.baseDir + "ShardVersion.txt"));
-        deleteDir(new File(Heart_Core.baseDir + "patch.zip"));
-        deleteDir(new File(Heart_Core.baseDir + "patch/Crystal-master"));
-        deleteDir(new File(Heart_Core.baseDir + "patch/Crystal-dev"));
+        deleteDir(new File(Heart_Core.getCore().getConfigurationManager().baseDir + "HeartVersion.txt"));
+        deleteDir(new File(Heart_Core.getCore().getConfigurationManager().baseDir + "ShardVersion.txt"));
+        deleteDir(new File(Heart_Core.getCore().getConfigurationManager().baseDir + "patch.zip"));
+        deleteDir(new File(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Crystal-master"));
+        deleteDir(new File(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Crystal-dev"));
     }
 }

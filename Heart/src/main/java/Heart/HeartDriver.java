@@ -12,19 +12,21 @@ package Heart;
 
 import Exceptions.ServerInitializationException;
 
+import java.awt.*;
+
 /**
  * Heart Driver. Starts the Heart service
  */
 public class HeartDriver {
 
     private static Heart_Core heartCore;
-    private static int corePort = 6987;
+    //    private static int corePort = 6987; // standard
+    private static int corePort = 7789; // testing
+    private static boolean headlessArg = false;
+    // TODO set dev to default false
+    static boolean dev = true;
 
     public static void main(String[] args) {
-        boolean headlessArg = false;
-        // TODO set dev to default false
-        boolean dev = true;
-
         for (String s : args) {
             s = s.toLowerCase();
             switch (s) {
@@ -36,24 +38,28 @@ public class HeartDriver {
             }
         }
 
+        init();
+    }
+
+    private static void init() {
         heartCore = new Heart_Core(headlessArg, dev);
         heartCore.init();
 
         // init Heart networking, start listening for Shards
         try {
-            System.out.println("Starting Heart server on port " + corePort);
-            heartCore.startHeartServer(corePort);
+            System.out.println("Starting Heart server on heartPort " + corePort);
+            heartCore.getServerManager().startHeartServer(corePort);
 
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
             }
 
-            // If the server is unable to host on the specified port, try another one
+            // If the server is unable to host on the specified heartPort, try another one
             while (!heartCore.isServerActive()) {
-                System.out.println("Attempting to host Heart server on port " + ++corePort);
-                heartCore.stopHeartServer();
-                heartCore.startHeartServer(corePort);
+                System.out.println("Attempting to host Heart server on heartPort " + ++corePort);
+                heartCore.getServerManager().stopHeartServer();
+                heartCore.getServerManager().startHeartServer(corePort);
 
                 if (!heartCore.isServerActive())
                     try {
@@ -62,7 +68,7 @@ public class HeartDriver {
                     }
             }
 
-            heartCore.initDNSSD();
+            heartCore.getServerManager().initDNSSD();
         } catch (ServerInitializationException e) {
             System.err.println("Error starting Heart server! Error message: " + e.getMessage());
         }

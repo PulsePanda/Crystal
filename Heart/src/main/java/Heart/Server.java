@@ -32,7 +32,7 @@ public class Server extends MultiClientServer {
     /**
      * Server default constructor
      *
-     * @param port int port to initialize the server on
+     * @param port int heartPort to initialize the server on
      * @throws NoSuchAlgorithmException thrown if there is an error initializing network encryption
      */
     public Server(int port) throws NoSuchAlgorithmException {
@@ -64,7 +64,7 @@ public class Server extends MultiClientServer {
      * close all server connections
      */
     public void closeConnections() {
-        Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, Heart_Core.getCore().getUUID().toString());
+        Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, Heart_Core.getCore().getConfigurationManager().getUUID().toString());
         p.packetString = "Manual disconnect";
 
         for (int i = 0; i < clients.size(); i++) {
