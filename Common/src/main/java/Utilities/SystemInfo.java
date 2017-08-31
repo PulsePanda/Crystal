@@ -42,11 +42,11 @@ public class SystemInfo {
     /**
      * Get the System's local IP address
      *
-     * @return String value of local IP address
+     * @return InetAddress value of local IP address
      * @throws UnknownHostException if there is an error retrieving local IP address
      */
-    public static String getSystemLocalIP() throws UnknownHostException {
-        return Inet4Address.getLocalHost().toString();
+    public static InetAddress getSystemLocalIP() throws UnknownHostException {
+        return Inet4Address.getLocalHost();
     }
 
     public static String getSystemHostname() throws UnknownHostException {

@@ -8,9 +8,22 @@
  * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
  */
 
-package Heart;
+/*
+ * This file is part of Crystal Home Systems.
+ *
+ * Crystal Home Systems is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * Crystal Home Systems is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
+ */
+
+package Heart.Manager;
 
 import Exceptions.ServerInitializationException;
+import Heart.ClientConnection;
+import Heart.Heart_Core;
+import Heart.Server;
 import Netta.DNSSD;
 import Utilities.Media.Exceptions.ServerHelperException;
 import Utilities.Media.ListItem;
@@ -25,13 +38,14 @@ public class ServerManager {
 
     private Heart_Core c;
     public int heartPort;
-    protected Server server = null;
+    private Server server = null;
     private Thread serverThread = null;
-    protected ArrayList<MediaServerHelper> mediaServerArrayList;
+    private ArrayList<MediaServerHelper> mediaServerArrayList;
     private DNSSD dnssd;
 
     public ServerManager(Heart_Core heart_core) {
         c = heart_core;
+        mediaServerArrayList = new ArrayList<>();
     }
 
     /**
@@ -145,10 +159,13 @@ public class ServerManager {
         }
 
         try {
-            c.updateCheckerThread.stop();
+            c.getUpdateCheckerThread().stop();
         } catch (NullPointerException e) {
         }
-        c.updateCheckerThread = null;
+        c.setUpdateCheckerThread(null);
     }
 
+    public Server getServer() {
+        return server;
+    }
 }

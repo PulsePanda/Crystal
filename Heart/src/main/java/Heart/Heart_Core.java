@@ -14,6 +14,10 @@
  */
 package Heart;
 
+import Heart.Manager.ConfigurationManager;
+import Heart.Manager.GUIManager;
+import Heart.Manager.ServerManager;
+import Heart.Manager.ShardManager;
 import Utilities.LogManager;
 import Utilities.Media.MediaManager;
 import Utilities.SystemInfo;
@@ -24,7 +28,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
 
 /**
  * Core Heart class. Handles every operation of the Server
@@ -57,7 +60,6 @@ public class Heart_Core {
         this.headless = headless;
         configurationManager.DEV_BUILD = DEV_BUILD;
         serverManager = new ServerManager(this);
-        serverManager.mediaServerArrayList = new ArrayList<>();
     }
 
 
@@ -116,7 +118,7 @@ public class Heart_Core {
         logManager = new LogManager();
         try {
             logManager.createLog(configurationManager.logBaseDir);
-            configurationManager.logActive = true;
+            configurationManager.setLogActive(true);
 
             // Start the logManager and initialize the text
             System.out.println("###############" + configurationManager.systemName + "###############");
@@ -136,9 +138,9 @@ public class Heart_Core {
      * Initializes the media index thread to provide a usable list for shards
      */
     private void initMediaManager() {
-        if (configurationManager.cfg_set) {
+        if (configurationManager.isCfg_set()) {
             mediaManager = new MediaManager(configurationManager.mediaDir, configurationManager.musicDir, configurationManager.movieDir);
-            mediaManager.index(true, Integer.parseInt(configurationManager.cfg.get("mediaIndexDelay")));
+            mediaManager.index(true, Integer.parseInt(configurationManager.getCfg().get("mediaIndexDelay")));
         } else {
             System.err.println("Configuration file was not found. Media management is unavailable until the configuration is set up.");
         }
@@ -213,11 +215,11 @@ public class Heart_Core {
             guiManager.appendToPane(msg, color);
         });
 
-        if (configurationManager.logActive) {
+        if (configurationManager.isLogActive()) {
             try {
                 logManager.write(msg);
             } catch (IOException e) {
-                configurationManager.logActive = false;
+                configurationManager.setLogActive(false);
                 System.err.println(
                         "Unable to write to log. IOException thrown. Deactivating log file, please reboot to regain access.");
                 success = false;
@@ -294,12 +296,30 @@ public class Heart_Core {
     }
 
     /**
+     * Get Update Checker Thread
+     *
+     * @return Thread Update checker thread
+     */
+    public Thread getUpdateCheckerThread() {
+        return updateCheckerThread;
+    }
+
+    /**
+     * Set Update Checker Thread
+     *
+     * @param updateCheckerThread Thread to set it to
+     */
+    public void setUpdateCheckerThread(Thread updateCheckerThread) {
+        this.updateCheckerThread = updateCheckerThread;
+    }
+
+    /**
      * Check if the Heart server is active
      *
      * @return true if the server is still active, else false.
      */
     public boolean isServerActive() {
-        return serverManager.server.isServerActive();
+        return serverManager.getServer().isServerActive();
     }
 
 }
