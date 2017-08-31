@@ -26,6 +26,7 @@ import Utilities.Media.MediaManager;
 import Utilities.Media.MediaServerHelper;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -35,6 +36,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -122,6 +124,8 @@ public class Heart_Core {
         initVariables();
 
         initCfg();
+
+        firstTimeSetup();
 
         initLog();
 
@@ -398,7 +402,7 @@ public class Heart_Core {
         if (cfg_set) {
             loadCfg();
         } else {
-            createCfg();
+            firstTimeSetup();
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -437,10 +441,29 @@ public class Heart_Core {
     }
 
     /**
-     * Walk the user through the creation of the configuration values
+     * Walk the user through the first time setup
      */
-    private void createCfg() {
-        JOptionPane.showMessageDialog(frame, "The configuration file hasn't been set up.\nThis will walk through the setup.");
+    private void firstTimeSetup() {
+        JLabel label = new JLabel();
+        Font font = label.getFont();
+        StringBuffer style = new StringBuffer("font-family:" + font.getFamily() + ";");
+        style.append("font-weight:" + (font.isBold() ? "bold" : "normal") + ";");
+        style.append("font-size:" + font.getSize() + "pt;");
+        JEditorPane ep = new JEditorPane("text/html", "<html><body style=\"" + style + "\">" //
+                + "Config file not found. Welcome to the first time setup.\nFor information regarding usage or troubleshooting, check out the <a href=\"https://github.com/PulsePanda/Crystal/wiki\">wiki</a>." //
+                + "</body></html>");
+        ep.addHyperlinkListener(e -> {
+            if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED))
+                try {
+                    Desktop.getDesktop().browse(URI.create(e.getURL().toString()));
+                } catch (IOException e1) {
+                    System.err.println("Error when trying to open link to wiki.");
+                }
+        });
+        ep.setEditable(false);
+        ep.setBackground(label.getBackground());
+        JOptionPane.showMessageDialog(null, ep);
+
         String systemName = JOptionPane.showInputDialog(frame, "What do you want to call this device?");
         JOptionPane.showMessageDialog(frame, "Enter the root media folder.");
         String mediaDir = FileChooser.chooseFile();
