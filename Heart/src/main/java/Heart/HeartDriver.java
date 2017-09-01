@@ -12,19 +12,17 @@ package Heart;
 
 import Exceptions.ServerInitializationException;
 
-import java.awt.*;
-
 /**
  * Heart Driver. Starts the Heart service
  */
 public class HeartDriver {
 
+    // TODO set dev to default false
+    static boolean dev = true;
     private static Heart_Core heartCore;
     //    private static int corePort = 6987; // standard
     private static int corePort = 7789; // testing
     private static boolean headlessArg = false;
-    // TODO set dev to default false
-    static boolean dev = true;
 
     public static void main(String[] args) {
         for (String s : args) {

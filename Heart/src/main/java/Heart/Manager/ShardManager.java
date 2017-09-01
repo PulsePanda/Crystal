@@ -57,20 +57,20 @@ public class ShardManager {
      */
     public void updateShardVersionFromLocal() {
         try {
-            File file = new File(c.getConfigurationManager().heartDir + "ShardVersion");
+            File file = new File(ConfigurationManager.heartDir + "ShardVersion");
             if (!file.exists())
                 file.createNewFile();
 
-            FileReader fileReader = new FileReader(c.getConfigurationManager().heartDir + "ShardVersion");
+            FileReader fileReader = new FileReader(ConfigurationManager.heartDir + "ShardVersion");
 
             BufferedReader bufferedReader = new BufferedReader(fileReader);
-            c.getConfigurationManager().SHARD_VERSION = bufferedReader.readLine();
+            ConfigurationManager.SHARD_VERSION = bufferedReader.readLine();
             bufferedReader.close();
-            c.getGuiManager().shardVersionLabel.setText("Shard_Version: " + c.getConfigurationManager().SHARD_VERSION);
+            c.getGuiManager().shardVersionLabel.setText("Shard_Version: " + ConfigurationManager.SHARD_VERSION);
         } catch (FileNotFoundException ex) {
-            System.err.println("Unable to find local ShardVersion file located at: " + c.getConfigurationManager().heartDir + "ShardVersion");
+            System.err.println("Unable to find local ShardVersion file located at: " + ConfigurationManager.heartDir + "ShardVersion");
         } catch (IOException ex) {
-            System.err.println("Unable to read local ShardVersion file located at: " + c.getConfigurationManager().heartDir + "ShardVersion");
+            System.err.println("Unable to read local ShardVersion file located at: " + ConfigurationManager.heartDir + "ShardVersion");
         }
     }
 }

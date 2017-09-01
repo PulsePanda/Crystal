@@ -10,6 +10,7 @@
 
 package Heart;
 
+import Heart.Manager.ConfigurationManager;
 import Kript.Kript;
 import Netta.Connection.Packet;
 import Netta.Connection.Server.ConnectedClient;
@@ -50,7 +51,7 @@ public class ClientConnection extends ConnectedClient {
         command = new Command(this);
         clientLogManager = new LogManager();
         try {
-            clientLogManager.createLog(Heart_Core.getCore().getConfigurationManager().shardLogsDir);
+            clientLogManager.createLog(ConfigurationManager.shardLogsDir);
             clientLogCreated = true;
         } catch (IOException ex) {
             System.err.println("Unable to create log for connected Shard. Ignoring logging.");

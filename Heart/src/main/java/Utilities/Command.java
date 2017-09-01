@@ -23,6 +23,7 @@ package Utilities;
 import Exceptions.APIException;
 import Heart.ClientConnection;
 import Heart.Heart_Core;
+import Heart.Manager.ConfigurationManager;
 import Netta.Connection.Packet;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Media.Exceptions.ServerHelperException;
@@ -97,7 +98,7 @@ public class Command {
             case "Patch":
                 byte[] file = null;
                 try {
-                    file = Files.readAllBytes(Paths.get(Heart_Core.getCore().getConfigurationManager().baseDir + "patch/Shard.zip"));
+                    file = Files.readAllBytes(Paths.get(ConfigurationManager.baseDir + "patch/Shard.zip"));
                 } catch (IOException e1) {
                     System.err.println("Error reading Shard.zip to send to shards. Aborting.");
                     sendToClient("patch file send error", true);
@@ -120,7 +121,7 @@ public class Command {
                 break;
             case "get Shard Version":
                 System.out.println("Shard requested version information.");
-                sendToClient("version:" + Heart_Core.getCore().getConfigurationManager().SHARD_VERSION, true);
+                sendToClient("version:" + ConfigurationManager.SHARD_VERSION, true);
                 break;
             case "Play Music":
                 System.out.println("Shard requested to play music. Song Name: " + packet.packetStringArray[0]);

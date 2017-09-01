@@ -34,12 +34,11 @@ import java.awt.event.ActionListener;
 
 public class GUIManager {
 
-    private Heart_Core c;
-
+    protected static JTextPane textArea;
     // GUI elements
     protected JFrame frame;
     protected JLabel shardVersionLabel;
-    protected static JTextPane textArea;
+    private Heart_Core c;
 
     public GUIManager(Heart_Core heart_core) {
         c = heart_core;
@@ -52,7 +51,7 @@ public class GUIManager {
      */
     public void initGUI() {
         // Frame and it's settings
-        frame = new JFrame(c.getConfigurationManager().systemName);
+        frame = new JFrame(ConfigurationManager.systemName);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setResizable(false);
@@ -105,11 +104,11 @@ public class GUIManager {
         clearLog.setBounds(new Rectangle(500, 10, 100, 40));
 
         // Heart Version Label
-        JLabel heartVersionLabel = new JLabel("Heart_Version: " + c.getConfigurationManager().HEART_VERSION);
+        JLabel heartVersionLabel = new JLabel("Heart_Version: " + ConfigurationManager.HEART_VERSION);
         heartVersionLabel.setBounds(new Rectangle(650, 5, 120, 25));
 
         // Shard Version Label
-        shardVersionLabel = new JLabel("Shard_Version: " + c.getConfigurationManager().SHARD_VERSION);
+        shardVersionLabel = new JLabel("Shard_Version: " + ConfigurationManager.SHARD_VERSION);
         shardVersionLabel.setBounds(new Rectangle(650, 35, 120, 25));
 
         // Scroll pane holding the text area

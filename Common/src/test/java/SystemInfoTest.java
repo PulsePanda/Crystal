@@ -17,10 +17,11 @@ import static org.junit.Assert.assertTrue;
 
 public class SystemInfoTest {
 
-    public SystemInfoTest(){}
+    public SystemInfoTest() {
+    }
 
     @Test
-    public void testSystem_os(){
+    public void testSystem_os() {
         SystemInfo.SYSTEM_OS os = SystemInfo.getSystem_os();
         assertTrue(os.toString().toLowerCase().contains("windows"));
     }

@@ -13,14 +13,15 @@ import org.junit.Test;
 
 import javax.swing.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class FileChooserTest {
 
-    public FileChooserTest(){}
+    public FileChooserTest() {
+    }
 
     @Test
-    public void testChooseFile(){
+    public void testChooseFile() {
         JOptionPane.showMessageDialog(null, "Testing file chooser. \nChoose a file in your C: drive.");
         String file = FileChooser.chooseFile();
         assertTrue(file.toLowerCase().contains("c:"));

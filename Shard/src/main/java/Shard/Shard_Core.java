@@ -69,7 +69,7 @@ public class Shard_Core {
      * the Shard will be ready to connect to a Heart.
      */
     public void init() {
-        if (configurationManager.remoteLoggingInitialized) {
+        if (ConfigurationManager.remoteLoggingInitialized) {
             return;
         }
 
@@ -95,10 +95,10 @@ public class Shard_Core {
      * Other variables can be remoteLoggingInitialized here too.
      */
     private void initVariables() {
-        configurationManager.baseDir = System.getProperty("user.home") + configurationManager.baseDir;
-        configurationManager.shardDir = configurationManager.baseDir + configurationManager.shardDir;
-        configurationManager.logBaseDir = configurationManager.shardDir + configurationManager.logBaseDir;
-        configurationManager.configDir = configurationManager.shardDir + configurationManager.configDir;
+        ConfigurationManager.baseDir = System.getProperty("user.home") + ConfigurationManager.baseDir;
+        ConfigurationManager.shardDir = ConfigurationManager.baseDir + ConfigurationManager.shardDir;
+        ConfigurationManager.logBaseDir = ConfigurationManager.shardDir + ConfigurationManager.logBaseDir;
+        ConfigurationManager.configDir = ConfigurationManager.shardDir + ConfigurationManager.configDir;
     }
 
 
@@ -108,8 +108,8 @@ public class Shard_Core {
     private void initLog() {
         logManager = new LogManager();
         try {
-            logManager.createLog(configurationManager.logBaseDir);
-            configurationManager.logActive = true;
+            logManager.createLog(ConfigurationManager.logBaseDir);
+            ConfigurationManager.logActive = true;
 
             // Start the logManager and initialize the text
             System.out.println("System logging enabled");
@@ -241,29 +241,29 @@ public class Shard_Core {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                guiManager.appendToPane(guiManager.textArea, msg, color);
-                guiManager.textArea.setCaretPosition(guiManager.textArea.getDocument().getLength());
+                guiManager.appendToPane(GUIManager.textArea, msg, color);
+                GUIManager.textArea.setCaretPosition(GUIManager.textArea.getDocument().getLength());
                 // textArea.append("\n");
             }
         });
 
-        if (configurationManager.logActive) {
+        if (ConfigurationManager.logActive) {
             try {
                 logManager.write(msg);
 
-                if (configurationManager.remoteLoggingInitialized) {
+                if (ConfigurationManager.remoteLoggingInitialized) {
                     // LogManager packet to Heart
                     Packet p = new Packet(Packet.PACKET_TYPE.Message, configurationManager.uuid.toString());
                     p.packetString = msg;
                     connectionManager.sendPacket(p, true);
                 }
             } catch (IOException e) {
-                configurationManager.logActive = false;
+                ConfigurationManager.logActive = false;
                 System.err.println(
                         "Unable to write to logManager. IOException thrown. Deactivating logManager file, please reboot to regain access.");
                 success = false;
             } catch (SendPacketException ex) {
-                configurationManager.remoteLoggingInitialized = false;
+                ConfigurationManager.remoteLoggingInitialized = false;
                 System.err.println("Unable to send logManager packet to Heart. Error: " + ex.getMessage());
             }
         }

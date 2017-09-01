@@ -36,13 +36,12 @@ import java.awt.event.ActionListener;
 
 public class GUIManager {
 
-    Shard_Core c;
-
+    public static JTextPane textArea;
     public JFrame frame;
+    public JLabel connectionStatus;
+    Shard_Core c;
     private JPanel consolePanel, commandPanel;
     private JTabbedPane tabbedPane;
-    public JLabel connectionStatus;
-    public static JTextPane textArea;
 
 
     public GUIManager(Shard_Core shard_core) {
@@ -56,7 +55,7 @@ public class GUIManager {
      */
     public void initGUI() {
         // Frame setup
-        frame = new JFrame(c.getConfigurationManager().systemName);
+        frame = new JFrame(ConfigurationManager.systemName);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
@@ -75,14 +74,14 @@ public class GUIManager {
 
         JButton checkUpdate = new JButton("Check for Updates");
         checkUpdate.addActionListener(e -> {
-            if (!c.getConnectionManager().patchReady)
+            if (!ConnectionManager.patchReady)
                 return;
             new Thread(new ShardConnectionThread(false, true)).start();
         });
 
         JButton goodMorning = new JButton("Good Morning");
         goodMorning.addActionListener(e -> {
-            if (!c.getConnectionManager().patchReady)
+            if (!ConnectionManager.patchReady)
                 return;
 
             Packet p = new Packet(Packet.PACKET_TYPE.Command, c.getConfigurationManager().uuid.toString());
@@ -96,7 +95,7 @@ public class GUIManager {
 
         JButton btcPrice = new JButton("BTC Price");
         btcPrice.addActionListener(e -> {
-            if (!c.getConnectionManager().patchReady)
+            if (!ConnectionManager.patchReady)
                 return;
 
             Packet p = new Packet(Packet.PACKET_TYPE.Command, c.getConfigurationManager().uuid.toString());
@@ -110,7 +109,7 @@ public class GUIManager {
 
         JButton weather = new JButton("Weather");
         weather.addActionListener(e -> {
-            if (!c.getConnectionManager().patchReady)
+            if (!ConnectionManager.patchReady)
                 return;
 
             Packet p = new Packet(Packet.PACKET_TYPE.Command, c.getConfigurationManager().uuid.toString());
@@ -124,7 +123,7 @@ public class GUIManager {
 
         JButton playMusic = new JButton("Play Music");
         playMusic.addActionListener(e -> {
-            if (!c.getConnectionManager().patchReady)
+            if (!ConnectionManager.patchReady)
                 return;
 
             Packet p = new Packet(Packet.PACKET_TYPE.Command, c.getConfigurationManager().uuid.toString());
@@ -140,7 +139,7 @@ public class GUIManager {
 
         JButton playMovie = new JButton("Play Movie");
         playMovie.addActionListener(e -> {
-            if (!c.getConnectionManager().patchReady)
+            if (!ConnectionManager.patchReady)
                 return;
 
             Packet p = new Packet(Packet.PACKET_TYPE.Command, c.getConfigurationManager().uuid.toString());
@@ -156,7 +155,7 @@ public class GUIManager {
 
         JButton stopMedia = new JButton("Stop Media");
         stopMedia.addActionListener(e -> {
-            if (!c.getConnectionManager().patchReady)
+            if (!ConnectionManager.patchReady)
                 return;
 
 //            mediaPlayback.stop();

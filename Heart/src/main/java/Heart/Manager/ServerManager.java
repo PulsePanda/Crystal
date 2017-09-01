@@ -36,8 +36,8 @@ import java.util.ArrayList;
 
 public class ServerManager {
 
-    private Heart_Core c;
     public int heartPort;
+    private Heart_Core c;
     private Server server = null;
     private Thread serverThread = null;
     private ArrayList<MediaServerHelper> mediaServerArrayList;

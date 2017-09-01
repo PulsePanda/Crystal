@@ -34,8 +34,8 @@ clean.doFirst {
 
 def exportedProjects = [
         ":Heart",
-	":Shard",
-	":Common",
+        ":Shard",
+        ":Common",
         ":Nerv"
 ]
 

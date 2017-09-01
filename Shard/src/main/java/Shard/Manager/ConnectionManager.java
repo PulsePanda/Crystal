@@ -32,6 +32,7 @@ import static Shard.Manager.ConfigurationManager.systemName;
 
 public class ConnectionManager {
 
+    public static boolean patchReady = false;
     private Shard_Core c;
     private Client client = null;
     private Thread clientThread = null;
@@ -42,7 +43,6 @@ public class ConnectionManager {
     private ShardPatcher patcher;
     private Thread mediaClientThread;
     private Thread shardConnectionThread;
-    public static boolean patchReady = false;
 
     public ConnectionManager(Shard_Core shard_core) {
         c = shard_core;
@@ -205,12 +205,12 @@ public class ConnectionManager {
             return;
         }
 
-        c.getConfigurationManager().SHARD_VERSION_SERVER = "";
+        ConfigurationManager.SHARD_VERSION_SERVER = "";
 
         // Check shard version
         patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.checkVersion);
         patcher.start();
-        while (c.getConfigurationManager().SHARD_VERSION_SERVER == "") {
+        while (ConfigurationManager.SHARD_VERSION_SERVER == "") {
             try {
                 Thread.sleep(5);
             } catch (InterruptedException ex) {
@@ -230,7 +230,7 @@ public class ConnectionManager {
 
         c.getGuiManager().connectionStatus.setText("CONNECTED");
         c.getGuiManager().connectionStatus.setForeground(Color.GREEN);
-        c.getConfigurationManager().remoteLoggingInitialized = true;
+        ConfigurationManager.remoteLoggingInitialized = true;
         try {
             swapID();
         } catch (SendPacketException e) {
@@ -251,7 +251,7 @@ public class ConnectionManager {
     public void swapID() throws SendPacketException {
         Packet p = new Packet(Packet.PACKET_TYPE.Command, c.getConfigurationManager().uuid.toString());
         p.packetString = "uuid";
-        p.packetStringArray = new String[]{systemName, c.getConfigurationManager().systemLocation};
+        p.packetStringArray = new String[]{systemName, ConfigurationManager.systemLocation};
         client.sendPacket(p, true);
     }
 
@@ -273,7 +273,7 @@ public class ConnectionManager {
         clientThread = null;
         c.getConfigurationManager().IP = "";
         port = 0;
-        c.getConfigurationManager().remoteLoggingInitialized = false;
+        ConfigurationManager.remoteLoggingInitialized = false;
     }
 
     /**

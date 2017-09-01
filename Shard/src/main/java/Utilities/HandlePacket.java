@@ -24,6 +24,7 @@ import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 import Shard.Client;
+import Shard.Manager.ConfigurationManager;
 import Shard.Shard_Core;
 
 import javax.swing.*;
@@ -64,7 +65,7 @@ public class HandlePacket {
                 if (message.startsWith("version:")) {
                     String[] split = message.split(":");
                     String version = split[1];
-                    Shard_Core.getShardCore().getConfigurationManager().SHARD_VERSION_SERVER = version;
+                    ConfigurationManager.SHARD_VERSION_SERVER = version;
                 } else if (message.equals("update")) {
                     Shard_Core.getShardCore().getConnectionManager().getPatcher().updateFile = packet.packetByteArray;
                 } else if (message.equals("new patch")) {

@@ -21,7 +21,6 @@ import java.util.UUID;
 
 public class ConfigurationManager {
 
-    private Shard_Core c;
     public static String SHARD_VERSION_SERVER = "";
     // Global variables
     public static String systemName = "CHS Shard", systemLocation = "", commandKey, baseDir = "/CrystalHomeSys/", shardDir = "Shard/",
@@ -30,11 +29,12 @@ public class ConfigurationManager {
     public static boolean remoteLoggingInitialized = false;
     private final int dnssdPort = 6980;
     public boolean headless = false;
-    private boolean cfg_set = false;
-    private SettingsFileManager cfg = null;
     public UUID uuid;
     public UUID heartUUID;
     public String IP = null;
+    private Shard_Core c;
+    private boolean cfg_set = false;
+    private SettingsFileManager cfg = null;
 
     public ConfigurationManager(Shard_Core shard_core) {
         c = shard_core;

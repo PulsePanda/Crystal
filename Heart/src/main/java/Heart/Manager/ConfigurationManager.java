@@ -40,17 +40,17 @@ import java.util.UUID;
 
 public class ConfigurationManager {
 
-    private Heart_Core c;
-    protected SettingsFileManager cfg = null;
     public final static String HEART_VERSION = "0.1.4";
     public static String SHARD_VERSION = "";
     public static String systemName = "CHS Heart", mediaDir = "", musicDir = "", movieDir = "", commandKey = "",
             baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardLogsDir = "Logs/", configDir = "heart_config.cfg",
             logBaseDir = "Logs/", shardFileDir = "Shard_Files/";
-    protected UUID uuid;
     public static boolean DEV_BUILD;
     private static boolean cfg_set = false;
     private static boolean logActive = false;
+    protected SettingsFileManager cfg = null;
+    protected UUID uuid;
+    private Heart_Core c;
 
     public ConfigurationManager(Heart_Core heart_core) {
         this.c = heart_core;

@@ -37,14 +37,14 @@ public class Heart_Core {
     protected static boolean initialized = false;
     private static Heart_Core heart_core;
     private static LogManager logManager;
-    private boolean headless = false;
+    private static SystemInfo systemInfo;
     protected Thread updateCheckerThread = null;
+    private boolean headless = false;
     private MediaManager mediaManager;
     private GUIManager guiManager;
     private ShardManager shardManager;
     private ConfigurationManager configurationManager;
     private ServerManager serverManager;
-    private static SystemInfo systemInfo;
 
     /**
      * Heart Core Default Constructor
@@ -58,15 +58,35 @@ public class Heart_Core {
         systemInfo = new SystemInfo();
         heart_core = this;
         this.headless = headless;
-        configurationManager.DEV_BUILD = DEV_BUILD;
+        ConfigurationManager.DEV_BUILD = DEV_BUILD;
         serverManager = new ServerManager(this);
     }
 
+    /**
+     * Get the Heart_Core object
+     *
+     * @return Heart_Core object
+     */
+    public static Heart_Core getCore() {
+        return heart_core;
+    }
+
+
+    //TODO Removing this method for service migration
+
+    /**
+     * Get System Info object
+     *
+     * @return SystemInfo object
+     */
+    public static SystemInfo getSystemInfo() {
+        return systemInfo;
+    }
 
     /**
      * Initialize the Heart Server
      */
-    public void init() {
+    private void init() {
         if (initialized) {
             return;
         }
@@ -89,29 +109,25 @@ public class Heart_Core {
         initPatchThread();
     }
 
-
-    //TODO Removing this method for service migration
-
     /**
      * Sets up the initial variables for directories
      */
     private void initVariables() {
         // Sets the baseDir to the home directory
-        configurationManager.baseDir = System.getProperty("user.home") + configurationManager.baseDir;
+        ConfigurationManager.baseDir = System.getProperty("user.home") + ConfigurationManager.baseDir;
 
-        configurationManager.heartDir = configurationManager.baseDir + configurationManager.heartDir;
+        ConfigurationManager.heartDir = ConfigurationManager.baseDir + ConfigurationManager.heartDir;
 
-        configurationManager.shardLogsDir = configurationManager.baseDir + configurationManager.shardLogsDir;
+        ConfigurationManager.shardLogsDir = ConfigurationManager.baseDir + ConfigurationManager.shardLogsDir;
 
-        configurationManager.logBaseDir = configurationManager.heartDir + configurationManager.logBaseDir;
+        ConfigurationManager.logBaseDir = ConfigurationManager.heartDir + ConfigurationManager.logBaseDir;
 
-        configurationManager.shardFileDir = configurationManager.heartDir + configurationManager.shardFileDir;
+        ConfigurationManager.shardFileDir = ConfigurationManager.heartDir + ConfigurationManager.shardFileDir;
 
-        configurationManager.configDir = configurationManager.heartDir + configurationManager.configDir;
+        ConfigurationManager.configDir = ConfigurationManager.heartDir + ConfigurationManager.configDir;
 
         shardManager.updateShardVersionFromLocal();
     }
-
 
     /**
      * set up the logging system
@@ -119,18 +135,18 @@ public class Heart_Core {
     private void initLog() {
         logManager = new LogManager();
         try {
-            logManager.createLog(configurationManager.logBaseDir);
-            configurationManager.setLogActive(true);
+            logManager.createLog(ConfigurationManager.logBaseDir);
+            ConfigurationManager.setLogActive(true);
 
             // Start the logManager and initialize the text
-            System.out.println("###############" + configurationManager.systemName + "###############");
+            System.out.println("###############" + ConfigurationManager.systemName + "###############");
             System.out.println("System logging enabled");
         } catch (SecurityException e) {
-            System.out.println("###############" + configurationManager.systemName + "###############");
+            System.out.println("###############" + ConfigurationManager.systemName + "###############");
             System.err.println(
                     "Unable to access logManager file or directory because of permission settings. Will continue running without logs, however please reboot to set logs.\n");
         } catch (IOException e) {
-            System.out.println("###############" + configurationManager.systemName + "###############");
+            System.out.println("###############" + ConfigurationManager.systemName + "###############");
             System.err.println(
                     "Unable to access find or create logManager on object creation. Will continue running without logs, however please reboot to set logs.\n");
         }
@@ -140,8 +156,8 @@ public class Heart_Core {
      * Initializes the media index thread to provide a usable list for shards
      */
     private void initMediaManager() {
-        if (configurationManager.isCfg_set()) {
-            mediaManager = new MediaManager(configurationManager.mediaDir, configurationManager.musicDir, configurationManager.movieDir);
+        if (ConfigurationManager.isCfg_set()) {
+            mediaManager = new MediaManager(ConfigurationManager.mediaDir, ConfigurationManager.musicDir, ConfigurationManager.movieDir);
             mediaManager.index(true, Integer.parseInt(configurationManager.getCfg().get("mediaIndexDelay")));
         } else {
             System.err.println("MEDIA_MANAGER: Configuration file was not found. Media management is unavailable until the configuration is set up.");
@@ -159,7 +175,7 @@ public class Heart_Core {
     /**
      * Function to redirect standard output streams to the write function
      */
-    public void redirectSystemStreams() {
+    private void redirectSystemStreams() {
         OutputStream out = new OutputStream() {
             @Override
             public void write(int b) throws IOException {
@@ -213,15 +229,13 @@ public class Heart_Core {
     public boolean println(final String msg, Color color) {
         boolean success = true;
 
-        SwingUtilities.invokeLater(() -> {
-            guiManager.appendToPane(msg, color);
-        });
+        SwingUtilities.invokeLater(() -> guiManager.appendToPane(msg, color));
 
-        if (configurationManager.isLogActive()) {
+        if (ConfigurationManager.isLogActive()) {
             try {
                 logManager.write(msg);
             } catch (IOException e) {
-                configurationManager.setLogActive(false);
+                ConfigurationManager.setLogActive(false);
                 System.err.println(
                         "Unable to write to log. IOException thrown. Deactivating log file, please reboot to regain access.");
                 success = false;
@@ -232,16 +246,6 @@ public class Heart_Core {
     }
 
     /**
-     * Get the Heart_Core object
-     *
-     * @return Heart_Core object
-     */
-    public static Heart_Core getCore() {
-        return heart_core;
-    }
-
-
-    /**
      * Get the media manager object
      *
      * @return MediaManager object
@@ -249,7 +253,6 @@ public class Heart_Core {
     public MediaManager getMediaManager() {
         return mediaManager;
     }
-
 
     /**
      * Get the Shard Manager
@@ -277,16 +280,6 @@ public class Heart_Core {
     public ServerManager getServerManager() {
         return serverManager;
     }
-
-    /**
-     * Get System Info object
-     *
-     * @return SystemInfo object
-     */
-    public static SystemInfo getSystemInfo() {
-        return systemInfo;
-    }
-
 
     /**
      * Get GUI Manager
