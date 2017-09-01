@@ -44,8 +44,8 @@ public class ShardConnectionThread implements Runnable {
         while (true) {
             try {
                 if (!patchOnly)
-                    sc.startShardClient();
-                sc.initPatcher();
+                    sc.getConnectionManager().startShardClient();
+                sc.getConnectionManager().initPatcher();
             } catch (ClientInitializationException e) {
                 // If the shard is already connected, this is executed. Don't need to do anything, just keep looping
             }

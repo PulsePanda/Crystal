@@ -144,7 +144,7 @@ public class Heart_Core {
             mediaManager = new MediaManager(configurationManager.mediaDir, configurationManager.musicDir, configurationManager.movieDir);
             mediaManager.index(true, Integer.parseInt(configurationManager.getCfg().get("mediaIndexDelay")));
         } else {
-            System.err.println("Configuration file was not found. Media management is unavailable until the configuration is set up.");
+            System.err.println("MEDIA_MANAGER: Configuration file was not found. Media management is unavailable until the configuration is set up.");
         }
     }
 

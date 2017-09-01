@@ -126,6 +126,7 @@ public class ConfigurationManager {
         movieDir = cfg.get("movieDir");
         commandKey = cfg.get("commandKey");
         uuid = UUID.fromString(cfg.get("uuid"));
+        cfg_set = Boolean.valueOf(cfg.get("cfg_set"));
 
         // Load check
         if (systemName == null || systemName == "")
@@ -140,6 +141,8 @@ public class ConfigurationManager {
             System.err.println("Unable to load Command Key from config file!");
         if (uuid == null || uuid.toString() == "")
             System.err.println("Unable to load UUID from config file!");
+        if (cfg_set == false)
+            System.err.println("Unable to load CFG_SET from config file!");
 
 
         System.out.println("Configuration file loaded.");

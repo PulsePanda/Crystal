@@ -95,7 +95,7 @@ public class ShardPatcher extends Thread {
             System.err.println("Error getting Hearts version of the Shard. Error: " + ex.getMessage());
             System.err.println("Cancelling execution, unsafe to run unpatched Shard.");
             try {
-                Shard_Core.getShardCore().stopShardClient();
+                Shard_Core.getShardCore().getConnectionManager().stopShardClient();
             } catch (ConnectionException ex1) {
             }
         }
@@ -122,20 +122,20 @@ public class ShardPatcher extends Thread {
      * Downloads the update from the Heart by calling updateHelper()
      */
     private void downloadUpdateHelper() {
-        if (!Shard_Core.SHARD_VERSION.equals(Shard_Core.SHARD_VERSION_SERVER)) {
+        if (!Shard_Core.SHARD_VERSION.equals(Shard_Core.getShardCore().getConfigurationManager().SHARD_VERSION_SERVER)) {
             System.out.println("Update required. Initializing update.");
             try {
                 updateHelper();
             } catch (SendPacketException e) {
                 System.err.println("Error sending update command to Heart. Details: " + e.getMessage());
-                Shard_Core.patchReady = true;
+                Shard_Core.getShardCore().getConnectionManager().patchReady = true;
                 return;
             }
         } else {
             System.out.println("Shard is up to date!");
-            Shard_Core.patchReady = true;
+            Shard_Core.getShardCore().getConnectionManager().patchReady = true;
         }
-        Shard_Core.patchReady = true;
+        Shard_Core.getShardCore().getConnectionManager().patchReady = true;
     }
 
     /**
@@ -165,11 +165,11 @@ public class ShardPatcher extends Thread {
 
         try {
             System.out.println("Saving update file...");
-            File file = new File(Shard_Core.shardDir + "Shard.zip");
+            File file = new File(Shard_Core.getShardCore().getConfigurationManager().shardDir + "Shard.zip");
             if (!file.exists())
                 file.createNewFile();
 
-            FileOutputStream fos = new FileOutputStream(Shard_Core.shardDir + "Shard.zip");
+            FileOutputStream fos = new FileOutputStream(Shard_Core.getShardCore().getConfigurationManager().shardDir + "Shard.zip");
             fos.write(updateFile);
             fos.close();
             System.out.println("Update file saved.");
@@ -184,10 +184,10 @@ public class ShardPatcher extends Thread {
      * Runs and installs the update
      */
     private void runUpdateHelper() {
-        if (!Shard_Core.SHARD_VERSION.equals(Shard_Core.SHARD_VERSION_SERVER)) {
+        if (!Shard_Core.SHARD_VERSION.equals(Shard_Core.getShardCore().getConfigurationManager().SHARD_VERSION_SERVER)) {
             System.out.println("Installing update...");
             try {
-                UnZipPython.unZip(Shard_Core.shardDir + "Shard.zip", Shard_Core.baseDir);
+                UnZipPython.unZip(Shard_Core.getShardCore().getConfigurationManager().shardDir + "Shard.zip", Shard_Core.getShardCore().getConfigurationManager().baseDir);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -195,15 +195,15 @@ public class ShardPatcher extends Thread {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
             }
-            deleteDir(new File(Shard_Core.shardDir + "Shard.zip"));
+            deleteDir(new File(Shard_Core.getShardCore().getConfigurationManager().shardDir + "Shard.zip"));
 
             System.out.println("Launching new version of Shard.");
             try {
                 if (os.equals("windows")) {
                     Runtime.getRuntime()
-                            .exec(new String[]{"cmd", "/c", "start", Shard_Core.shardDir + "bin/Shard.bat"});
+                            .exec(new String[]{"cmd", "/c", "start", Shard_Core.getShardCore().getConfigurationManager().shardDir + "bin/Shard.bat"});
                 } else if (os.equals("linux")) {
-                    ProcessBuilder pb = new ProcessBuilder(Shard_Core.shardDir + "bin/Shard");
+                    ProcessBuilder pb = new ProcessBuilder(Shard_Core.getShardCore().getConfigurationManager().shardDir + "bin/Shard");
                     pb.start();
                 }
             } catch (IOException e) {
