@@ -33,6 +33,9 @@ import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 public class GUIManager {
 
@@ -214,8 +217,93 @@ public class GUIManager {
         tabbedPane.addTab("Console", consolePanel);
         frame.add(tabbedPane);
         frame.setVisible(true);
+
+        redirectSystemStreams();
     }
 
+    /**
+     * Function to redirect standard output streams to the write function
+     */
+    private void redirectSystemStreams() {
+        OutputStream out = new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                println(String.valueOf((char) b), Color.BLACK);
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+                println(new String(b, off, len), Color.BLACK);
+            }
+
+            @Override
+            public void write(byte[] b) throws IOException {
+                write(b, 0, b.length);
+            }
+        };
+
+        OutputStream err = new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                println(String.valueOf((char) b), Color.RED);
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+                println(new String(b, off, len), Color.RED);
+            }
+
+            @Override
+            public void write(byte[] b) throws IOException {
+                write(b, 0, b.length);
+            }
+        };
+
+        System.setOut(new PrintStream(out, true));
+        System.setErr(new PrintStream(err, true));
+    }
+
+    /**
+     * Writes to the Standard Output Stream, as well as calls 'write' on the
+     * local logManager object
+     *
+     * @param msg Message to be displayed and written
+     * @return Returns TRUE if successful at writing to the logManager, FALSE if not
+     */
+    private boolean println(String msg, Color color) {
+        boolean success = true;
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                appendToPane(GUIManager.textArea, msg, color);
+                GUIManager.textArea.setCaretPosition(GUIManager.textArea.getDocument().getLength());
+                // textArea.append("\n");
+            }
+        });
+
+        if (ConfigurationManager.logActive) {
+            try {
+                c.getLogManager().write(msg);
+
+                if (ConfigurationManager.remoteLoggingInitialized) {
+                    // LogManager packet to Heart
+                    Packet p = new Packet(Packet.PACKET_TYPE.Message, c.getConfigurationManager().uuid.toString());
+                    p.packetString = msg;
+                    c.getConnectionManager().sendPacket(p, true);
+                }
+            } catch (IOException e) {
+                ConfigurationManager.logActive = false;
+                System.err.println(
+                        "Unable to write to logManager. IOException thrown. Deactivating logManager file, please reboot to regain access.");
+                success = false;
+            } catch (SendPacketException ex) {
+                ConfigurationManager.remoteLoggingInitialized = false;
+                System.err.println("Unable to send logManager packet to Heart. Error: " + ex.getMessage());
+            }
+        }
+
+        return success;
+    }
 
     public void appendToPane(JTextPane tp, String msg, Color c) {
         tp.setEditable(true);
