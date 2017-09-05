@@ -124,7 +124,7 @@ public class ShardPatcher extends Thread {
      * Downloads the update from the Heart by calling updateHelper()
      */
     private void downloadUpdateHelper() {
-        if (!Shard_Core.SHARD_VERSION.equals(ConfigurationManager.SHARD_VERSION_SERVER)) {
+        if (!Shard_Core.getShardCore().getConfigurationManager().SHARD_VERSION.equals(ConfigurationManager.SHARD_VERSION_SERVER)) {
             System.out.println("Update required. Initializing update.");
             try {
                 updateHelper();
@@ -186,7 +186,7 @@ public class ShardPatcher extends Thread {
      * Runs and installs the update
      */
     private void runUpdateHelper() {
-        if (!Shard_Core.SHARD_VERSION.equals(ConfigurationManager.SHARD_VERSION_SERVER)) {
+        if (!Shard_Core.getShardCore().getConfigurationManager().SHARD_VERSION.equals(ConfigurationManager.SHARD_VERSION_SERVER)) {
             System.out.println("Installing update...");
             try {
                 UnZipPython.unZip(ConfigurationManager.shardDir + "Shard.zip", ConfigurationManager.baseDir);

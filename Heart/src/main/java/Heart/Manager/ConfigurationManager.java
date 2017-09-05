@@ -40,7 +40,7 @@ import java.util.UUID;
 
 public class ConfigurationManager {
 
-    public final static String HEART_VERSION = "0.1.4";
+    public final static String HEART_VERSION = "0.1.5";
     public static String SHARD_VERSION = "";
     public static String systemName = "CHS Heart", mediaDir = "", musicDir = "", movieDir = "", commandKey = "",
             baseDir = "/CrystalHomeSys/", heartDir = "Heart/", shardLogsDir = "Logs/", configDir = "heart_config.cfg",

@@ -73,11 +73,16 @@ public class UpdateCheckerThread extends Thread {
                 checkForUpdate();
                 if (shardUpdate || heartUpdate || forceUpdate) {
                     System.out.println("UPDATER: Update found. Updating...");
-                    patcherPython.patch(Heart_Core.getCore().getConfigurationManager().DEV_BUILD, heartUpdate || forceUpdate);
+                    patcherPython.patch(Heart_Core.getCore().getConfigurationManager().DEV_BUILD, heartUpdate || forceUpdate, forceUpdate);
+                    if (shardUpdate)
+                        installShardPatch();
+
                     if (heartUpdate || forceUpdate) {
                         Heart_Core.getCore().shutdownHeart();
                         System.exit(0);
                     }
+                } else {
+                    System.out.println("UPDATER: System up to date.");
                 }
 
                 shardUpdate = false;
