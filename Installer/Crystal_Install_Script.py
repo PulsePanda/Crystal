@@ -1,8 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
+import platform
 import sys
 from pathlib import Path
+from zipfile import ZipFile
 
 devBuild = True
 
@@ -99,7 +101,6 @@ else:
     # Download and unzip files without saving to hdd
     from io import BytesIO
     from urllib.request import urlopen
-    from zipfile import ZipFile
 
     if devBuild:
         # Dev
@@ -113,27 +114,46 @@ else:
         with ZipFile(BytesIO(zipresp.read())) as zfile:
             zfile.extractall(userhome + "/CrystalHomeSys/")
 
-dir_src = userhome + "\CrystalHomeSys\Crystal-"
-if devBuild:
-    dir_src = dir_src + "dev"
-else:
-    dir_src = dir_src + "master"
+    dir_src = userhome + "\CrystalHomeSys\Crystal-"
+    if devBuild:
+        dir_src = dir_src + "dev"
+    else:
+        dir_src = dir_src + "master"
 
-print("Compiling files...")
-from subprocess import Popen
+    print("Compiling files...")
+    from subprocess import Popen
 
-p = Popen("gradlew bundle", shell=True, cwd=dir_src)
-stdout, stderr = p.communicate()
+    p = Popen("gradlew build", shell=True, cwd=dir_src)
+    stdout, stderr = p.communicate()
 
-# finish assigning dir_src to the sub Heart directory for copy
-dir_src = dir_src + "\Heart"
+    # finish assigning dir_src to the sub Heart directory for copy
+    dir_src_nonspecific = dir_src
+    dir_src = dir_src + "/Heart"
 
-print("Updating Heart files...")
-dir_dst = userhome + "/CrystalHomeSys/Heart"
-import distutils
+    print("Updating Heart files...")
+    dir_dst = userhome + "/CrystalHomeSys/"
+    # import distutils
+    #
+    # distutils.dir_util.copy_tree(dir_src, dir_dst)
+    zip_ref = ZipFile(dir_src + "/build/distributions/Heart.zip")
+    zip_ref.extractall(dir_dst)
+    zip_ref.close()
 
-distutils.dir_util.copy_tree(dir_src, dir_dst)
+    print("Packaging Shard install for distribution...")
+    patchHome = dir_dst + "patch"
+    if not os.path.isdir(patchHome):
+        os.makedirs(patchHome)
+    os.replace(dir_src_nonspecific + "/Shard/build/distributions/Shard.zip", patchHome + "/Shard.zip")
 
-print("Packaging Shard install for distribution...")
+    print("Cleaning up...")
+    import shutil
 
-print("Starting Heart server...")
+    shutil.rmtree(dir_src_nonspecific)
+
+    print("Starting Heart server...")
+    if "Linux" in platform.system():
+        Popen("Heart", shell=True, cwd=userhome + "/CrystalHomeSys/Heart/bin/")
+    elif "Windows" in platform.system():
+        Popen("Heart.bat", shell=True, cwd=userhome + "/CrystalHomeSys/Heart/bin/")
+
+    print("-------------Application Launch Directory: " + dir_dst + "Heart/bin/Heart.(sh/bat)-------------")
