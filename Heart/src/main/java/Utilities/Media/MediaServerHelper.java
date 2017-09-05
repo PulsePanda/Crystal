@@ -41,7 +41,7 @@ public class MediaServerHelper {
         this.media = media;
         this.client = client;
 
-        Packet packet = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getUUID().toString());
+        Packet packet = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getConfigurationManager().getUUID().toString());
         packet.packetString = "media server";
 
         // Verify the media file is a valid file
@@ -54,7 +54,7 @@ public class MediaServerHelper {
         // Create server
         try {
             System.out.println("Starting media server for media file " + media.getName());
-            System.out.println("Attempting to host media server on port " + mediaServerPort);
+            System.out.println("Attempting to host media server on heartPort " + mediaServerPort);
 
             // Convert mp3 file to wav for streaming
             if (mediaFile.getPath().contains(".mp3")) {
@@ -77,7 +77,7 @@ public class MediaServerHelper {
             }
 
             while (!serverHelper.isServerActive()) {
-                System.out.println("Attempting to host media server on port " + ++mediaServerPort);
+                System.out.println("Attempting to host media server on heartPort " + ++mediaServerPort);
                 stopMediaServer();
 
                 serverHelper = new ServerHelper(mediaServerPort, this, mediaFile);

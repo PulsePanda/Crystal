@@ -10,6 +10,7 @@
 
 package Heart;
 
+import Heart.Manager.ConfigurationManager;
 import Kript.Kript;
 import Netta.Connection.Packet;
 import Netta.Connection.Server.ConnectedClient;
@@ -17,7 +18,7 @@ import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
 import Netta.Exceptions.SendPacketException;
 import Utilities.Command;
-import Utilities.Log;
+import Utilities.LogManager;
 import Utilities.Media.MediaServerHelper;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class ClientConnection extends ConnectedClient {
     public UUID clientUUID;
     public String clientName, clientLocation;
     private Command command;
-    private Log clientLog;
+    private LogManager clientLogManager;
     private boolean clientLogCreated = false, conversation = false;
     private MediaServerHelper mediaServer;
 
@@ -48,9 +49,9 @@ public class ClientConnection extends ConnectedClient {
         super(socket, kript);
 
         command = new Command(this);
-        clientLog = new Log();
+        clientLogManager = new LogManager();
         try {
-            clientLog.createLog(Heart_Core.shardLogsDir);
+            clientLogManager.createLog(ConfigurationManager.shardLogsDir);
             clientLogCreated = true;
         } catch (IOException ex) {
             System.err.println("Unable to create log for connected Shard. Ignoring logging.");
@@ -92,9 +93,9 @@ public class ClientConnection extends ConnectedClient {
                 case "Message":
                     if (clientLogCreated) {
                         try {
-                            clientLog.write(p.packetString);
+                            clientLogManager.write(p.packetString);
                         } catch (IOException ex) {
-                            System.err.println("Unable to write to Shard Log.");
+                            System.err.println("Unable to write to Shard LogManager.");
                         }
                     }
                     break;

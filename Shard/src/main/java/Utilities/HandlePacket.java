@@ -24,6 +24,7 @@ import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.SendPacketException;
 import Shard.Client;
+import Shard.Manager.ConfigurationManager;
 import Shard.Shard_Core;
 
 import javax.swing.*;
@@ -64,11 +65,11 @@ public class HandlePacket {
                 if (message.startsWith("version:")) {
                     String[] split = message.split(":");
                     String version = split[1];
-                    Shard_Core.SHARD_VERSION_SERVER = version;
+                    ConfigurationManager.SHARD_VERSION_SERVER = version;
                 } else if (message.equals("update")) {
-                    Shard_Core.getShardCore().getPatcher().updateFile = packet.packetByteArray;
+                    Shard_Core.getShardCore().getConnectionManager().getPatcher().updateFile = packet.packetByteArray;
                 } else if (message.equals("new patch")) {
-                    ShardPatcher patcher = new ShardPatcher(Shard_Core.getShardCore().getClient(),
+                    ShardPatcher patcher = new ShardPatcher(Shard_Core.getShardCore().getConnectionManager().getClient(),
                             ShardPatcher.PATCHER_TYPE.downloadUpdate);
                     patcher.start();
                 } else if (message.equals("patch file send error")) {
@@ -77,9 +78,9 @@ public class HandlePacket {
                             "The filepath is inaccessible to the Heart, likely because of permissions issues. File path is /%userhome%/CrystalHomeSys/\n" +
                             "For further information, refer to the README provided with Crystal, or at http://github.com/PulsePanda/Crystal\n" +
                             "\nShard is now closing connections.");
-                    Shard_Core.getShardCore().stopShardConnectionThread();
+                    Shard_Core.getShardCore().getConnectionManager().stopShardConnectionThread();
                     try {
-                        Shard_Core.getShardCore().stopShardClient();
+                        Shard_Core.getShardCore().getConnectionManager().stopShardClient();
                     } catch (ConnectionException e) {
                         System.err.println("Error closing Shard. Details: " + e.getMessage());
                     }
@@ -100,7 +101,7 @@ public class HandlePacket {
                         Packet p = new Packet(Packet.PACKET_TYPE.Command, Shard_Core.getShardCore().getUUID().toString());
                         p.packetString = "Play Music";
                         p.packetStringArray = new String[]{songPath};
-                        Shard_Core.getShardCore().getClient().sendPacket(p, true);
+                        Shard_Core.getShardCore().getConnectionManager().getClient().sendPacket(p, true);
                     } catch (ArrayIndexOutOfBoundsException e) {
                         JOptionPane.showMessageDialog(null, "Heart was unable to find a song matching that name!");
                         System.err.println("Heart was unable to find a song matching that name!");
@@ -124,7 +125,7 @@ public class HandlePacket {
                         Packet p = new Packet(Packet.PACKET_TYPE.Command, Shard_Core.getShardCore().getUUID().toString());
                         p.packetString = "Play Movie";
                         p.packetStringArray = new String[]{moviePath};
-                        Shard_Core.getShardCore().getClient().sendPacket(p, true);
+                        Shard_Core.getShardCore().getConnectionManager().getClient().sendPacket(p, true);
                     } catch (ArrayIndexOutOfBoundsException e) {
                         JOptionPane.showMessageDialog(null, "Heart was unable to find a movie matching that name!");
                         System.err.println("Heart was unable to find a movie matching that name!");
@@ -133,8 +134,8 @@ public class HandlePacket {
                     }
                 } else if (message.equals("media server")) {
                     int mediaServerPort = packet.packetInt;
-                    System.out.println("Received media server information. Port: " + mediaServerPort + " Address: " + Shard_Core.getShardCore().getIP());
-                    Shard_Core.getShardCore().connectToMediaServer(mediaServerPort, "music"); // TODO the Music param needs to be dynamic
+                    System.out.println("Received media server information. Port: " + mediaServerPort + " Address: " + Shard_Core.getShardCore().getConnectionManager().getIP());
+                    Shard_Core.getShardCore().getConnectionManager().connectToMediaServer(mediaServerPort, "music"); // TODO the Music param needs to be dynamic
                 } else if (message.equals("uuid")) {
                     Shard_Core.getShardCore().setHeartUUID(UUID.fromString(packet.senderID));
                 } else {
@@ -144,7 +145,7 @@ public class HandlePacket {
             case "closeconnection":
                 System.out.println(
                         "Server requested connection termination. Reason: " + packet.packetString + ". Closing connection.");
-                Shard_Core.getShardCore().resetConnectionData();
+                Shard_Core.getShardCore().getConnectionManager().resetConnectionData();
 
                 break;
         }

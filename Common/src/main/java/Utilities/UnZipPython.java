@@ -13,14 +13,14 @@ package Utilities;
 import java.io.IOException;
 
 /**
- * UnZip
+ * UnZipPython
  * <p>
  * Utility to unzip zip files into output folders
  */
-public class UnZip {
+public class UnZipPython {
 
     /**
-     * UnZip the given zip file into the given output folder
+     * UnZipPython the given zip file into the given output folder
      *
      * @param source      input Zip file
      * @param destination output folder

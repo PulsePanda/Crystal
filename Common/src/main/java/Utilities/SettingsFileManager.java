@@ -16,11 +16,11 @@ import java.io.*;
 import java.util.Properties;
 
 /**
- * Configuration Manager.
+ * Settings File Manager.
  * <p>
  * Used to handle configuration files for software
  */
-public class Config {
+public class SettingsFileManager {
 
     private Properties config = new Properties();
     private File configFile;
@@ -34,7 +34,7 @@ public class Config {
      *                                configuration file. Details of the error are found in the
      *                                message.
      */
-    public Config(String fullDir) throws ConfigurationException {
+    public SettingsFileManager(String fullDir) throws ConfigurationException {
         configFile = new File(fullDir);
 
         reload();

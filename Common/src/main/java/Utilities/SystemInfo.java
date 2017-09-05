@@ -10,6 +10,10 @@
 
 package Utilities;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 /**
  * SystemInfo
  * <p>
@@ -33,6 +37,20 @@ public class SystemInfo {
             return SYSTEM_OS.Linux;
         else
             return SYSTEM_OS.ERROR;
+    }
+
+    /**
+     * Get the System's local IP address
+     *
+     * @return InetAddress value of local IP address
+     * @throws UnknownHostException if there is an error retrieving local IP address
+     */
+    public static InetAddress getSystemLocalIP() throws UnknownHostException {
+        return Inet4Address.getLocalHost();
+    }
+
+    public static String getSystemHostname() throws UnknownHostException {
+        return InetAddress.getLocalHost().getHostName();
     }
 
     /**

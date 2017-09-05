@@ -9,7 +9,7 @@
  */
 
 /**
- * Log manager. Creates and edits log files, with file names based on the current system date.
+ * LogManager manager. Creates and edits log files, with file names based on the current system date.
  */
 
 package Utilities;
@@ -22,13 +22,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Log {
+public class LogManager {
     private BufferedWriter writer;
 
     /**
      * Default Constructor
      */
-    public Log() {
+    public LogManager() {
     }
 
     /**
@@ -63,8 +63,8 @@ public class Log {
     }
 
     /**
-     * write lines to the log file. Passed String is what gets written. This
-     * does not add a new line at the end of the write!
+     * Write lines to the log file. Passed String is what gets written. This
+     * does not add a new line at the end of the entry!
      *
      * @param entry String value of what needs to be written to the file
      * @throws IOException If an I/O error occurs

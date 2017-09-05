@@ -30,6 +30,10 @@ public class ShardDriver {
             }
         }
 
+        startShard();
+    }
+
+    private static void startShard() {
         try {
             shardCore = new Shard_Core(headlessArg);
             shardCore.init();
@@ -37,6 +41,6 @@ public class ShardDriver {
             System.err.println("Error starting Shard Core. Error: " + ex.getMessage());
         }
 
-        shardCore.startConnectionThread();
+        shardCore.getConnectionManager().startConnectionThread();
     }
 }
