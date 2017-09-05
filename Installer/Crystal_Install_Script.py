@@ -120,25 +120,19 @@ else:
     dir_src = dir_src + "master"
 
 print("Compiling files...")
-import subprocess
+from subprocess import Popen
 
-# os.system('cd ' + dir_src + " && gradlew")
-print('cd ' + dir_src + " && gradlew bundle")
-subprocess.call('cd ' + dir_src + " && setup.bat", shell=True)
+p = Popen("gradlew bundle", shell=True, cwd=dir_src)
+stdout, stderr = p.communicate()
 
 # finish assigning dir_src to the sub Heart directory for copy
 dir_src = dir_src + "\Heart"
 
 print("Updating Heart files...")
-import shutil
-
 dir_dst = userhome + "/CrystalHomeSys/Heart"
-for file in os.listdir(dir_src):
-    print(file)  # testing
-    src_file = os.path.join(dir_src, file)
-    dst_file = os.path.join(dir_dst, file)
-    # Permission denied
-    shutil.copy(src_file, dst_file)
+import distutils
+
+distutils.dir_util.copy_tree(dir_src, dir_dst)
 
 print("Packaging Shard install for distribution...")
 
