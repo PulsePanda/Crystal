@@ -73,7 +73,7 @@ public class UpdateCheckerThread extends Thread {
                 checkForUpdate();
                 if (shardUpdate || heartUpdate || forceUpdate) {
                     System.out.println("UPDATER: Update found. Updating...");
-                    patcherPython.patch(Heart_Core.getCore().getConfigurationManager().DEV_BUILD, heartUpdate || forceUpdate);
+                    patcherPython.patch(Heart_Core.getCore().getConfigurationManager().DEV_BUILD, heartUpdate || forceUpdate, forceUpdate);
                     if (shardUpdate)
                         installShardPatch();
 

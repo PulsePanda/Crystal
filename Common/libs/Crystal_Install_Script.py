@@ -10,12 +10,19 @@ from zipfile import ZipFile
 
 devBuild = False
 launchAfter = False
+forceUpdate = False
 
 for arg in sys.argv:
     if arg == '-dev':
         devBuild = True
     if arg == '-launch':
         launchAfter = True
+    if arg == '-force':
+        forceUpdate = True
+    if arg == '-help':
+        print(
+            "Options: -dev to install dev build; -launch to launch software after installation; -force to force an update and launch (works only with Heart system)")
+        sys.exit(0)
 
 print("Crystal Home Systems Install Script")
 
@@ -151,8 +158,8 @@ def patch(heart):
     # TODO CLEANUP SUPPRESSION
     # shutil.rmtree(dir_src_nonspecific)
 
-    if launchAfter:
-        if heart:
+    if launchAfter or forceUpdate:
+        if heart or forceUpdate:
             print("Starting Heart server...")
             if "Linux" in platform.system():
                 Popen("Heart", shell=True, cwd=userhome + "/CrystalHomeSys/Heart/bin/")
@@ -173,8 +180,8 @@ def patch(heart):
 
 # Search for Heart DNSSD service
 print("Searching for an existing Heart server...")
-# if searchForService(): # If service exists, returns true
-if True:  # If Server found, Installing Shard
+# if searchForService() and not forceUpdate: # If service exists, returns true
+if True and not forceUpdate:  # If Server found, Installing Shard
     print("Found existing Heart server! Creating Shard install...")
     # Create working Shard directory
     if not os.path.isdir(userhome + "/CrystalHomeSys/Shard"):
