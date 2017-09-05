@@ -130,7 +130,7 @@ else:
     print("Compiling files...")
     from subprocess import Popen
 
-    p = Popen("gradlew build", shell=True, cwd=dir_src)
+    p = Popen("gradlew assemble", shell=True, cwd=dir_src)
     stdout, stderr = p.communicate()
 
     # finish assigning dir_src to the sub Heart directory for copy
