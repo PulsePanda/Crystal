@@ -37,6 +37,7 @@ public class UpdateCheckerThread extends Thread {
     private static final int waitDelay = Integer.parseInt(Heart_Core.getCore().getConfigurationManager().getCfg().get("updateCheckDelay")) * 60 * 1000;
     private boolean running = false, shardUpdate = false, heartUpdate = false, keepRunning, forceUpdate;
     private String shardVersion;
+    private PatcherPython patcherPython;
 
     /**
      * Update Checker Thread default constructor
@@ -48,6 +49,7 @@ public class UpdateCheckerThread extends Thread {
         this.keepRunning = keepRunning;
         this.forceUpdate = forceUpdate;
         shardUpdate = forceUpdate;
+        patcherPython = new PatcherPython();
     }
 
     /**
@@ -70,25 +72,25 @@ public class UpdateCheckerThread extends Thread {
                 System.out.println("UPDATER: Checking for update...");
                 checkForUpdate();
                 if (shardUpdate || heartUpdate || forceUpdate) {
-                    System.out.println("UPDATER: There is a new version of the build. Downloading...");
-                    downloadUpdate();
-                    System.out.println("UPDATER: Update is downloaded. Packing for distribution...");
-                    System.out.println("UPDATER: Preparing patch...");
-                    preparePatch();
-                    System.out.println("UPDATER: Patch is ready.");
-                    if (heartUpdate)
-                        installHeartPatch();
-                    if (shardUpdate)
-                        installShardPatch();
+                    System.out.println("UPDATER: Update found. Updating...");
+                    patcherPython.patch(Heart_Core.getCore().getConfigurationManager().DEV_BUILD, heartUpdate || forceUpdate);
+                    if (heartUpdate || forceUpdate) {
+                        Heart_Core.getCore().shutdownHeart();
+                        System.exit(0);
+                    }
                 }
-                removeFiles();
-                System.out.println("UPDATER: All software is up to date!");
+
                 shardUpdate = false;
                 heartUpdate = false;
             } catch (UpdateCheckerThreadException ex) {
-                System.err.println("UPDATER: Issue patching. Aborting patch. Details: " + ex.getMessage());
+                System.err.println("UPDATER: Problem checking for updates. Details: " + ex.getMessage());
                 shardUpdate = false;
                 heartUpdate = false;
+                removeFiles();
+            } catch (IOException e) {
+                shardUpdate = false;
+                heartUpdate = false;
+                System.err.println("UPDATER: Problem patching system. Aborting.");
                 removeFiles();
             }
             try {
@@ -193,30 +195,32 @@ public class UpdateCheckerThread extends Thread {
      *
      * @throws UpdateCheckerThreadException thrown if there is an error accessing or downloading the repository
      */
-    private void downloadUpdate() throws UpdateCheckerThreadException {
-        URL url;
-        try {
-            if (!ConfigurationManager.DEV_BUILD)
-                url = new URL(gitAddressMaster);
-            else
-                url = new URL(gitAddressDev);
-        } catch (IOException e) {
-            throw new UpdateCheckerThreadException("Unable to create URL for patch.");
-        }
-
-        try {
-            BufferedInputStream bis = new BufferedInputStream(url.openStream());
-            FileOutputStream fis = new FileOutputStream(ConfigurationManager.baseDir + "patch.zip");
-            byte[] buffer = new byte[1024];
-            int count = 0;
-            while ((count = bis.read(buffer, 0, 1024)) != -1) {
-                fis.write(buffer, 0, count);
-            }
-            fis.close();
-            bis.close();
-        } catch (IOException e) {
-            throw new UpdateCheckerThreadException("Unable to download update from URL.");
-        }
+//    private void downloadUpdate() throws UpdateCheckerThreadException {
+//        URL url;
+//        try {
+//            if (!ConfigurationManager.DEV_BUILD)
+//                url = new URL(gitAddressMaster);
+//            else
+//                url = new URL(gitAddressDev);
+//        } catch (IOException e) {
+//            throw new UpdateCheckerThreadException("Unable to create URL for patch.");
+//        }
+//
+//        try {
+//            BufferedInputStream bis = new BufferedInputStream(url.openStream());
+//            FileOutputStream fis = new FileOutputStream(ConfigurationManager.baseDir + "patch.zip");
+//            byte[] buffer = new byte[1024];
+//            int count = 0;
+//            while ((count = bis.read(buffer, 0, 1024)) != -1) {
+//                fis.write(buffer, 0, count);
+//            }
+//            fis.close();
+//            bis.close();
+//        } catch (IOException e) {
+//            throw new UpdateCheckerThreadException("Unable to download update from URL.");
+//        }
+//    }
+    private void downloadUpdate() throws IOException {
     }
 
     /**
@@ -357,8 +361,5 @@ public class UpdateCheckerThread extends Thread {
     private void removeFiles() {
         deleteDir(new File(ConfigurationManager.baseDir + "HeartVersion.txt"));
         deleteDir(new File(ConfigurationManager.baseDir + "ShardVersion.txt"));
-        deleteDir(new File(ConfigurationManager.baseDir + "patch.zip"));
-        deleteDir(new File(ConfigurationManager.baseDir + "patch/Crystal-master"));
-        deleteDir(new File(ConfigurationManager.baseDir + "patch/Crystal-dev"));
     }
 }

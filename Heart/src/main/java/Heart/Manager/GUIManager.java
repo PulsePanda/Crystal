@@ -70,7 +70,7 @@ public class GUIManager {
 
                 allowShutdown = false;
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                c.getServerManager().stopHeartServer();
+                c.shutdownHeart();
                 System.out.println("");
                 System.out.println("IT IS NOW SAFE TO CLOSE THE WINDOW");
                 System.out.println("");

@@ -6,7 +6,14 @@ import sys
 from pathlib import Path
 from zipfile import ZipFile
 
-devBuild = True
+devBuild = False
+launchAfter = False
+
+for arg in sys.argv:
+    if arg == '-dev':
+        devBuild = True
+    if arg == '-launch':
+        launchAfter = True
 
 print("Crystal Home Systems Install Script")
 
@@ -150,10 +157,13 @@ else:
 
     shutil.rmtree(dir_src_nonspecific)
 
-    print("Starting Heart server...")
-    if "Linux" in platform.system():
-        Popen("Heart", shell=True, cwd=userhome + "/CrystalHomeSys/Heart/bin/")
-    elif "Windows" in platform.system():
-        Popen("Heart.bat", shell=True, cwd=userhome + "/CrystalHomeSys/Heart/bin/")
+    if launchAfter:
+        print("Starting Heart server...")
+        if "Linux" in platform.system():
+            Popen("Heart", shell=True, cwd=userhome + "/CrystalHomeSys/Heart/bin/")
+        elif "Windows" in platform.system():
+            Popen("Heart.bat", shell=True, cwd=userhome + "/CrystalHomeSys/Heart/bin/")
 
     print("-------------Application Launch Directory: " + dir_dst + "Heart/bin/Heart.(sh/bat)-------------")
+
+sys.exit(0)

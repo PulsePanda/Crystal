@@ -86,7 +86,7 @@ public class Heart_Core {
     /**
      * Initialize the Heart Server
      */
-    private void init() {
+    public void init() {
         if (initialized) {
             return;
         }
@@ -161,6 +161,19 @@ public class Heart_Core {
             mediaManager.index(true, Integer.parseInt(configurationManager.getCfg().get("mediaIndexDelay")));
         } else {
             System.err.println("MEDIA_MANAGER: Configuration file was not found. Media management is unavailable until the configuration is set up.");
+        }
+    }
+
+
+    /**
+     * Shutdown and close all utilities with Heart
+     */
+    public void shutdownHeart() {
+        try {
+            serverManager.stopHeartServer();
+            mediaManager.close();
+            updateCheckerThread.join();
+        } catch (Exception e) {
         }
     }
 
