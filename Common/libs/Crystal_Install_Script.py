@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from zipfile import ZipFile
 
-##### TODO REMOVE REPO DOWNLOAD SUPPRESSION, IMPLEMENT SEARCHFORSERVICE, CLEAN UP SUPRESSION
+##### TODO IMPLEMENT SEARCHFORSERVICE
 
 devBuild = False
 launchAfter = False
@@ -110,11 +110,10 @@ def patch(heart):
         # Master
         gitAddress = "https://github.com/PulsePanda/Crystal/archive/master.zip"
 
-    # TODO DOWNLOAD SUPPRESSION
-    # zipurl = gitAddress
-    # with urlopen(zipurl) as zipresp:
-    #     with ZipFile(BytesIO(zipresp.read())) as zfile:
-    #         zfile.extractall(userhome + "/CrystalHomeSys/")
+    zipurl = gitAddress
+    with urlopen(zipurl) as zipresp:
+        with ZipFile(BytesIO(zipresp.read())) as zfile:
+            zfile.extractall(userhome + "/CrystalHomeSys/")
 
     dir_src = userhome + "\CrystalHomeSys\Crystal-"
     if devBuild:
@@ -155,8 +154,7 @@ def patch(heart):
     # os.replace(dir_src_nonspecific + "/Shard/build/distributions/Shard.zip", patchHome + "/Shard.zip")
 
     print("Cleaning up...")
-    # TODO CLEANUP SUPPRESSION
-    # shutil.rmtree(dir_src_nonspecific)
+    shutil.rmtree(dir_src_nonspecific)
 
     if launchAfter or forceUpdate:
         if heart or forceUpdate:

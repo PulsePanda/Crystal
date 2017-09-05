@@ -21,6 +21,7 @@ import java.util.UUID;
 
 public class ConfigurationManager {
 
+    public static final String SHARD_VERSION = "0.1.7";
     public static String SHARD_VERSION_SERVER = "";
     // Global variables
     public static String systemName = "CHS Shard", systemLocation = "", commandKey, baseDir = "/CrystalHomeSys/", shardDir = "Shard/",

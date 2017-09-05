@@ -29,7 +29,6 @@ import static Shard.Manager.ConfigurationManager.systemName;
  */
 public class Shard_Core {
 
-    public static final String SHARD_VERSION = "0.1.6";
     public final static SystemInfo systemInfo = new SystemInfo();
     private static Shard_Core shard_core = null;
     private LogManager logManager;
@@ -71,7 +70,7 @@ public class Shard_Core {
             guiManager.initGUI();
         }
 
-        System.out.println("VERSION: " + SHARD_VERSION);
+        System.out.println("VERSION: " + configurationManager.SHARD_VERSION);
 
         initVariables();
 
