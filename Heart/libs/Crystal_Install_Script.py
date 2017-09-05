@@ -116,10 +116,10 @@ else:
         # Master
         gitAddress = "https://github.com/PulsePanda/Crystal/archive/master.zip"
 
-    zipurl = gitAddress
-    with urlopen(zipurl) as zipresp:
-        with ZipFile(BytesIO(zipresp.read())) as zfile:
-            zfile.extractall(userhome + "/CrystalHomeSys/")
+    # zipurl = gitAddress
+    # with urlopen(zipurl) as zipresp:
+    #     with ZipFile(BytesIO(zipresp.read())) as zfile:
+    #         zfile.extractall(userhome + "/CrystalHomeSys/")
 
     dir_src = userhome + "\CrystalHomeSys\Crystal-"
     if devBuild:
@@ -155,7 +155,7 @@ else:
     print("Cleaning up...")
     import shutil
 
-    shutil.rmtree(dir_src_nonspecific)
+    # shutil.rmtree(dir_src_nonspecific)
 
     if launchAfter:
         print("Starting Heart server...")

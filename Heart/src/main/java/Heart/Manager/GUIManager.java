@@ -21,6 +21,7 @@
 package Heart.Manager;
 
 import Heart.Heart_Core;
+import Utilities.PatcherPython;
 import Utilities.UpdateCheckerThread;
 
 import javax.swing.*;
@@ -31,6 +32,7 @@ import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 public class GUIManager {
 
