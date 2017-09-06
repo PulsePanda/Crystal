@@ -18,7 +18,7 @@ import Exceptions.ClientInitializationException;
 public class ShardDriver {
 
     private static Shard_Core shardCore;
-    private static boolean headlessArg = false;
+    private static boolean headlessArg = false, dev = false;
 
     public static void main(String[] args) {
         for (String s : args) {
@@ -26,6 +26,9 @@ public class ShardDriver {
             switch (s) {
                 case "-h":
                     headlessArg = true;
+                    break;
+                case "-dev":
+                    dev = true;
                     break;
             }
         }
@@ -35,7 +38,7 @@ public class ShardDriver {
 
     private static void startShard() {
         try {
-            shardCore = new Shard_Core(headlessArg);
+            shardCore = new Shard_Core(headlessArg, dev);
             shardCore.init();
         } catch (ClientInitializationException ex) {
             System.err.println("Error starting Shard Core. Error: " + ex.getMessage());

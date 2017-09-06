@@ -23,6 +23,7 @@ public class ConfigurationManager {
 
     public static final String SHARD_VERSION = "0.1.7";
     public static String SHARD_VERSION_SERVER = "";
+    public static boolean DEV_BUILD;
     // Global variables
     public static String systemName = "CHS Shard", systemLocation = "", commandKey, baseDir = "/CrystalHomeSys/", shardDir = "Shard/",
             logBaseDir = "Logs/", configDir = "shard_config.cfg";

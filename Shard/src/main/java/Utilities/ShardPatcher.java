@@ -29,8 +29,6 @@ import Shard.Manager.ConnectionManager;
 import Shard.Shard_Core;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -80,9 +78,13 @@ public class ShardPatcher extends Thread {
         if (type == PATCHER_TYPE.checkVersion) {
             checkVersionHelper();
         } else if (type == PATCHER_TYPE.downloadUpdate) {
-            downloadUpdateHelper();
+            try {
+                downloadUpdateHelper();
+            } catch (IOException e) {
+                System.err.println("Error spawning update script!");
+            }
         } else if (type == PATCHER_TYPE.runUpdate) {
-            runUpdateHelper();
+//            runUpdateHelper();
         }
     }
 
@@ -122,97 +124,21 @@ public class ShardPatcher extends Thread {
 
     /**
      * Downloads the update from the Heart by calling updateHelper()
+     *
+     * @throws IOException if there is an error launching the patch script
      */
-    private void downloadUpdateHelper() {
+    private void downloadUpdateHelper() throws IOException {
         if (!Shard_Core.getShardCore().getConfigurationManager().SHARD_VERSION.equals(ConfigurationManager.SHARD_VERSION_SERVER)) {
             System.out.println("Update required. Initializing update.");
+            PatcherPython.patch(Shard_Core.getShardCore().getConfigurationManager().DEV_BUILD, true, false, true);
             try {
-                updateHelper();
-            } catch (SendPacketException e) {
-                System.err.println("Error sending update command to Heart. Details: " + e.getMessage());
-                ConnectionManager.patchReady = true;
-                return;
+                Shard_Core.getShardCore().getConnectionManager().stopShardClient();
+            } catch (ConnectionException e) {
             }
+            System.exit(0);
         } else {
             System.out.println("Shard is up to date!");
             ConnectionManager.patchReady = true;
-        }
-        ConnectionManager.patchReady = true;
-    }
-
-    /**
-     * Downloads the update from the Heart
-     *
-     * @throws SendPacketException thrown if there is an error sending the request.
-     *                             Details will be in the getMessage()
-     */
-    private void updateHelper() throws SendPacketException {
-        Packet p = new Packet(Packet.PACKET_TYPE.Command, Shard_Core.getShardCore().getUUID().toString());
-        p.packetString = "Patch";
-        client.setPacketEncrypted(false);
-        client.sendPacket(p, true);
-        System.out.println("Requested patch from Heart.");
-
-        while (updateFile == null) {
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-            }
-        }
-        client.setPacketEncrypted(true);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
-
-        try {
-            System.out.println("Saving update file...");
-            File file = new File(ConfigurationManager.shardDir + "Shard.zip");
-            if (!file.exists())
-                file.createNewFile();
-
-            FileOutputStream fos = new FileOutputStream(ConfigurationManager.shardDir + "Shard.zip");
-            fos.write(updateFile);
-            fos.close();
-            System.out.println("Update file saved.");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Runs and installs the update
-     */
-    private void runUpdateHelper() {
-        if (!Shard_Core.getShardCore().getConfigurationManager().SHARD_VERSION.equals(ConfigurationManager.SHARD_VERSION_SERVER)) {
-            System.out.println("Installing update...");
-            try {
-                UnZipPython.unZip(ConfigurationManager.shardDir + "Shard.zip", ConfigurationManager.baseDir);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-            }
-            deleteDir(new File(ConfigurationManager.shardDir + "Shard.zip"));
-
-            System.out.println("Launching new version of Shard.");
-            try {
-                if (os.equals("windows")) {
-                    Runtime.getRuntime()
-                            .exec(new String[]{"cmd", "/c", "start", ConfigurationManager.shardDir + "bin/Shard.bat"});
-                } else if (os.equals("linux")) {
-                    ProcessBuilder pb = new ProcessBuilder(ConfigurationManager.shardDir + "bin/Shard");
-                    pb.start();
-                }
-            } catch (IOException e) {
-                System.err.println("Error launching updated version of Shard.");
-                e.printStackTrace();
-            }
-            System.exit(0);
         }
     }
 
