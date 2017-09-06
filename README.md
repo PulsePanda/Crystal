@@ -1,14 +1,12 @@
-[![Build Status](https://travis-ci.org/PulsePanda/Crystal.svg?branch=master)](https://travis-ci.org/PulsePanda/Crystal)
-
 ![alt tag](http://austinva.me/austinVanAlstyne_files/chs.png)
 
 # Crystal Home Systems
 Copyright© 2015 Austin VanAlstyne, Bailey Thorson
 
 # Using Crystal
-Crystal comes in two parts. The Heart (or main server), and the Shard (or client). The Heart requires a Window's machine for now, and network access. The Shard can be run on any machine and needs network access as well.
+Crystal comes in two parts. The Heart (or main server), and the Shard (or client). Both can be run on any machine.
 
-After you have downloaded the seperate parts as zip files, extract the folders into their respective locations (it does not matter where). Inside of each directory there is a bin folder. To run the respective software, run either the .bat file or the shell file, depending on what OS you are using. Crystal does NOT require administrator permissions.
+Download the Crystal_Install_Script.py file from Releases. Check out the [wiki](https://github.com/PulsePanda/Crystal/wiki/How-to-Install) for more information!
 
 From there the software will walk you through the quick setup steps, and you are ready to go!
 
