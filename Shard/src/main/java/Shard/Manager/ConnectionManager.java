@@ -11,6 +11,7 @@
 package Shard.Manager;
 
 import Exceptions.ClientInitializationException;
+import Exceptions.ConfigurationException;
 import Netta.Connection.Packet;
 import Netta.DNSSD;
 import Netta.Exceptions.ConnectionException;
@@ -18,8 +19,10 @@ import Netta.Exceptions.SendPacketException;
 import Netta.ServiceEntry;
 import Shard.Client;
 import Shard.ShardConnectionThread;
+import Shard.ShardDriver;
 import Shard.Shard_Core;
 import Utilities.Media.Client.MediaClientHelper;
+import Utilities.SettingsFileManager;
 import Utilities.ShardPatcher;
 
 import java.awt.*;
@@ -43,6 +46,7 @@ public class ConnectionManager {
     private ShardPatcher patcher;
     private Thread mediaClientThread;
     private Thread shardConnectionThread;
+    private String IP;
 
     public ConnectionManager(Shard_Core shard_core) {
         c = shard_core;
@@ -55,7 +59,9 @@ public class ConnectionManager {
      * If the connection is already active, nothing happens. Used to automatically reconnect to the Heart on
      * disconnect.
      */
-    public void startConnectionThread() {
+    public void startConnectionThread(String IP, int port) {
+        this.IP = IP;
+        this.port = port;
         ShardConnectionThread sct = new ShardConnectionThread(true, false);
         shardConnectionThread = new Thread(sct);
         shardConnectionThread.start();
@@ -78,40 +84,54 @@ public class ConnectionManager {
         } catch (NullPointerException e) {
             // If client is not remoteLoggingInitialized, initialize it
             try {
-                // Start the search for dnssd service
-                try {
-                    System.out.println("Searching for DNS_SD service on local network.");
-                    dnssd.discoverService("_http._tcp.local.", InetAddress.getLocalHost());
-                } catch (UnknownHostException e1) {
-                }
-
-                ServiceEntry heartService = null;
-                while (heartService == null) {
-                    ArrayList<ServiceEntry> entries = dnssd.getServiceList();
-                    for (ServiceEntry temp : entries) {
-                        if (temp.getServiceName().equals("Crystal Heart Server"))
-                            heartService = temp;
-                    }
-
+                // Try to connect using the loaded IP and port
+                if (!ShardDriver.connectionFileExists) {
+                    // Start the search for dnssd service
                     try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e1) {
+                        System.out.println("Searching for DNS_SD service on local network.");
+                        dnssd.discoverService("_http._tcp.local.", InetAddress.getLocalHost());
+                    } catch (UnknownHostException e1) {
+                    }
+
+                    ServiceEntry heartService = null;
+                    while (heartService == null) {
+                        ArrayList<ServiceEntry> entries = dnssd.getServiceList();
+                        for (ServiceEntry temp : entries) {
+                            if (temp.getServiceName().equals("Crystal Heart Server"))
+                                heartService = temp;
+                        }
+
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e1) {
+                        }
+                    }
+
+                    // after search has finished, close the search
+                    dnssd.closeServiceDiscovery();
+
+                    // load the service info
+                    // service will be loaded as http://192.168.0.2:6666
+                    String serviceInfo = heartService.getServiceInfo();
+                    String[] serviceSplit = serviceInfo.split("http://");
+                    String ipPort = serviceSplit[1]; // removes http://
+                    String[] ipPortSplit = ipPort.split(":"); // splits IP and port
+                    IP = ipPortSplit[0];
+                    port = Integer.parseInt(ipPortSplit[1]);
+
+                    SettingsFileManager sfm = null;
+                    try {
+                        sfm = new SettingsFileManager(ShardDriver.fileName);
+                        sfm.set("IP", IP);
+                        sfm.set("port", Integer.toString(port));
+                        sfm.save();
+                    } catch (ConfigurationException e1) {
+                        System.err.println("Error saving connection information to connection file. Details: " + e1.getMessage());
                     }
                 }
 
-                // after search has finished, close the search
-                dnssd.closeServiceDiscovery();
-
-                // load the service info
-                // service will be loaded as http://192.168.0.2:6666
-                String serviceInfo = heartService.getServiceInfo();
-                String[] serviceSplit = serviceInfo.split("http://");
-                String ipPort = serviceSplit[1]; // removes http://
-                String[] ipPortSplit = ipPort.split(":"); // splits IP and port
-                c.getConfigurationManager().IP = ipPortSplit[0];
-                port = Integer.parseInt(ipPortSplit[1]);
-
-                client = new Client(c.getConfigurationManager().IP, port);
+                ShardDriver.connectionFileExists = false;
+                client = new Client(IP, port);
             } catch (NoSuchAlgorithmException e1) {
                 throw new ClientInitializationException(
                         "Unable to initialize client. Likely an issue loading RSA cipher. Aborting creation.");
@@ -130,14 +150,14 @@ public class ConnectionManager {
         } catch (ConnectionException ex) {
         }
 
-        System.out.println("Connecting to Heart. IP: " + c.getConfigurationManager().IP + " Port: " + port);
+        System.out.println("Connecting to Heart. IP: " + IP + " Port: " + port);
         clientThread = new Thread(client);
         clientThread.start();
     }
 
     public void connectToMediaServer(int mediaServerPort, String mediaType) {
         try {
-            mediaClient = new MediaClientHelper(c.getConfigurationManager().IP, mediaServerPort, mediaType);
+            mediaClient = new MediaClientHelper(IP, mediaServerPort, mediaType);
             mediaClientThread = new Thread(mediaClient);
             mediaClientThread.start();
         } catch (NoSuchAlgorithmException e) {
@@ -173,7 +193,7 @@ public class ConnectionManager {
         client.closeIOStreams();
         clientThread.stop();
         clientThread = null;
-        c.getConfigurationManager().IP = "";
+        IP = "";
         port = 0;
 
         try {
@@ -267,7 +287,7 @@ public class ConnectionManager {
         client = null;
         clientThread.stop();
         clientThread = null;
-        c.getConfigurationManager().IP = "";
+        IP = "";
         port = 0;
         ConfigurationManager.remoteLoggingInitialized = false;
     }
@@ -317,7 +337,7 @@ public class ConnectionManager {
      * @return String IP address being connected to
      */
     public String getIP() {
-        return c.getConfigurationManager().IP;
+        return IP;
     }
 
 

@@ -11,6 +11,12 @@
 package Shard;
 
 import Exceptions.ClientInitializationException;
+import Exceptions.ConfigurationException;
+import Shard.Manager.ConfigurationManager;
+import Utilities.SettingsFileManager;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Driver for Shard. Initializes needed objects and starts threads
@@ -19,6 +25,9 @@ public class ShardDriver {
 
     private static Shard_Core shardCore;
     private static boolean headlessArg = false, dev = false;
+    public static boolean connectionFileExists = true;
+    private static SettingsFileManager sfm;
+    public static String fileName = System.getProperty("user.home") + ConfigurationManager.baseDir + "Shard/con_inf.ini";
 
     public static void main(String[] args) {
         for (String s : args) {
@@ -43,7 +52,53 @@ public class ShardDriver {
         } catch (ClientInitializationException ex) {
             System.err.println("Error starting Shard Core. Error: " + ex.getMessage());
         }
+        String[] connectionInfo = new String[]{"localhost", "6987"};
+        try {
+            connectionInfo = getConnectionInfo();
+        } catch (ConfigurationException e) {
+            System.err.println("Error reading the connection information file. Details: " + e.getMessage());
+        }
+        try {
+            shardCore.getConnectionManager().startConnectionThread(connectionInfo[0], Integer.parseInt(connectionInfo[1]));
+        } catch (NumberFormatException e) {
+            System.err.println("Unable to read connection file. Rewriting it.");
+            connectionFileExists = false;
+            shardCore.getConnectionManager().startConnectionThread("localhost", 6987);
+        }
+    }
 
-        shardCore.getConnectionManager().startConnectionThread();
+    /**
+     * Pull connection info from the connection information file for faster connection to heart. If there is no file, or no data,
+     * default localhost information will be returned, which will then be ignored by the ConnectionManager
+     *
+     * @return String[] containing IP in index 0, and Port in index 1
+     * @throws ConfigurationException thrown if there is an error creating/finding the connection file
+     */
+    private static String[] getConnectionInfo() throws ConfigurationException {
+        String[] connectionInfo = new String[]{"localhost", "6987"};
+
+        try {
+            sfm = new SettingsFileManager(fileName);
+        } catch (ConfigurationException e) {
+            connectionFileExists = false;
+            try {
+                new File(fileName).createNewFile();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                throw e;
+            }
+        }
+
+        // if the connection file already existed, read from it
+        if (connectionFileExists) {
+            connectionInfo[0] = sfm.get("IP");
+            connectionInfo[1] = sfm.get("port");
+        }
+
+        return connectionInfo;
+    }
+
+    public static SettingsFileManager getSFM() {
+        return sfm;
     }
 }

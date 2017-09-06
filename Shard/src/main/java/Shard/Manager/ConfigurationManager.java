@@ -33,7 +33,6 @@ public class ConfigurationManager {
     public boolean headless = false;
     public UUID uuid;
     public UUID heartUUID;
-    public String IP = null;
     private Shard_Core c;
     private boolean cfg_set = false;
     private SettingsFileManager cfg = null;
