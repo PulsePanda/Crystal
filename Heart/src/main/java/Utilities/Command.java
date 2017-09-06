@@ -31,9 +31,6 @@ import Utilities.Media.ListItem;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.UUID;
 
@@ -95,30 +92,30 @@ public class Command {
                     // TODO have error packet sent to shard
                 }
                 break;
-            case "Patch":
-                byte[] file = null;
-                try {
-                    file = Files.readAllBytes(Paths.get(ConfigurationManager.baseDir + "patch/Shard.zip"));
-                } catch (IOException e1) {
-                    System.err.println("Error reading Shard.zip to send to shards. Aborting.");
-                    sendToClient("patch file send error", true);
-                    return;
-                }
-                // dummy packet to allow client's readpacket to reset
-                Packet blank = new Packet(Packet.PACKET_TYPE.NULL, Heart_Core.getCore().getConfigurationManager().getUUID().toString());
-                sendToClient(blank, true);
-
-                Packet p = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getConfigurationManager().getUUID().toString());
-                p.packetString = "update";
-                p.packetByteArray = file;
-                System.out.println("Sending patch to Shard...");
-                sendToClient(p, false);
-                System.out.println("Sent patch to Shard.");
-
-                // second dummy packet
-                Packet blank2 = new Packet(Packet.PACKET_TYPE.NULL, Heart_Core.getCore().getConfigurationManager().getUUID().toString());
-                sendToClient(blank2, false);
-                break;
+//            case "Patch":
+//                byte[] file = null;
+//                try {
+//                    file = Files.readAllBytes(Paths.get(ConfigurationManager.baseDir + "patch/Shard.zip"));
+//                } catch (IOException e1) {
+//                    System.err.println("Error reading Shard.zip to send to shards. Aborting.");
+//                    sendToClient("patch file send error", true);
+//                    return;
+//                }
+//                // dummy packet to allow client's readpacket to reset
+//                Packet blank = new Packet(Packet.PACKET_TYPE.NULL, Heart_Core.getCore().getConfigurationManager().getUUID().toString());
+//                sendToClient(blank, true);
+//
+//                Packet p = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getConfigurationManager().getUUID().toString());
+//                p.packetString = "update";
+//                p.packetByteArray = file;
+//                System.out.println("Sending patch to Shard...");
+//                sendToClient(p, false);
+//                System.out.println("Sent patch to Shard.");
+//
+//                // second dummy packet
+//                Packet blank2 = new Packet(Packet.PACKET_TYPE.NULL, Heart_Core.getCore().getConfigurationManager().getUUID().toString());
+//                sendToClient(blank2, false);
+//                break;
             case "get Shard Version":
                 System.out.println("Shard requested version information.");
                 sendToClient("version:" + ConfigurationManager.SHARD_VERSION, true);
@@ -136,7 +133,7 @@ public class Command {
                     } else {
                         try {
                             ListItem[] temp = Heart_Core.getCore().getMediaManager().getSongList().get(musicPaths[0]);
-                            Heart_Core.getCore().getServerManager().startMediaServer(temp[0], connection);
+                            Heart_Core.getCore().getServerManager().startMediaServer(temp[0]);
                         } catch (NullPointerException e) {
                         } catch (ServerHelperException e) {
                             System.err.println("Unable to start Media Server! Details: " + e.getMessage());
@@ -158,7 +155,7 @@ public class Command {
                         try {
                             ListItem[] temp = Heart_Core.getCore().getMediaManager().getMovieList().get(moviePaths[0]);
                             try {
-                                Heart_Core.getCore().getServerManager().startMediaServer(temp[0], connection);
+                                Heart_Core.getCore().getServerManager().startMediaServer(temp[0]);
                             } catch (ServerHelperException e) {
                                 System.err.println("Unable to start Media Server! Details: " + e.getMessage());
                             }
@@ -168,6 +165,10 @@ public class Command {
                 }
                 break;
             default:
+                try {
+                    System.err.println("Unrecognized command from Shard. Details:\nCommand: " + c + "\nMessage: " + packet.packetStringArray[0]);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                }
                 break;
         }
 

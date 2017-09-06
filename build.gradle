@@ -1,4 +1,6 @@
 apply plugin: 'base'
+apply plugin: 'idea'
+apply plugin: 'java'
 
 allprojects {
 
@@ -77,6 +79,7 @@ project(':Heart') {
     dependencies {
         compile fileTree(dir: 'libs', include: ['*.jar', '*.py'])
         compile project(':Common')
+        compile project(':MediaManager')
     }
 
     applicationDistribution.from(copyLicense) {
@@ -95,6 +98,7 @@ project(':Shard') {
         compile fileTree(dir: 'libs/Sphinx', include: ['*.jar'])
         compile fileTree(dir: 'libs/TTS', include: ['*.jar'])
         compile project(':Common')
+        compile project(':MediaManager')
     }
 
     applicationDistribution.from(copyLicense) {
@@ -114,5 +118,23 @@ project(':Nerv') {
 
     applicationDistribution.from(copyLicense) {
         into ""
+    }
+}
+
+// MediaManager specific stuff
+project(':MediaManager') {
+    dependencies {
+        compile project(':Common')
+        compile fileTree(dir: 'libs', include: ['*.jar', '*.py'])
+    }
+
+    jar {
+        // Keep jar clean:
+        exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.MF'
+
+        manifest {
+            attributes 'Main-Class': 'MediaManager'
+        }
+
     }
 }

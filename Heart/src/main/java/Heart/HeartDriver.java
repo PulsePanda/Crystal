@@ -13,6 +13,7 @@ package Heart;
 import Exceptions.ConfigurationException;
 import Exceptions.ServerInitializationException;
 import Heart.Manager.ConfigurationManager;
+import Utilities.MediaManagerProcessBuilder;
 import Utilities.SettingsFileManager;
 
 import java.io.File;
@@ -84,6 +85,13 @@ public class HeartDriver {
             sfm.set("port", Integer.toString(hostPort));
             sfm.save();
             heartCore.getServerManager().initDNSSD();
+
+            try {
+                new MediaManagerProcessBuilder(new String[]{"-server", "-port", Integer.toString(hostPort), "-file", "E:/Media/music/Linkin Park/Not Alone.mp3"}, heartCore.getGuiManager().outputStream, heartCore.getGuiManager().errStream).start();
+            } catch (IOException e) {
+                System.err.println("Unable to start MediaManager Process. StackTrace:");
+                e.printStackTrace();
+            }
         } catch (ServerInitializationException e) {
             System.err.println("Error starting Heart server! Error message: " + e.getMessage());
         } catch (ConfigurationException | NullPointerException e) {

@@ -8,29 +8,32 @@
  * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
  */
 
-import Heart.Heart_Core;
-import Heart.Manager.GUIManager;
-import org.junit.Test;
+package Utilities;
 
-import java.awt.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
-public class GUIManagerTest {
+public class MediaManagerProcessBuilder {
 
-    private GUIManager gm;
-    private Heart_Core c;
+    private String mediaManagerPath = "../lib/MediaManager.jar";
+    private String[] args;
 
-    public GUIManagerTest() {
-        c = new Heart_Core(false, true);
-        gm = new GUIManager(c);
+    public MediaManagerProcessBuilder(String[] args) {
+        this.args = new String[args.length + 3];
+        this.args[0] = "java";
+        this.args[1] = "-jar";
+        this.args[2] = mediaManagerPath;
+
+        for (int i = 0; i < args.length; i++) {
+            this.args[i + 3] = args[i];
+        }
     }
 
-    @Test
-    public void testInitGUI() {
-        gm.initGUI();
-    }
+    public Process start() throws IOException {
+        ProcessBuilder pb = new ProcessBuilder(args);
+        pb.inheritIO();
+        Process p = pb.start();
 
-//    @Test
-//    public void testAppend() {
-//        gm.appendToPane("test", Color.BLACK);
-//    }
+        return p;
+    }
 }

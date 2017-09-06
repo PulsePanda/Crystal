@@ -36,7 +36,7 @@ public class Heart_Core {
 
     protected static boolean initialized = false;
     private static Heart_Core heart_core;
-    private static LogManager logManager;
+    public static LogManager logManager;
     private static SystemInfo systemInfo;
     protected Thread updateCheckerThread = null;
     private boolean headless = false;
@@ -94,8 +94,6 @@ public class Heart_Core {
         if (!headless) {
             guiManager = new GUIManager(this);
             guiManager.initGUI();
-
-            redirectSystemStreams();
         }
 
         initVariables();
@@ -183,79 +181,6 @@ public class Heart_Core {
     private void initPatchThread() {
         updateCheckerThread = new UpdateCheckerThread(true, false);
         updateCheckerThread.start();
-    }
-
-    /**
-     * Function to redirect standard output streams to the write function
-     */
-    private void redirectSystemStreams() {
-        OutputStream out = new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-
-                println(String.valueOf((char) b), Color.BLACK);
-            }
-
-            @Override
-            public void write(byte[] b, int off, int len) throws IOException {
-
-                println(new String(b, off, len), Color.BLACK);
-            }
-
-            @Override
-            public void write(byte[] b) throws IOException {
-                write(b, 0, b.length);
-            }
-        };
-
-        OutputStream err = new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-
-                println(String.valueOf((char) b), Color.RED);
-            }
-
-            @Override
-            public void write(byte[] b, int off, int len) throws IOException {
-
-                println(new String(b, off, len), Color.RED);
-            }
-
-            @Override
-            public void write(byte[] b) throws IOException {
-                write(b, 0, b.length);
-            }
-        };
-
-        System.setOut(new PrintStream(out, true));
-        System.setErr(new PrintStream(err, true));
-    }
-
-    /**
-     * Writes to the Standard Output Stream, as well as calls 'write' on the
-     * local logManager object
-     *
-     * @param msg   String message to be displayed and written
-     * @param color Color to set the line of text
-     * @return Returns TRUE if successful at writing to the logManager, FALSE if not
-     */
-    public boolean println(final String msg, Color color) {
-        boolean success = true;
-
-        SwingUtilities.invokeLater(() -> guiManager.appendToPane(msg, color));
-
-        if (ConfigurationManager.isLogActive()) {
-            try {
-                logManager.write(msg);
-            } catch (IOException e) {
-                ConfigurationManager.setLogActive(false);
-                System.err.println(
-                        "Unable to write to log. IOException thrown. Deactivating log file, please reboot to regain access.");
-                success = false;
-            }
-        }
-
-        return success;
     }
 
     /**

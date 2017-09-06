@@ -3,4 +3,5 @@ include ':Shard'
 include ':Common'
 include ':Heart'
 include ':Nerv'
+include ':MediaManager'
 

@@ -21,7 +21,6 @@
 package Heart.Manager;
 
 import Heart.Heart_Core;
-import Utilities.PatcherPython;
 import Utilities.UpdateCheckerThread;
 
 import javax.swing.*;
@@ -33,6 +32,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 public class GUIManager {
 
@@ -41,6 +42,8 @@ public class GUIManager {
     protected JFrame frame;
     protected JLabel shardVersionLabel;
     private Heart_Core c;
+    public OutputStream outputStream;
+    public OutputStream errStream;
 
     public GUIManager(Heart_Core heart_core) {
         c = heart_core;
@@ -128,6 +131,81 @@ public class GUIManager {
         frame.getContentPane().add(shardVersionLabel);
         frame.getContentPane().add(scrollPane);
         frame.setVisible(true);
+
+        redirectSystemStreams();
+    }
+
+    /**
+     * Function to redirect standard output streams to the write function
+     */
+    private void redirectSystemStreams() {
+        outputStream = new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+
+                println(String.valueOf((char) b), Color.BLACK);
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+
+                println(new String(b, off, len), Color.BLACK);
+            }
+
+            @Override
+            public void write(byte[] b) throws IOException {
+                write(b, 0, b.length);
+            }
+        };
+
+        errStream = new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+
+                println(String.valueOf((char) b), Color.RED);
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+
+                println(new String(b, off, len), Color.RED);
+            }
+
+            @Override
+            public void write(byte[] b) throws IOException {
+                write(b, 0, b.length);
+            }
+        };
+
+        System.setOut(new PrintStream(outputStream, true));
+        System.setErr(new PrintStream(errStream, true));
+    }
+
+    /**
+     * Writes to the Standard Output Stream, as well as calls 'write' on the
+     * local logManager object
+     *
+     * @param msg   String message to be displayed and written
+     * @param color Color to set the line of text
+     * @return Returns TRUE if successful at writing to the logManager, FALSE if not
+     */
+    public boolean println(final String msg, Color color) {
+        boolean success = true;
+
+        SwingUtilities.invokeLater(() -> appendToPane(msg, color));
+
+        if (ConfigurationManager.isLogActive()) {
+            try {
+                Heart_Core.getCore().logManager.write(msg);
+            } catch (IOException e) {
+                ConfigurationManager.setLogActive(false);
+                System.err.println(
+                        "Unable to write to log. IOException thrown. Deactivating log file, please reboot to regain access.");
+                success = false;
+            }
+        }
+
+        return success;
     }
 
     /**

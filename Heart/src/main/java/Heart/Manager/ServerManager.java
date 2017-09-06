@@ -21,15 +21,15 @@
 package Heart.Manager;
 
 import Exceptions.ServerInitializationException;
-import Heart.ClientConnection;
 import Heart.Heart_Core;
 import Heart.Server;
 import Netta.DNSSD;
 import Utilities.Media.Exceptions.ServerHelperException;
 import Utilities.Media.ListItem;
-import Utilities.Media.MediaServerHelper;
+import Utilities.MediaManagerProcessBuilder;
 import Utilities.SystemInfo;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class ServerManager {
     private Heart_Core c;
     private Server server = null;
     private Thread serverThread = null;
-    private ArrayList<MediaServerHelper> mediaServerArrayList;
+    private ArrayList<Process> mediaServerArrayList;
     private DNSSD dnssd;
 
     public ServerManager(Heart_Core heart_core) {
@@ -93,15 +93,16 @@ public class ServerManager {
     /**
      * Start the server the Shard will connect to allowing for Media Streaming
      *
-     * @param media  String chosen media URL
-     * @param client ClientConnection Shard client object requesting media playback
-     * @throws ServerHelperException Thrown when there is an issue creating the MediaServerHelper.
+     * @param media String chosen media URL
+     * @throws ServerHelperException Thrown when there is an issue creating the MediaManager.
      *                               Details will be in the getMessage()
      */
-    public void startMediaServer(ListItem media, ClientConnection client) throws ServerHelperException {
-        MediaServerHelper mediaServer = new MediaServerHelper(media, client);
-        client.setMediaServer(mediaServer);
-        mediaServerArrayList.add(mediaServer);
+    public void startMediaServer(ListItem media) throws ServerHelperException {
+        try {
+            mediaServerArrayList.add(new MediaManagerProcessBuilder(new String[]{"-server", "-port", Integer.toString(heartPort), "-file", media.getPath()}).start());
+        } catch (IOException e) {
+            throw new ServerHelperException("Unable to start MediaManager Process.");
+        }
     }
 
     /**
@@ -129,9 +130,8 @@ public class ServerManager {
      */
     @SuppressWarnings("deprecation")
     public void stopHeartServer() {
-        for (MediaServerHelper ms : mediaServerArrayList) {
-            ms.stopMediaServer();
-            ms = null;
+        for (Process p : mediaServerArrayList) {
+            p.destroyForcibly();
         }
         mediaServerArrayList = null;
 
