@@ -10,18 +10,21 @@ from zipfile import ZipFile
 
 devBuild = False
 launchAfter = False
-forceUpdate = False
+forceHeart = False
+forceShard = False
 
 for arg in sys.argv:
     if arg == '-dev':
         devBuild = True
     if arg == '-launch':
         launchAfter = True
-    if arg == '-force':
-        forceUpdate = True
+    if arg == '-forceHeart':
+        forceHeart = True
+    if arg == '-forceShard':
+        forceShard = True
     if arg == '-help':
         print(
-            "Options: -dev to install dev build; -launch to launch software after installation; -force to force an update and launch (works only with Heart system)")
+            "Options: -dev to install dev build; -launch to launch software after installation; -forceHeart to force the Heart to update; -forceShard to force the Shard to update;")
         sys.exit(0)
 
 print("Crystal Home Systems Install Script")
@@ -56,7 +59,10 @@ else:
 
 
 # TODO SEARCHFORSERVICE
-# def searchForService():
+def searchForService():
+    return True
+
+
 #     import logging
 #     import socket
 #     import sys
@@ -100,7 +106,7 @@ else:
 #             zeroconf.close()
 
 
-def patch(heart):
+def patch(isHeart):
     print("Downloading Crystal Home Systems from repository...")
     # Download and unzip files without saving to hdd
     if devBuild:
@@ -110,9 +116,13 @@ def patch(heart):
         # Master
         gitAddress = "https://github.com/PulsePanda/Crystal/archive/master.zip"
 
+    # Download the project zip file from repo
+    from io import BytesIO
+    from urllib.request import urlopen
     zipurl = gitAddress
     with urlopen(zipurl) as zipresp:
         with ZipFile(BytesIO(zipresp.read())) as zfile:
+            # Extract the zip file without saving it to disk
             zfile.extractall(userhome + "/CrystalHomeSys/")
 
     dir_src = userhome + "\CrystalHomeSys\Crystal-"
@@ -124,45 +134,44 @@ def patch(heart):
     print("Compiling files...")
     from subprocess import Popen
 
+    # Build the project with Gradle
     p = Popen("gradlew assemble", shell=True, cwd=dir_src)
     stdout, stderr = p.communicate()
 
-    # finish assigning dir_src to the sub Heart directory for copy
+    # finish assigning dir_src to the proper sub directory for copy
     dir_src_nonspecific = dir_src
-    if heart:
+    if isHeart:
         dir_src = dir_src + "/Heart"
         print("Updating Heart files...")
-
-
     else:
         dir_src = dir_src + "/Shard"
         print("Updating Shard files...")
 
-    # Unzip Heart.zip to /CrystalHomeSys/
+    # Unzip Heart/Shard.zip distribution file to /CrystalHomeSys/, creating the proper directories
     dir_dst = userhome + "/CrystalHomeSys/"
-    if heart:
+    if isHeart:
         zip_ref = ZipFile(dir_src + "/build/distributions/Heart.zip")
     else:
         zip_ref = ZipFile(dir_src + "/build/distributions/Shard.zip")
     zip_ref.extractall(dir_dst)
     zip_ref.close()
 
-    # print("Packaging Shard install for distribution...")
-    # patchHome = dir_dst + "patch"
-    # if not os.path.isdir(patchHome):
-    #     os.makedirs(patchHome)
-    # os.replace(dir_src_nonspecific + "/Shard/build/distributions/Shard.zip", patchHome + "/Shard.zip")
-
     print("Cleaning up...")
+    import shutil
+    # Remove the Crystal- project folder
     shutil.rmtree(dir_src_nonspecific)
 
-    if launchAfter or forceUpdate:
-        if heart or forceUpdate:
+    # If the -launch arg was passed
+    if launchAfter:
+        # Launch if the download is for a Heart, or if there was a force heart update
+        if isHeart:
             print("Starting Heart server...")
             if "Linux" in platform.system():
                 Popen("Heart", shell=True, cwd=userhome + "/CrystalHomeSys/Heart/bin/")
             elif "Windows" in platform.system():
                 Popen("Heart.bat", shell=True, cwd=userhome + "/CrystalHomeSys/Heart/bin/")
+
+        # Launch if the download is for a shard, or if there was a force shard update
         else:
             print("Starting Shard client...")
             if "Linux" in platform.system():
@@ -170,7 +179,7 @@ def patch(heart):
             elif "Windows" in platform.system():
                 Popen("Shard.bat", shell=True, cwd=userhome + "/CrystalHomeSys/Shard/bin/")
 
-    if heart:
+    if isHeart:
         print("-------------Application Launch Directory: " + dir_dst + "Heart/bin/Heart.(sh/bat)-------------")
     else:
         print("-------------Application Launch Directory: " + dir_dst + "Shard/bin/Shard.(sh/bat)-------------")
@@ -178,8 +187,11 @@ def patch(heart):
 
 # Search for Heart DNSSD service
 print("Searching for an existing Heart server...")
-# if searchForService() and not forceUpdate: # If service exists, returns true
-if True and not forceUpdate:  # If Server found, Installing Shard
+serviceFound = False
+if not forceHeart or not forceShard:
+    serviceFound = searchForService()
+
+if serviceFound or forceShard:  # If service exists, Heart is found, returns true
     print("Found existing Heart server! Creating Shard install...")
     # Create working Shard directory
     if not os.path.isdir(userhome + "/CrystalHomeSys/Shard"):
@@ -187,7 +199,7 @@ if True and not forceUpdate:  # If Server found, Installing Shard
 
     print("Downloading Shard files...")
     patch(False)
-else:  # If server not found, installing heart
+elif not serviceFound or forceHeart:  # If server not found, installing heart
     print("No existing Heart server found! Creating Heart install...")
     patch(True)
 
