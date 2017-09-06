@@ -36,13 +36,14 @@ public class Shard_Core {
     private ConfigurationManager configurationManager;
     private ConnectionManager connectionManager;
 
-    public Shard_Core(boolean headless) throws ClientInitializationException {
+    public Shard_Core(boolean headless, boolean dev) throws ClientInitializationException {
         if (shard_core != null) {
             throw new ClientInitializationException("There can only be one instance of Shard Core!");
         }
         shard_core = this;
         guiManager = new GUIManager(this);
         configurationManager = new ConfigurationManager(this);
+        configurationManager.DEV_BUILD = dev;
         connectionManager = new ConnectionManager(this);
         configurationManager.headless = headless;
     }

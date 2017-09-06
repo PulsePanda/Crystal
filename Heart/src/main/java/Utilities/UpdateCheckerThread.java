@@ -32,12 +32,9 @@ import java.net.URL;
  */
 public class UpdateCheckerThread extends Thread {
 
-    private static final String gitAddressMaster = "https://github.com/PulsePanda/Crystal/archive/master.zip";
-    private static final String gitAddressDev = "https://github.com/PulsePanda/Crystal/archive/dev.zip";
     private static final int waitDelay = Integer.parseInt(Heart_Core.getCore().getConfigurationManager().getCfg().get("updateCheckDelay")) * 60 * 1000;
     private boolean running = false, shardUpdate = false, heartUpdate = false, keepRunning, forceUpdate;
     private String shardVersion;
-    private PatcherPython patcherPython;
 
     /**
      * Update Checker Thread default constructor
@@ -49,7 +46,6 @@ public class UpdateCheckerThread extends Thread {
         this.keepRunning = keepRunning;
         this.forceUpdate = forceUpdate;
         shardUpdate = forceUpdate;
-        patcherPython = new PatcherPython();
     }
 
     /**
@@ -72,12 +68,12 @@ public class UpdateCheckerThread extends Thread {
                 System.out.println("UPDATER: Checking for update...");
                 checkForUpdate();
                 if (shardUpdate || heartUpdate || forceUpdate) {
-                    System.out.println("UPDATER: Update found. Updating...");
-                    patcherPython.patch(Heart_Core.getCore().getConfigurationManager().DEV_BUILD, heartUpdate || forceUpdate, forceUpdate);
                     if (shardUpdate)
                         installShardPatch();
 
                     if (heartUpdate || forceUpdate) {
+                        System.out.println("UPDATER: Update found. Updating...");
+                        PatcherPython.patch(Heart_Core.getCore().getConfigurationManager().DEV_BUILD, true, true, false);
                         Heart_Core.getCore().shutdownHeart();
                         System.exit(0);
                     }
@@ -196,142 +192,12 @@ public class UpdateCheckerThread extends Thread {
     }
 
     /**
-     * Download the repository for the update
-     *
-     * @throws UpdateCheckerThreadException thrown if there is an error accessing or downloading the repository
-     */
-//    private void downloadUpdate() throws UpdateCheckerThreadException {
-//        URL url;
-//        try {
-//            if (!ConfigurationManager.DEV_BUILD)
-//                url = new URL(gitAddressMaster);
-//            else
-//                url = new URL(gitAddressDev);
-//        } catch (IOException e) {
-//            throw new UpdateCheckerThreadException("Unable to create URL for patch.");
-//        }
-//
-//        try {
-//            BufferedInputStream bis = new BufferedInputStream(url.openStream());
-//            FileOutputStream fis = new FileOutputStream(ConfigurationManager.baseDir + "patch.zip");
-//            byte[] buffer = new byte[1024];
-//            int count = 0;
-//            while ((count = bis.read(buffer, 0, 1024)) != -1) {
-//                fis.write(buffer, 0, count);
-//            }
-//            fis.close();
-//            bis.close();
-//        } catch (IOException e) {
-//            throw new UpdateCheckerThreadException("Unable to download update from URL.");
-//        }
-//    }
-    private void downloadUpdate() throws IOException {
-    }
-
-    /**
-     * Prepare the patch
-     *
-     * @throws UpdateCheckerThreadException thrown if there is an error accessing or reading the patch data
-     */
-    private synchronized void preparePatch() throws UpdateCheckerThreadException {
-        try {
-            UnZipPython.unZip(ConfigurationManager.baseDir + "patch.zip", ConfigurationManager.baseDir + "patch");
-        } catch (IOException e) {
-            throw new UpdateCheckerThreadException("Unable to unzip patch data.");
-        }
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-        }
-
-        File patchDir;
-        if (!ConfigurationManager.DEV_BUILD)
-            patchDir = new File(ConfigurationManager.baseDir + "patch/Crystal-master/");
-        else
-            patchDir = new File(ConfigurationManager.baseDir + "patch/Crystal-dev/");
-
-        if (shardUpdate) {
-            String[] params = new String[]{"cmd.exe", "/c", "gradlew Shard:build"};
-            ProcessBuilder builder = new ProcessBuilder(params);
-            builder.directory(patchDir);
-            try {
-                builder.start();
-            } catch (IOException e) {
-                throw new UpdateCheckerThreadException("Unable to build Shard patch with Gradle.");
-            }
-
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-            }
-
-            File dir;
-            if (!ConfigurationManager.DEV_BUILD)
-                dir = new File(ConfigurationManager.baseDir + "patch/Crystal-master/Shard/build/distributions/Shard.zip");
-            else
-                dir = new File(ConfigurationManager.baseDir + "patch/Crystal-dev/Shard/build/distributions/Shard.zip");
-            dir.renameTo(new File(ConfigurationManager.baseDir + "patch/Shard.zip"));
-        }
-
-        if (heartUpdate) {
-            String[] params = new String[]{"cmd.exe", "/c", "gradlew Heart:build"};
-            ProcessBuilder builder = new ProcessBuilder(params);
-            builder.directory(patchDir);
-            try {
-                builder.start();
-            } catch (IOException e) {
-                throw new UpdateCheckerThreadException("Unable to build Heart with Gradle.");
-            }
-
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-            }
-
-            File dir;
-            if (!ConfigurationManager.DEV_BUILD)
-                dir = new File(ConfigurationManager.baseDir + "patch/Crystal-master/Heart/build/distributions/Heart.zip");
-            else
-                dir = new File(ConfigurationManager.baseDir + "patch/Crystal-dev/Heart/build/distributions/Heart.zip");
-            dir.renameTo(new File(ConfigurationManager.baseDir + "patch/Heart.zip"));
-        }
-    }
-
-    /**
-     * Install the Heart patch
-     *
-     * @throws UpdateCheckerThreadException thrown if there is an error accessing or reading patch data
-     */
-    private void installHeartPatch() throws UpdateCheckerThreadException {
-        Heart_Core.getCore().getServerManager().stopHeartServer();
-
-        try {
-            UnZipPython.unZip(ConfigurationManager.baseDir + "patch/Heart.zip", ConfigurationManager.baseDir);
-        } catch (IOException e) {
-            throw new UpdateCheckerThreadException("Unable to unzip Heart patch.");
-        }
-
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-        }
-
-        System.out.println("UPDATER: Starting Heart Patcher...");
-        try {
-            Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", ConfigurationManager.heartDir + "bin/Heart.bat"});
-            System.exit(0);
-        } catch (IOException e) {
-            throw new UpdateCheckerThreadException("Unable to start Heart patch file.");
-        }
-    }
-
-    /**
      * Install the Shard patch
      * <p>
      * Updates the local ShardVersion file with correct Shard version, and calls Heart_Core.notifyShardsOfUpdate();
      */
     private void installShardPatch() {
+        System.out.println("PATCHER: Updating local Shard version.");
         PrintWriter out;
         try {
             out = new PrintWriter(ConfigurationManager.heartDir + "ShardVersion");

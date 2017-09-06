@@ -236,10 +236,6 @@ public class ConnectionManager {
         } catch (SendPacketException e) {
             System.err.println("Error sending Heart ID information. Details: " + e.getMessage());
         }
-
-        // Run shard update
-        patcher = new ShardPatcher(client, ShardPatcher.PATCHER_TYPE.runUpdate);
-        patcher.start();
     }
 
     /**

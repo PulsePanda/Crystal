@@ -54,20 +54,22 @@ public class PatcherPython {
      *
      * @throws IOException thrown if there is an error spawning the script
      */
-    public void patch(boolean devBuild, boolean launchAfter, boolean forceUpdate) throws IOException {
+    public static void patch(boolean devBuild, boolean launchAfter, boolean forceHeart, boolean forceShard) throws IOException {
         String[] params = null;
-        String dev = "", launch = "", force = "";
+        String dev = "", launch = "", forceH = "", forceS = "";
         if (devBuild)
             dev = "-dev";
         if (launchAfter)
             launch = "-launch";
-        if (forceUpdate)
-            force = "-force";
+        if (forceHeart)
+            forceH = "-forceHeart";
+        if (forceShard)
+            forceS = "-forceShard";
 
         if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Windows)
-            params = new String[]{"py", "../lib/Crystal_Install_Script.py", dev, launch};
+            params = new String[]{"py", "../lib/Crystal_Install_Script.py", dev, launch, forceH, forceS};
         else if (SystemInfo.getSystem_os() == SystemInfo.SYSTEM_OS.Linux)
-            params = new String[]{"python3", "../lib/Crystal_Install_Script.py", dev, launch};
+            params = new String[]{"python3", "../lib/Crystal_Install_Script.py", dev, launch, forceH, forceS};
 
         Runtime.getRuntime().exec(params);
     }
