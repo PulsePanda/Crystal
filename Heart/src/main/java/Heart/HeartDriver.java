@@ -10,7 +10,13 @@
 
 package Heart;
 
+import Exceptions.ConfigurationException;
 import Exceptions.ServerInitializationException;
+import Heart.Manager.ConfigurationManager;
+import Utilities.SettingsFileManager;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Heart Driver. Starts the Heart service
@@ -22,7 +28,9 @@ public class HeartDriver {
     private static Heart_Core heartCore;
     //    private static int corePort = 6987; // standard
     private static int corePort = 7789; // testing
-    private static boolean headlessArg = false;
+    private static boolean headlessArg = false, connectionFileExists = true;
+    static String fileName = System.getProperty("user.home") + ConfigurationManager.baseDir + "Heart/con_inf.ini";
+    static SettingsFileManager sfm;
 
     public static void main(String[] args) {
         for (String s : args) {
@@ -43,10 +51,17 @@ public class HeartDriver {
         heartCore = new Heart_Core(headlessArg, dev);
         heartCore.init();
 
+        int hostPort = corePort;
+        try {
+            hostPort = getPort();
+        } catch (ConfigurationException e) {
+            System.err.println("Error retrieving the connection file information. Details: " + e.getMessage());
+        }
+
         // init Heart networking, start listening for Shards
         try {
-            System.out.println("Starting Heart server on heartPort " + corePort);
-            heartCore.getServerManager().startHeartServer(corePort);
+            System.out.println("Starting Heart server on heartPort " + hostPort);
+            heartCore.getServerManager().startHeartServer(hostPort);
 
             try {
                 Thread.sleep(1000);
@@ -55,9 +70,9 @@ public class HeartDriver {
 
             // If the server is unable to host on the specified heartPort, try another one
             while (!heartCore.isServerActive()) {
-                System.out.println("Attempting to host Heart server on heartPort " + ++corePort);
+                System.out.println("Attempting to host Heart server on heartPort " + ++hostPort);
                 heartCore.getServerManager().stopHeartServer();
-                heartCore.getServerManager().startHeartServer(corePort);
+                heartCore.getServerManager().startHeartServer(hostPort);
 
                 if (!heartCore.isServerActive())
                     try {
@@ -66,9 +81,47 @@ public class HeartDriver {
                     }
             }
 
+            sfm.set("port", Integer.toString(hostPort));
+            sfm.save();
             heartCore.getServerManager().initDNSSD();
         } catch (ServerInitializationException e) {
             System.err.println("Error starting Heart server! Error message: " + e.getMessage());
+        } catch (ConfigurationException | NullPointerException e) {
+            System.err.println("Error saving the connection information into the connection file.");
         }
+    }
+
+    /**
+     * Try to read the connection file and retrieve the port. If the file cannot be read, it will return corePort
+     *
+     * @return Integer port value
+     * @throws ConfigurationException if the connection file cannot be found/created/saved to
+     */
+    private static int getPort() throws ConfigurationException {
+        int port = corePort;
+        try {
+            sfm = new SettingsFileManager(fileName);
+        } catch (ConfigurationException e) {
+            connectionFileExists = false;
+            try {
+                new File(fileName).createNewFile();
+                return getPort();
+            } catch (IOException e1) {
+                throw e;
+            }
+        }
+
+        if (!connectionFileExists) {
+            sfm.set("port", Integer.toString(port));
+            sfm.save();
+            return port;
+        }
+
+        // if the connection file already existed, read from it
+        if (connectionFileExists) {
+            port = Integer.parseInt(sfm.get("port"));
+        }
+
+        return port;
     }
 }
