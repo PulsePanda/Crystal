@@ -10,6 +10,7 @@
 
 import Netta.Connection.Packet;
 import Netta.Connection.Server.SingleClientServer;
+import Netta.Exceptions.SendPacketException;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -20,6 +21,13 @@ public class Server extends SingleClientServer {
     public Server(int port, String filePath) throws NoSuchAlgorithmException {
         super(port, null);
         this.filePath = filePath;
+        Packet p = new Packet(Packet.PACKET_TYPE.Message, null);
+        p.packetString = filePath;
+        try {
+            sendPacket(p);
+        } catch (SendPacketException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -20,6 +20,6 @@ public class Client extends ClientTemplate {
 
     @Override
     public void packetReceived(Packet packet) {
-
+        System.out.println(packet.packetString);
     }
 }

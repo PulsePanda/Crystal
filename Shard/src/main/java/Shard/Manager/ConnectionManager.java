@@ -22,10 +22,12 @@ import Shard.ShardConnectionThread;
 import Shard.ShardDriver;
 import Shard.Shard_Core;
 import Utilities.Media.Client.MediaClientHelper;
+import Utilities.MediaManagerProcessBuilder;
 import Utilities.SettingsFileManager;
 import Utilities.ShardPatcher;
 
 import java.awt.*;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
@@ -47,6 +49,7 @@ public class ConnectionManager {
     private Thread mediaClientThread;
     private Thread shardConnectionThread;
     private String IP;
+    private boolean bypassConnFile = false;
 
     public ConnectionManager(Shard_Core shard_core) {
         c = shard_core;
@@ -85,7 +88,7 @@ public class ConnectionManager {
             // If client is not remoteLoggingInitialized, initialize it
             try {
                 // Try to connect using the loaded IP and port
-                if (!ShardDriver.connectionFileExists) {
+                if (!ShardDriver.connectionFileExists || bypassConnFile) {
                     // Start the search for dnssd service
                     try {
                         System.out.println("Searching for DNS_SD service on local network.");
@@ -132,6 +135,7 @@ public class ConnectionManager {
 
                 ShardDriver.connectionFileExists = false;
                 client = new Client(IP, port);
+                bypassConnFile = true;
             } catch (NoSuchAlgorithmException e1) {
                 throw new ClientInitializationException(
                         "Unable to initialize client. Likely an issue loading RSA cipher. Aborting creation.");
@@ -155,13 +159,12 @@ public class ConnectionManager {
         clientThread.start();
     }
 
-    public void connectToMediaServer(int mediaServerPort, String mediaType) {
+    public void connectToMediaServer(int mediaServerPort) {
         try {
-            mediaClient = new MediaClientHelper(IP, mediaServerPort, mediaType);
-            mediaClientThread = new Thread(mediaClient);
-            mediaClientThread.start();
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println("Error starting MediaClient. Kript was unable to set up encryption keys. Aborting creation.");
+            new MediaManagerProcessBuilder(new String[]{"-client", "-port", Integer.toString(mediaServerPort), "-ip", IP}).start();
+        } catch (IOException e) {
+            System.err.println("Unable to start Media client.");
+            e.printStackTrace();
         }
     }
 

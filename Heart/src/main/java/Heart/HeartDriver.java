@@ -86,12 +86,12 @@ public class HeartDriver {
             sfm.save();
             heartCore.getServerManager().initDNSSD();
 
-            try {
-                new MediaManagerProcessBuilder(new String[]{"-server", "-port", Integer.toString(hostPort), "-file", "E:/Media/music/Linkin Park/Not Alone.mp3"}).start();
-            } catch (IOException e) {
-                System.err.println("Unable to start MediaManager Process. StackTrace:");
-                e.printStackTrace();
-            }
+//            try {
+//                new MediaManagerProcessBuilder(new String[]{"-server", "-port", Integer.toString(hostPort), "-file", "E:/Media/music/Linkin Park/Not Alone.mp3"}).start();
+//            } catch (IOException e) {
+//                System.err.println("Unable to start MediaManager Process. StackTrace:");
+//                e.printStackTrace();
+//            }
         } catch (ServerInitializationException e) {
             System.err.println("Error starting Heart server! Error message: " + e.getMessage());
         } catch (ConfigurationException | NullPointerException e) {

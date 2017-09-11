@@ -135,7 +135,7 @@ public class HandlePacket {
                 } else if (message.equals("media server")) {
                     int mediaServerPort = packet.packetInt;
                     System.out.println("Received media server information. Port: " + mediaServerPort + " Address: " + Shard_Core.getShardCore().getConnectionManager().getIP());
-                    Shard_Core.getShardCore().getConnectionManager().connectToMediaServer(mediaServerPort, "music"); // TODO the Music param needs to be dynamic
+                    Shard_Core.getShardCore().getConnectionManager().connectToMediaServer(mediaServerPort);
                 } else if (message.equals("uuid")) {
                     Shard_Core.getShardCore().setHeartUUID(UUID.fromString(packet.senderID));
                 } else {
