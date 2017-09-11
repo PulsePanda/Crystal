@@ -10,6 +10,7 @@
 
 package Heart;
 
+import Kript.Kript;
 import Netta.Connection.Packet;
 import Netta.Connection.Server.MultiClientServer;
 import Netta.Exceptions.ConnectionException;
@@ -36,7 +37,7 @@ public class Server extends MultiClientServer {
      * @throws NoSuchAlgorithmException thrown if there is an error initializing network encryption
      */
     public Server(int port) throws NoSuchAlgorithmException {
-        super(port);
+        super(port, new Kript());
         clients = new ArrayList<ClientConnection>();
         clientThreads = new ArrayList<Thread>();
     }
@@ -70,7 +71,7 @@ public class Server extends MultiClientServer {
         for (int i = 0; i < clients.size(); i++) {
             ClientConnection temp = clients.get(i);
             try {
-                temp.sendPacket(p, true);
+                temp.sendPacket(p);
             } catch (SendPacketException e) {
                 System.err.println("Unable to send close Connection Packet to Shard. Error: " + e.getMessage());
             }

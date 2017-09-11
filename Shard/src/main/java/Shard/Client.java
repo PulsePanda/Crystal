@@ -10,6 +10,7 @@
 
 package Shard;
 
+import Kript.Kript;
 import Netta.Connection.Client.ClientTemplate;
 import Netta.Connection.Packet;
 import Utilities.HandlePacket;
@@ -22,7 +23,7 @@ import java.security.NoSuchAlgorithmException;
 public class Client extends ClientTemplate {
 
     public Client(String serverIP, int port) throws NoSuchAlgorithmException {
-        super(serverIP, port);
+        super(serverIP, port, new Kript());
     }
 
     /**

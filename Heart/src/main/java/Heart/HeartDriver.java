@@ -87,7 +87,7 @@ public class HeartDriver {
             heartCore.getServerManager().initDNSSD();
 
             try {
-                new MediaManagerProcessBuilder(new String[]{"-server", "-port", Integer.toString(hostPort), "-file", "E:/Media/music/Linkin Park/Not Alone.mp3"}, heartCore.getGuiManager().outputStream, heartCore.getGuiManager().errStream).start();
+                new MediaManagerProcessBuilder(new String[]{"-server", "-port", Integer.toString(hostPort), "-file", "E:/Media/music/Linkin Park/Not Alone.mp3"}).start();
             } catch (IOException e) {
                 System.err.println("Unable to start MediaManager Process. StackTrace:");
                 e.printStackTrace();

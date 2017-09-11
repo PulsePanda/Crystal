@@ -119,7 +119,7 @@ public class ShardPatcher extends Thread {
             Thread.sleep(2000);
         } catch (InterruptedException ex) {
         }
-        client.sendPacket(p, true);
+        client.sendPacket(p);
     }
 
     /**

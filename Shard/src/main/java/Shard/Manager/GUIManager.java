@@ -90,7 +90,7 @@ public class GUIManager {
             Packet p = new Packet(Packet.PACKET_TYPE.Command, c.getConfigurationManager().uuid.toString());
             p.packetString = "Good Morning";
             try {
-                c.getConnectionManager().sendPacket(p, true);
+                c.getConnectionManager().sendPacket(p);
             } catch (SendPacketException ex) {
                 System.err.println("Error sending Good Morning packet to Heart. Error: " + ex.getMessage());
             }
@@ -104,7 +104,7 @@ public class GUIManager {
             Packet p = new Packet(Packet.PACKET_TYPE.Command, c.getConfigurationManager().uuid.toString());
             p.packetString = "BTC Price";
             try {
-                c.getConnectionManager().sendPacket(p, true);
+                c.getConnectionManager().sendPacket(p);
             } catch (SendPacketException ex) {
                 System.err.println("Error sending BTC Price packet to Heart. Error: " + ex.getMessage());
             }
@@ -118,7 +118,7 @@ public class GUIManager {
             Packet p = new Packet(Packet.PACKET_TYPE.Command, c.getConfigurationManager().uuid.toString());
             p.packetString = "Weather";
             try {
-                c.getConnectionManager().sendPacket(p, true);
+                c.getConnectionManager().sendPacket(p);
             } catch (SendPacketException ex) {
                 System.err.println("Error sending Weather packet to Heart. Error: " + ex.getMessage());
             }
@@ -134,7 +134,7 @@ public class GUIManager {
             String song = JOptionPane.showInputDialog(null, "Song name");
             p.packetStringArray = new String[]{song};
             try {
-                c.getConnectionManager().sendPacket(p, true);
+                c.getConnectionManager().sendPacket(p);
             } catch (SendPacketException e1) {
                 System.err.println("Error sending Play Music packet to Heart. Error: " + e1.getMessage());
             }
@@ -150,7 +150,7 @@ public class GUIManager {
             String movie = JOptionPane.showInputDialog(null, "Movie name");
             p.packetStringArray = new String[]{movie};
             try {
-                c.getConnectionManager().sendPacket(p, true);
+                c.getConnectionManager().sendPacket(p);
             } catch (SendPacketException e1) {
                 System.err.println("Error sending Play Movie packet to Heart. Error: " + e1.getMessage());
             }
@@ -289,7 +289,7 @@ public class GUIManager {
                     // LogManager packet to Heart
                     Packet p = new Packet(Packet.PACKET_TYPE.Message, c.getConfigurationManager().uuid.toString());
                     p.packetString = msg;
-                    c.getConnectionManager().sendPacket(p, true);
+                    c.getConnectionManager().sendPacket(p);
                 }
             } catch (IOException e) {
                 ConfigurationManager.logActive = false;

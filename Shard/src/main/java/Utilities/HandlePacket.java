@@ -101,7 +101,7 @@ public class HandlePacket {
                         Packet p = new Packet(Packet.PACKET_TYPE.Command, Shard_Core.getShardCore().getUUID().toString());
                         p.packetString = "Play Music";
                         p.packetStringArray = new String[]{songPath};
-                        Shard_Core.getShardCore().getConnectionManager().getClient().sendPacket(p, true);
+                        Shard_Core.getShardCore().getConnectionManager().getClient().sendPacket(p);
                     } catch (ArrayIndexOutOfBoundsException e) {
                         JOptionPane.showMessageDialog(null, "Heart was unable to find a song matching that name!");
                         System.err.println("Heart was unable to find a song matching that name!");
@@ -125,7 +125,7 @@ public class HandlePacket {
                         Packet p = new Packet(Packet.PACKET_TYPE.Command, Shard_Core.getShardCore().getUUID().toString());
                         p.packetString = "Play Movie";
                         p.packetStringArray = new String[]{moviePath};
-                        Shard_Core.getShardCore().getConnectionManager().getClient().sendPacket(p, true);
+                        Shard_Core.getShardCore().getConnectionManager().getClient().sendPacket(p);
                     } catch (ArrayIndexOutOfBoundsException e) {
                         JOptionPane.showMessageDialog(null, "Heart was unable to find a movie matching that name!");
                         System.err.println("Heart was unable to find a movie matching that name!");

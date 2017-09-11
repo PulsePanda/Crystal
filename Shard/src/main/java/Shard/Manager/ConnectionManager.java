@@ -186,7 +186,7 @@ public class ConnectionManager {
         Packet p = new Packet(Packet.PACKET_TYPE.CloseConnection, c.getConfigurationManager().uuid.toString());
         try {
             p.packetString = "Manual disconnect";
-            client.sendPacket(p, true);
+            client.sendPacket(p);
         } catch (SendPacketException e) {
             System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
         }
@@ -198,7 +198,7 @@ public class ConnectionManager {
 
         try {
             p.packetString = "Manual disconnect";
-            client.sendPacket(p, true);
+            client.sendPacket(p);
         } catch (SendPacketException e) {
             System.err.println("Error sending disconnect packet to Heart. Error: " + e.getMessage());
         }
@@ -268,7 +268,7 @@ public class ConnectionManager {
         Packet p = new Packet(Packet.PACKET_TYPE.Command, c.getConfigurationManager().uuid.toString());
         p.packetString = "uuid";
         p.packetStringArray = new String[]{systemName, ConfigurationManager.systemLocation};
-        client.sendPacket(p, true);
+        client.sendPacket(p);
     }
 
 
@@ -303,13 +303,12 @@ public class ConnectionManager {
     /**
      * Send a packet to the Heart
      *
-     * @param p         Packet to send
-     * @param encrypted boolean True to encrypt packet, else false
+     * @param p Packet to send
      * @throws SendPacketException thrown if there is an error sending the Packet to the Heart.
      *                             Error will be in the getMessage()
      */
-    public void sendPacket(Packet p, boolean encrypted) throws SendPacketException {
-        client.sendPacket(p, encrypted);
+    public void sendPacket(Packet p) throws SendPacketException {
+        client.sendPacket(p);
     }
 
     /**

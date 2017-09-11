@@ -36,7 +36,7 @@ import java.util.ArrayList;
 
 public class ServerManager {
 
-    public int heartPort;
+    public int heartPort, mediaManagerPort = 8437;
     private Heart_Core c;
     private Server server = null;
     private Thread serverThread = null;
@@ -99,7 +99,7 @@ public class ServerManager {
      */
     public void startMediaServer(ListItem media) throws ServerHelperException {
         try {
-            mediaServerArrayList.add(new MediaManagerProcessBuilder(new String[]{"-server", "-port", Integer.toString(heartPort), "-file", media.getPath()}).start());
+            mediaServerArrayList.add(new MediaManagerProcessBuilder(new String[]{"-server", "-port", Integer.toString(mediaManagerPort++), "-file", media.getPath()}).start());
         } catch (IOException e) {
             throw new ServerHelperException("Unable to start MediaManager Process.");
         }

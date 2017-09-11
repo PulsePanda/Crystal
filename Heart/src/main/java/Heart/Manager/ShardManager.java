@@ -45,7 +45,7 @@ public class ShardManager {
             Packet p = new Packet(Packet.PACKET_TYPE.Message, c.getConfigurationManager().uuid.toString());
             p.packetString = "new patch";
             try {
-                cc.sendPacket(p, true);
+                cc.sendPacket(p);
             } catch (SendPacketException e) {
                 System.err.println("Error sending update notification to shard. Details: " + e.getMessage());
             }

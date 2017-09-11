@@ -66,7 +66,7 @@ public class Command {
                 connection.clientUUID = UUID.fromString(packet.senderID);
                 connection.clientName = packet.packetStringArray[0];
                 connection.clientLocation = packet.packetStringArray[1];
-                sendToClient("uuid", true);
+                sendToClient("uuid");
                 break;
             case "Good Morning":
                 try {
@@ -118,7 +118,7 @@ public class Command {
 //                break;
             case "get Shard Version":
                 System.out.println("Shard requested version information.");
-                sendToClient("version:" + ConfigurationManager.SHARD_VERSION, true);
+                sendToClient("version:" + ConfigurationManager.SHARD_VERSION);
                 break;
             case "Play Music":
                 System.out.println("Shard requested to play music. Song Name: " + packet.packetStringArray[0]);
@@ -129,7 +129,7 @@ public class Command {
                     if (musicPaths.length > 1) { // If there is more than one matching song, ask the shard which one
                         music.packetString = "which song";
                         music.packetStringArray = musicPaths;
-                        sendToClient(music, true);
+                        sendToClient(music);
                     } else {
                         try {
                             ListItem[] temp = Heart_Core.getCore().getMediaManager().getSongList().get(musicPaths[0]);
@@ -150,7 +150,7 @@ public class Command {
                     if (moviePaths.length > 1) { // If there is more than one matching movie, ask the shard which one
                         movie.packetString = "which movie";
                         movie.packetStringArray = moviePaths;
-                        sendToClient(movie, true);
+                        sendToClient(movie);
                     } else {
                         try {
                             ListItem[] temp = Heart_Core.getCore().getMediaManager().getMovieList().get(moviePaths[0]);
@@ -196,7 +196,7 @@ public class Command {
         String wCoverage = api.getJSONArray("weather").getJSONObject(0).getString("description");
         int wTemp = (int) kelvinToF(api.getJSONObject("main").getDouble("temp"));
         sendToClient("Good Morning.\n\nBTC Price: $" + btcPrice + ".\n\nCurrent Weather: " + wCoverage + " and " + wTemp
-                + " degrees.\n", true);
+                + " degrees.\n");
     }
 
     /**
@@ -213,7 +213,7 @@ public class Command {
         api = new APIHandler("https://blockchain.info/ticker");
         Double btcPrice = api.getJSONObject("USD").getDouble("buy");
 
-        sendToClient("BTC Price today: $" + btcPrice.toString(), true);
+        sendToClient("BTC Price today: $" + btcPrice.toString());
     }
 
     /**
@@ -256,7 +256,7 @@ public class Command {
                     + "\nTemperature: " + temp + "\n\n");
         }
 
-        sendToClient(forecast.toString(), true);
+        sendToClient(forecast.toString());
     }
 
     /**
@@ -266,22 +266,21 @@ public class Command {
      * @throws SendPacketException thrown if there is an issue sending the packet to the Shard.
      *                             Details will be in the getMessage()
      */
-    private void sendToClient(String s, boolean encrypted) throws SendPacketException {
+    private void sendToClient(String s) throws SendPacketException {
         Packet p = new Packet(Packet.PACKET_TYPE.Message, Heart_Core.getCore().getConfigurationManager().getUUID().toString());
         p.packetString = s;
-        connection.sendPacket(p, encrypted);
+        connection.sendPacket(p);
     }
 
     /**
      * Send a packet to the Shard.
      *
      * @param p         Packet being sent to the shard
-     * @param encrypted
      * @throws SendPacketException thrown if there is an issue sending the packet to the Shard.
      *                             Details will be in the getMessage()
      */
-    private void sendToClient(Packet p, boolean encrypted) throws SendPacketException {
-        connection.sendPacket(p, encrypted);
+    private void sendToClient(Packet p) throws SendPacketException {
+        connection.sendPacket(p);
     }
 
     /**
