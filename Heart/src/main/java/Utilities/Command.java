@@ -133,7 +133,7 @@ public class Command {
                     } else {
                         try {
                             ListItem[] temp = Heart_Core.getCore().getMediaManager().getSongList().get(musicPaths[0]);
-                            Heart_Core.getCore().getServerManager().startMediaServer(temp[0]);
+                            Heart_Core.getCore().getServerManager().startMediaServer(temp[0], connection);
                         } catch (NullPointerException e) {
                         } catch (ServerHelperException e) {
                             System.err.println("Unable to start Media Server! Details: " + e.getMessage());
@@ -155,7 +155,7 @@ public class Command {
                         try {
                             ListItem[] temp = Heart_Core.getCore().getMediaManager().getMovieList().get(moviePaths[0]);
                             try {
-                                Heart_Core.getCore().getServerManager().startMediaServer(temp[0]);
+                                Heart_Core.getCore().getServerManager().startMediaServer(temp[0], connection);
                             } catch (ServerHelperException e) {
                                 System.err.println("Unable to start Media Server! Details: " + e.getMessage());
                             }
@@ -275,7 +275,7 @@ public class Command {
     /**
      * Send a packet to the Shard.
      *
-     * @param p         Packet being sent to the shard
+     * @param p Packet being sent to the shard
      * @throws SendPacketException thrown if there is an issue sending the packet to the Shard.
      *                             Details will be in the getMessage()
      */

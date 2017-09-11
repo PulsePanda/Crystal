@@ -18,6 +18,8 @@
  * You should have received a copy of the GNU General Public License along with Crystal Home Systems. If not, see http://www.gnu.org/licenses/.
  */
 
+import java.security.NoSuchAlgorithmException;
+
 public class MediaManager {
 
     public static boolean isServer = false, isClient = false;
@@ -38,11 +40,19 @@ public class MediaManager {
         pullConnectionData(args);
 
         if (isServer) {
-
+            try {
+                new Thread(new Server(port, filePath)).start();
+            } catch (NoSuchAlgorithmException e) {
+                System.err.println("Unable to create media server on this port.");
+            }
         }
 
         if (isClient) {
-
+            try {
+                new Thread(new Client(IP, port)).start();
+            } catch (NoSuchAlgorithmException e) {
+                System.err.println("Unable to create media client.");
+            }
         }
     }
 

@@ -23,7 +23,10 @@ package Heart.Manager;
 import Exceptions.ServerInitializationException;
 import Heart.Heart_Core;
 import Heart.Server;
+import Netta.Connection.Connection;
+import Netta.Connection.Packet;
 import Netta.DNSSD;
+import Netta.Exceptions.SendPacketException;
 import Utilities.Media.Exceptions.ServerHelperException;
 import Utilities.Media.ListItem;
 import Utilities.MediaManagerProcessBuilder;
@@ -93,15 +96,22 @@ public class ServerManager {
     /**
      * Start the server the Shard will connect to allowing for Media Streaming
      *
-     * @param media String chosen media URL
+     * @param media      String chosen media URL
+     * @param connection Connection object to allow media server port sending
      * @throws ServerHelperException Thrown when there is an issue creating the MediaManager.
      *                               Details will be in the getMessage()
      */
-    public void startMediaServer(ListItem media) throws ServerHelperException {
+    public void startMediaServer(ListItem media, Connection connection) throws ServerHelperException {
         try {
-            mediaServerArrayList.add(new MediaManagerProcessBuilder(new String[]{"-server", "-port", Integer.toString(mediaManagerPort++), "-file", media.getPath()}).start());
+            mediaServerArrayList.add(new MediaManagerProcessBuilder(new String[]{"-server", "-port", Integer.toString(mediaManagerPort), "-file", media.getPath()}).start());
+            Packet p = new Packet(Packet.PACKET_TYPE.Message, c.getConfigurationManager().uuid.toString());
+            p.packetString = "media server";
+            p.packetInt = mediaManagerPort++;
+            connection.sendPacket(p);
         } catch (IOException e) {
             throw new ServerHelperException("Unable to start MediaManager Process.");
+        } catch (SendPacketException e) {
+            System.err.println("Unable to send connection information to Shard for Media Server.");
         }
     }
 
